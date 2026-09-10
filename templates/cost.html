@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Cost Estimation{% endblock %}
+
+{% block content %}
+<div class="cost-page">
+    <header class="page-header text-center">
+        <h1>Construction Cost Estimate</h1>
+    </header>
+
+    <div class="disclaimer-box warning mb-4">
+        <p><strong>Disclaimer:</strong> This is a planning estimate only. Actual costs may vary based on location, material quality, labor rates, and market fluctuations. Please consult a professional contractor for a finalized quote.</p>
+    </div>
+
+    <div class="cost-layout">
+        <!-- Left Side: Configuration Summary -->
+        <aside class="config-summary">
+            <div class="card">
+                <h3>Project Configuration</h3>
+                <ul class="config-list mt-3">
+                    <li><strong>Built-up Area:</strong> <span id="confArea">--</span> sq.ft</li>
+                    <li><strong>Floors:</strong> <span id="confFloors">--</span></li>
+                    <li><strong>Rooms:</strong> <span id="confRooms">--</span></li>
+                    <li><strong>Wall Material:</strong> <span id="confWallMat">--</span></li>
+                    <li><strong>Floor Material:</strong> <span id="confFloorMat">--</span></li>
+                    <li><strong>Roof Type:</strong> <span id="confRoofType">--</span></li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('builder') }}" class="btn btn-outline btn-block">Adjust Configuration</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Side: Cost Breakdown -->
+        <main class="cost-breakdown">
+            <div class="card">
+                <h3>Detailed Estimate</h3>
+                
+                <div class="cost-table-container mt-3">
+                    <table class="cost-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th class="text-right">Estimated Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="costBreakdownBody">
+                            <tr>
+                                <td>Foundation & Civil Work</td>
+                                <td class="text-right" id="costCivil">--</td>
+                            </tr>
+                            <tr>
+                                <td>Doors & Windows</td>
+                                <td class="text-right" id="costDoors">--</td>
+                            </tr>
+                            <tr>
+                                <td>Electrical & Plumbing</td>
+                                <td class="text-right" id="costMep">--</td>
+                            </tr>
+                            <tr>
+                                <td>Flooring & Painting</td>
+                                <td class="text-right" id="costFinishes">--</td>
+                            </tr>
+                            <tr>
+                                <td>Interior & Woodwork</td>
+                                <td class="text-right" id="costInterior">--</td>
+                            </tr>
+                            <tr>
+                                <td>Labor Charges</td>
+                                <td class="text-right" id="costLabor">--</td>
+                            </tr>
+                            <tr>
+                                <td>Contingency (5%)</td>
+                                <td class="text-right" id="costContingency">--</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td>Total Estimated Cost</td>
+                                <td class="text-right"><strong class="highlight-total" id="costTotal">--</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="budget-comparison mt-4">
+                    <h4>Budget vs Estimate</h4>
+                    <div class="progress-bar-container mt-2">
+                        <div class="progress-bar" id="budgetProgress"></div>
+                    </div>
+                    <div class="budget-labels mt-2">
+                        <span>Estimate: <b id="lblEstimate">--</b></span>
+                        <span>Budget: <b id="lblBudget">--</b></span>
+                    </div>
+                    <p class="budget-status mt-2" id="budgetStatusMsg"></p>
+                </div>
+
+                <div class="cost-actions mt-4">
+                    <button class="btn btn-primary" id="btnSaveProject">Save Project</button>
+                    <a href="{{ url_for('risk') }}" class="btn btn-success">Proceed to Risk Analysis</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/data/cost-engine.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/pages/cost-page.js') }}"></script>
+{% endblock %}

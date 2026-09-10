@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Project Summary{% endblock %}
+
+{% block content %}
+<div class="summary-page">
+    <header class="summary-header text-center mb-5">
+        <h1 id="sumProjectName">My Project</h1>
+        <p class="text-muted"><span id="sumStyle">Modern</span> Style | Created on <span id="sumDate">--</span></p>
+    </header>
+
+    <div class="summary-top mb-5">
+        <div class="mini-3d-preview">
+            <div class="animated-house-wrapper">
+                <div class="house-3d">
+                    <div class="face front"></div>
+                    <div class="face back"></div>
+                    <div class="face left"></div>
+                    <div class="face right"></div>
+                    <div class="face top"></div>
+                    <div class="face bottom"></div>
+                    <div class="roof left"></div>
+                    <div class="roof right"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="analysis-scores grid-2x2">
+            <div class="score-card">
+                <h4>Space Utilization</h4>
+                <div class="score-value" id="scoreSpace">--/10</div>
+            </div>
+            <div class="score-card">
+                <h4>Budget Suitability</h4>
+                <div class="score-value" id="scoreBudget">--/10</div>
+            </div>
+            <div class="score-card">
+                <h4>Design Suitability</h4>
+                <div class="score-value" id="scoreDesign">--/10</div>
+            </div>
+            <div class="score-card">
+                <h4>Climate Readiness</h4>
+                <div class="score-value" id="scoreClimate">--/10</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-details grid-2col mb-5">
+        <div class="card">
+            <h3>Cost Summary</h3>
+            <ul class="simple-list mt-3">
+                <li><strong>Estimated Cost:</strong> <span id="sumCost">₹ --</span></li>
+                <li><strong>Your Budget:</strong> <span id="sumTargetBudget">₹ --</span></li>
+                <li><strong>Built-up Area:</strong> <span id="sumArea">--</span> sq.ft</li>
+                <li><strong>Cost per sq.ft:</strong> <span id="sumCostPerSqft">₹ --</span></li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h3>Risk Overview</h3>
+            <ul class="simple-list mt-3" id="sumRiskList">
+                <li>Analyzing risks...</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <h3>Final Recommendations</h3>
+        <ul class="recommendation-list mt-3" id="finalRecommendations">
+            <li>Reviewing your project...</li>
+        </ul>
+    </div>
+
+    <div class="disclaimer-box warning mb-5">
+        <p><strong>Disclaimer:</strong> The scores and recommendations above are planning indicators only — they are not professional certifications. Always engage certified architects and engineers before beginning construction.</p>
+    </div>
+
+    <div class="summary-actions text-center">
+        <button class="btn btn-primary" id="btnFinalSave">Save Project</button>
+        <button class="btn btn-outline" id="btnPrint">Print / Download PDF</button>
+        <a href="{{ url_for('requirements') }}" class="btn btn-ghost">Start New Project</a>
+    </div>
+</div>
+
+<style>
+/* Mini 3D house for preview */
+.mini-3d-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.animated-house-wrapper {
+    perspective: 800px;
+    width: 100px;
+    height: 100px;
+}
+.house-3d {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotateHouse 15s infinite linear;
+}
+.house-3d .face {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #3b82f6;
+    top: 25px;
+    left: 25px;
+}
+.house-3d .front  { transform: translateZ(25px); }
+.house-3d .back   { transform: rotateY(180deg) translateZ(25px); }
+.house-3d .left   { transform: rotateY(-90deg) translateZ(25px); }
+.house-3d .right  { transform: rotateY(90deg) translateZ(25px); }
+.house-3d .top    { transform: rotateX(90deg) translateZ(25px); background: #1e40af; }
+.house-3d .bottom { transform: rotateX(-90deg) translateZ(25px); }
+@keyframes rotateHouse {
+    0% { transform: rotateY(0deg) rotateX(15deg); }
+    100% { transform: rotateY(360deg) rotateX(15deg); }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/pages/summary-page.js') }}"></script>
+{% endblock %}

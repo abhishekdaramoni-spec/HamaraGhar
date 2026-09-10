@@ -1,0 +1,30 @@
+{
+  "construction_per_sqft": {
+    "basic": 1200,
+    "standard": 1800,
+    "premium": 2800,
+    "luxury": 4500
+  },
+  "foundation_multiplier": 0.15,
+  "labor_multiplier": 0.25,
+  "contingency_multiplier": 0.08,
+  "electrical_per_sqft": 80,
+  "plumbing_per_sqft": 65,
+  "painting_per_sqft_wall": 20,
+  "interior_per_room": {
+    "modern": 45000,
+    "minimal": 35000,
+    "traditional": 55000,
+    "luxury": 120000
+  },
+  "parking_cost": 80000,
+  "balcony_per_sqft": 600,
+  "compound_wall_per_rft": 800,
+  "garden_per_sqft": 150,
+  "staircase_per_floor": 35000,
+  "notes": [
+    "Rates are approximate 2024 estimates for Tier-1 Indian cities",
+    "Actual costs may vary significantly by location, contractor, and material quality",
+    "This is a planning estimate only — consult a licensed contractor for quotations"
+  ]
+}

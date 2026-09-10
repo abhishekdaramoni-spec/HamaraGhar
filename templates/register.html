@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="split-layout">
+    <div class="split-left dark-panel">
+        <div class="branding">
+            <h1>SmartBuild 3D</h1>
+            <p>Create an account to save your dream home designs.</p>
+        </div>
+    </div>
+    <div class="split-right form-panel">
+        <div class="card clean-card">
+            <h2>Create an Account</h2>
+            <form action="{{ url_for('register') }}" method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="regName">Full Name</label>
+                    <input type="text" id="regName" name="name" required placeholder="John Doe">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regEmail">Email Address</label>
+                    <input type="email" id="regEmail" name="email" required placeholder="you@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" name="password" required>
+                    <div id="passwordStrength" class="password-strength-indicator"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regConfirm">Confirm Password</label>
+                    <input type="password" id="regConfirm" name="confirm_password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
+            
+            <p class="form-footer">
+                Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const passInput = document.getElementById('regPassword');
+    const strengthIndicator = document.getElementById('passwordStrength');
+    
+    passInput.addEventListener('input', function() {
+        const val = this.value;
+        let strength = 'Weak';
+        let color = '#ef4444';
+        
+        if(val.length > 8 && /[A-Z]/.test(val) && /[0-9]/.test(val)) {
+            strength = 'Strong';
+            color = '#22c55e';
+        } else if(val.length > 5) {
+            strength = 'Medium';
+            color = '#eab308';
+        }
+        
+        if (val.length === 0) {
+            strengthIndicator.textContent = '';
+        } else {
+            strengthIndicator.textContent = `Strength: ${strength}`;
+            strengthIndicator.style.color = color;
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="split-layout">
+    <div class="split-left dark-panel">
+        <div class="branding">
+            <h1>SmartBuild 3D</h1>
+            <p>Sign in to access your projects and continue designing.</p>
+        </div>
+    </div>
+    <div class="split-right form-panel">
+        <div class="card clean-card">
+            <h2>Welcome Back</h2>
+            <form action="{{ url_for('login') }}" method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" name="email" required placeholder="you@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" name="password" required>
+                        <button type="button" class="btn-toggle-password">Show</button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+            </form>
+            
+            <p class="form-footer">
+                Don't have an account? <a href="{{ url_for('register') }}">Register here</a>
+            </p>
+            
+            <p class="hidden-info" style="display:none;">Demo: Register a new account to get started</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

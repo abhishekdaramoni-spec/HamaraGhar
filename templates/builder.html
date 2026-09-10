@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}3D Builder{% endblock %}
+
+{% block content %}
+<div class="builder-layout">
+    <!-- Left panel -->
+    <aside class="tool-panel">
+        <form id="builderForm">
+            <div class="panel-section">
+                <h3>View</h3>
+                <div class="toggle-group">
+                    <label>
+                        <input type="radio" name="viewMode" id="viewModeFull" value="full" checked>
+                        <span class="btn btn-sm">Full 3D</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="viewMode" id="viewModeSketch" value="sketch">
+                        <span class="btn btn-sm">Sketch</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Structure</h3>
+                <div class="form-group-inline">
+                    <label for="floors">Floors</label>
+                    <input type="number" id="floors" name="floors" min="1" max="5" value="1">
+                </div>
+                <div class="form-group-inline">
+                    <label for="rooms">Rooms per Floor</label>
+                    <input type="number" id="rooms" name="rooms" min="1" max="10" value="4">
+                </div>
+                <div class="form-group-inline">
+                    <label for="land">Land Size (sqft)</label>
+                    <input type="number" id="land" name="land" value="2400">
+                </div>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="compound" name="compound"> Compound Wall</label>
+                    <label><input type="checkbox" id="garden" name="garden"> Garden</label>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Exterior Materials</h3>
+                <div class="form-group">
+                    <label for="wallMaterial">Wall Material</label>
+                    <select id="wallMaterial" name="wallMaterial">
+                        <option value="brick">Brick</option>
+                        <option value="concrete">Concrete</option>
+                        <option value="wood">Wood</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="floorMaterial">Floor Material</label>
+                    <select id="floorMaterial" name="floorMaterial">
+                        <option value="tile">Tile</option>
+                        <option value="wood">Hardwood</option>
+                        <option value="concrete">Polished Concrete</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="roofType">Roof Type</label>
+                    <select id="roofType" name="roofType">
+                        <option value="flat">Flat</option>
+                        <option value="sloped">Sloped</option>
+                    </select>
+                </div>
+                
+                <div class="color-palette">
+                    <label>Wall Color</label>
+                    <div class="swatches" id="wallColors">
+                        <div class="swatch" style="background: #ffffff;" data-color="#ffffff"></div>
+                        <div class="swatch" style="background: #f3f4f6;" data-color="#f3f4f6"></div>
+                        <div class="swatch" style="background: #e5e7eb;" data-color="#e5e7eb"></div>
+                        <div class="swatch" style="background: #fef08a;" data-color="#fef08a"></div>
+                        <div class="swatch" style="background: #fed7aa;" data-color="#fed7aa"></div>
+                        <div class="swatch" style="background: #fca5a5;" data-color="#fca5a5"></div>
+                        <div class="swatch" style="background: #93c5fd;" data-color="#93c5fd"></div>
+                        <div class="swatch" style="background: #86efac;" data-color="#86efac"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="btnRebuild" class="btn btn-primary btn-block">Rebuild House</button>
+        </form>
+    </aside>
+
+    <!-- Center panel -->
+    <main class="builder-center">
+        <div class="top-bar">
+            <h2 id="builderProjectName">My Project</h2>
+            <div class="top-actions">
+                <button class="btn btn-outline btn-sm">Save</button>
+                <a href="{{ url_for('cost') }}" class="btn btn-success btn-sm">Go to Cost</a>
+            </div>
+        </div>
+
+        <div class="scene-container">
+            <div id="scene">
+                <div id="house">
+                    <!-- Dynamic 3D elements injected here via JS -->
+                </div>
+            </div>
+            
+            <div class="overlay-controls">
+                <button id="btnResetView" class="btn btn-icon" title="Reset View">⟲ Reset View</button>
+                <button id="btnZoomIn" class="btn btn-icon">+</button>
+                <button id="btnZoomOut" class="btn btn-icon">-</button>
+            </div>
+            
+            <div class="view-label">Mode: <span id="currentViewLabel">Full 3D</span></div>
+        </div>
+
+        <div class="cost-bar">
+            <div class="cost-stat">Built-up Area: <span id="barArea">--</span> sqft</div>
+            <div class="cost-stat">Estimated Cost: <span id="barCost">₹ --</span></div>
+            <div class="cost-stat">Budget: <span id="barBudget">₹ --</span></div>
+            <div class="cost-stat">Status: <span id="barStatus" class="badge">--</span></div>
+        </div>
+    </main>
+
+    <!-- Right panel -->
+    <aside class="properties-panel">
+        <div class="panel-section">
+            <h3>Properties</h3>
+            <div id="propertiesContent">
+                <p class="text-muted">Click any part of the house to see its properties</p>
+            </div>
+        </div>
+        
+        <div class="panel-section mt-auto">
+            <h3>House Summary</h3>
+            <ul class="summary-list">
+                <li>Floors: <span id="sumFloors">1</span></li>
+                <li>Rooms: <span id="sumRooms">4</span></li>
+                <li>Est. Area: <span id="sumArea">1200</span> sqft</li>
+            </ul>
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/data/cost-engine.js') }}"></script>
+<script src="{{ url_for('static', filename='js/data/materials.js') }}"></script>
+<script src="{{ url_for('static', filename='js/builder/controls.js') }}"></script>
+<script src="{{ url_for('static', filename='js/builder/house-builder.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/builder-page.js') }}"></script>
+{% endblock %}

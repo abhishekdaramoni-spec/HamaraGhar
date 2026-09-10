@@ -1,0 +1,38 @@
+{
+  "wall": [
+    {"id": "brick", "name": "Brick", "quality": "standard", "unit": "sqft", "price": 45, "description": "Traditional fired clay bricks"},
+    {"id": "concrete", "name": "Concrete Block", "quality": "standard", "unit": "sqft", "price": 40, "description": "Precast concrete blocks"},
+    {"id": "aac", "name": "AAC Block", "quality": "premium", "unit": "sqft", "price": 55, "description": "Autoclaved aerated concrete - lightweight"},
+    {"id": "stone", "name": "Stone", "quality": "luxury", "unit": "sqft", "price": 120, "description": "Natural stone masonry"}
+  ],
+  "floor": [
+    {"id": "tile", "name": "Ceramic Tile", "quality": "basic", "unit": "sqft", "price": 35, "description": "Standard ceramic floor tiles"},
+    {"id": "vitrified", "name": "Vitrified Tile", "quality": "standard", "unit": "sqft", "price": 65, "description": "High-gloss vitrified tiles"},
+    {"id": "marble", "name": "Marble", "quality": "luxury", "unit": "sqft", "price": 180, "description": "Natural marble flooring"},
+    {"id": "wood", "name": "Hardwood", "quality": "premium", "unit": "sqft", "price": 150, "description": "Engineered hardwood flooring"},
+    {"id": "granite", "name": "Granite", "quality": "premium", "unit": "sqft", "price": 130, "description": "Natural granite stone"}
+  ],
+  "roof": [
+    {"id": "rcc", "name": "RCC Flat", "quality": "standard", "unit": "sqft", "price": 80, "description": "Reinforced concrete flat roof"},
+    {"id": "clay_tile", "name": "Clay Tile", "quality": "standard", "unit": "sqft", "price": 95, "description": "Traditional clay roof tiles"},
+    {"id": "metal", "name": "Metal Sheet", "quality": "basic", "unit": "sqft", "price": 60, "description": "Galvanized metal roofing"},
+    {"id": "shingles", "name": "Asphalt Shingles", "quality": "premium", "unit": "sqft", "price": 110, "description": "Architectural asphalt shingles"}
+  ],
+  "paint": [
+    {"id": "distemper", "name": "Distemper", "quality": "basic", "unit": "sqft", "price": 8, "description": "Basic water-based distemper"},
+    {"id": "emulsion", "name": "Emulsion", "quality": "standard", "unit": "sqft", "price": 15, "description": "Acrylic emulsion paint"},
+    {"id": "premium_emulsion", "name": "Premium Emulsion", "quality": "premium", "unit": "sqft", "price": 25, "description": "Washable premium emulsion"},
+    {"id": "texture", "name": "Texture Paint", "quality": "luxury", "unit": "sqft", "price": 40, "description": "Decorative texture coating"}
+  ],
+  "door": [
+    {"id": "flush", "name": "Flush Door", "quality": "basic", "unit": "per door", "price": 6000, "description": "Plain flush door with frame"},
+    {"id": "panel", "name": "Panel Door", "quality": "standard", "unit": "per door", "price": 9000, "description": "Decorative panel door"},
+    {"id": "teak", "name": "Teak Wood Door", "quality": "premium", "unit": "per door", "price": 18000, "description": "Solid teak wood door"},
+    {"id": "upvc", "name": "uPVC Door", "quality": "premium", "unit": "per door", "price": 14000, "description": "Low-maintenance uPVC door"}
+  ],
+  "window": [
+    {"id": "aluminum", "name": "Aluminum", "quality": "basic", "unit": "per window", "price": 4000, "description": "Aluminum frame window"},
+    {"id": "upvc_win", "name": "uPVC", "quality": "standard", "unit": "per window", "price": 7000, "description": "uPVC double-glazed window"},
+    {"id": "wooden", "name": "Wood Frame", "quality": "premium", "unit": "per window", "price": 10000, "description": "Hardwood frame window"}
+  ]
+}

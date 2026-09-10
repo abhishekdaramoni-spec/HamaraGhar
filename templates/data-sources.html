@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Sources{% endblock %}
+
+{% block content %}
+<div class="data-sources-page container">
+    <header class="page-header mt-5">
+        <h1>Data Sources & Methodology</h1>
+        <p class="lead-text">Transparency is important to us. Below are the public datasets, models, and references used by the SmartBuild 3D rule engines to provide estimates and recommendations.</p>
+    </header>
+
+    <div class="disclaimer-box warning my-4">
+        <p><strong>Important Disclaimer:</strong> All data is generalized for educational and planning purposes. Construction costs, local regulations, and geographic risks change frequently. Do not use this tool as a substitute for certified professional assessment.</p>
+    </div>
+
+    <section class="mb-5">
+        <h2>Datasets Utilized</h2>
+        <div class="table-responsive mt-3">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Source</th>
+                        <th>Purpose</th>
+                        <th>License / Type</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Housing & Dimensions</strong></td>
+                        <td>National Building Code (NBC) Guidelines</td>
+                        <td>Vastu compliance, standard room dimensions, and structural safety rules.</td>
+                        <td>Public Domain</td>
+                        <td>2023 Guidelines</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cost Data</strong></td>
+                        <td>CPWD Schedule of Rates (SOR)</td>
+                        <td>Baseline construction costs for civil works, plumbing, and electrical.</td>
+                        <td>Public Data</td>
+                        <td>2024 Reference</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Market Rates</strong></td>
+                        <td>Aggregated Regional Real Estate Indices</td>
+                        <td>Adjusting base costs for premium materials and current labor market rates.</td>
+                        <td>Proprietary Aggregation</td>
+                        <td>Q4 2025</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Seismic Risk</strong></td>
+                        <td>Global Seismic Hazard Assessment Program (GSHAP)</td>
+                        <td>Determining earthquake risk zones and recommending foundation types.</td>
+                        <td>Open Access</td>
+                        <td>Continuous</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Flood Risk</strong></td>
+                        <td>Regional Topographical & Floodplain Open Data</td>
+                        <td>Assessing plinth height recommendations and water-logging risks.</td>
+                        <td>Open Data Commons</td>
+                        <td>2024</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Climate Data</strong></td>
+                        <td>World Meteorological Organization (WMO) Standard Normals</td>
+                        <td>Providing heat, rainfall, and wind speed insights for architectural design.</td>
+                        <td>Open Access</td>
+                        <td>2024</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <h2>How We Use Data</h2>
+        
+        <div class="grid-2col mt-4">
+            <div class="card">
+                <h3>Floor Plan Generation</h3>
+                <p>The layout generator uses a rule-based algorithm that optimizes for NBC guidelines, ensuring minimum room sizes, adequate ventilation pathways, and logical flow (e.g., placing the kitchen near the dining area). Vastu compliance algorithms are applied as secondary heuristics.</p>
+            </div>
+            
+            <div class="card">
+                <h3>Cost Estimation</h3>
+                <p>Cost is calculated using a base rate multiplier method. The total built-up area is multiplied by a regional base rate, which is then adjusted based on the selected material quality, number of floors, and interior finish styles. A standard 5% contingency is added to account for unforeseen expenses.</p>
+            </div>
+
+            <div class="card">
+                <h3>Risk Analysis</h3>
+                <p>Location data is mapped to our regional hazard database. The engine flags any intersections with known high-risk zones (e.g., Seismic Zone IV/V or historical flood plains) and generates automated architectural recommendations like raised plinths or reinforced foundations.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.data-table th, .data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+.data-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #1e293b;
+}
+.table-responsive {
+    overflow-x: auto;
+}
+</style>
+{% endblock %}

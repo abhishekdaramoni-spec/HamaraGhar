@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Floor Plan{% endblock %}
+
+{% block content %}
+<div class="floor-plan-page">
+    <header class="page-header">
+        <h1>Your Floor Plan</h1>
+        <p class="plot-info">Plot: <span id="displayPlotSize">-- x --</span> ft</p>
+    </header>
+
+    <div class="floor-plan-layout">
+        <aside class="sidebar-left">
+            <div class="legend-card">
+                <h3>Room Legend</h3>
+                <ul class="legend-list">
+                    <li><span class="color-box" style="background: #e2e8f0;"></span> Living Room</li>
+                    <li><span class="color-box" style="background: #bfdbfe;"></span> Bedroom</li>
+                    <li><span class="color-box" style="background: #fef08a;"></span> Kitchen</li>
+                    <li><span class="color-box" style="background: #bbf7d0;"></span> Bathroom</li>
+                    <li><span class="color-box" style="background: #fbcfe8;"></span> Circulation</li>
+                </ul>
+            </div>
+            
+            <div class="stats-card">
+                <h3>Statistics</h3>
+                <p>Total Area: <span id="statArea">0</span> sq.ft</p>
+                <p>Rooms: <span id="statRooms">0</span></p>
+                <p>Doors: <span id="statDoors">0</span></p>
+                <p>Windows: <span id="statWindows">0</span></p>
+            </div>
+        </aside>
+
+        <main class="canvas-container">
+            <canvas id="floorPlanCanvas" width="800" height="600"></canvas>
+            
+            <div class="info-bar">
+                <span>Rooms: <b id="barRoomCount">0</b></span> |
+                <span>Total Area: <b id="barTotalArea">0 sq.ft</b></span> |
+                <span class="compliance-note">Vastu Compliant: <b id="barCompliance">Yes</b></span>
+            </div>
+        </main>
+
+        <aside class="sidebar-right">
+            <div class="controls-card">
+                <h3>Actions</h3>
+                <button id="btnGenerateNew" class="btn btn-outline btn-block mb-3">Generate New Plan</button>
+                <a href="{{ url_for('builder') }}" class="btn btn-primary btn-block mb-3">Edit in 3D</a>
+                <button id="btnDownload" class="btn btn-secondary btn-block">Download PNG</button>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/planner/plan-generator.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/planner/floor-plan.js') }}"></script>
+{% endblock %}

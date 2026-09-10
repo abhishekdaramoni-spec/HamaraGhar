@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Location Risk Analysis{% endblock %}
+
+{% block content %}
+<div class="risk-page">
+    <header class="page-header text-center">
+        <h1>Location Risk Analysis</h1>
+        <p class="lead-text">Based on your selected location: <strong id="riskLocationDisplay">City, State</strong></p>
+        <button id="btnAnalyze" class="btn btn-primary mt-3">Analyze Location</button>
+    </header>
+
+    <div class="disclaimer-box warning my-4">
+        <p><strong>Disclaimer:</strong> This is an educational planning tool only. Risk levels are generalized estimations based on regional data and do not substitute for professional surveying, structural engineering, or official risk assessments.</p>
+    </div>
+
+    <div class="risk-dashboard" id="riskDashboard" style="display: none;">
+        <div class="risk-grid">
+            <!-- Flood Risk -->
+            <article class="risk-card" id="cardFlood">
+                <div class="risk-header">
+                    <span class="risk-icon">🌊</span>
+                    <h3>Flood Risk</h3>
+                    <span class="badge" id="badgeFlood">--</span>
+                </div>
+                <p class="risk-desc" id="descFlood">Analyzing topography and historical data...</p>
+            </article>
+
+            <!-- Seismic Risk -->
+            <article class="risk-card" id="cardSeismic">
+                <div class="risk-header">
+                    <span class="risk-icon">🌍</span>
+                    <h3>Seismic Zone</h3>
+                    <span class="badge" id="badgeSeismic">--</span>
+                </div>
+                <p class="risk-desc" id="descSeismic">Checking tectonic activity levels...</p>
+            </article>
+
+            <!-- Heat Risk -->
+            <article class="risk-card" id="cardHeat">
+                <div class="risk-header">
+                    <span class="risk-icon">☀️</span>
+                    <h3>Heat & Sun</h3>
+                    <span class="badge" id="badgeHeat">--</span>
+                </div>
+                <p class="risk-desc" id="descHeat">Evaluating average summer temperatures...</p>
+            </article>
+
+            <!-- Rainfall Risk -->
+            <article class="risk-card" id="cardRainfall">
+                <div class="risk-header">
+                    <span class="risk-icon">🌧️</span>
+                    <h3>Heavy Rainfall</h3>
+                    <span class="badge" id="badgeRainfall">--</span>
+                </div>
+                <p class="risk-desc" id="descRainfall">Assessing monsoon intensity...</p>
+            </article>
+
+            <!-- Wind Risk -->
+            <article class="risk-card" id="cardWind">
+                <div class="risk-header">
+                    <span class="risk-icon">💨</span>
+                    <h3>Wind Speed</h3>
+                    <span class="badge" id="badgeWind">--</span>
+                </div>
+                <p class="risk-desc" id="descWind">Analyzing prevailing wind conditions...</p>
+            </article>
+
+            <!-- Cyclone Risk -->
+            <article class="risk-card" id="cardCyclone">
+                <div class="risk-header">
+                    <span class="risk-icon">🌀</span>
+                    <h3>Cyclone Risk</h3>
+                    <span class="badge" id="badgeCyclone">--</span>
+                </div>
+                <p class="risk-desc" id="descCyclone">Checking coastal proximity and history...</p>
+            </article>
+        </div>
+
+        <div class="recommendations-section mt-5">
+            <div class="card">
+                <h3>Architectural Recommendations</h3>
+                <ul class="recommendation-list" id="riskRecommendations">
+                    <li>Loading recommendations based on analysis...</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="data-attribution mt-4 text-center">
+            <p class="text-sm text-muted">Data aggregated from regional climate profiles and historical zoning data. <a href="{{ url_for('data_sources') }}">View Data Sources</a></p>
+            
+            <div class="mt-4">
+                <a href="{{ url_for('summary') }}" class="btn btn-success btn-large">View Final Summary</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/data/risk-engine.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/pages/risk-page.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,822 @@
+{
+  "cities": {
+    "Mumbai": {
+      "state": "Maharashtra",
+      "flood": "High",
+      "heat": "Medium",
+      "rainfall": "High",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Medium",
+      "waterlogging": "High",
+      "recommendations": [
+        "Install proper drainage and sump pumps",
+        "Consider waterproofing for ground floor and basement",
+        "Use corrosion-resistant materials near coast",
+        "Ensure Seismic Zone III structural design compliance"
+      ]
+    },
+    "Delhi": {
+      "state": "Delhi",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Ensure Seismic Zone IV structural design compliance",
+        "Use thermal insulation to counter high heat",
+        "Consider air purifiers and proper ventilation"
+      ]
+    },
+    "Bengaluru": {
+      "state": "Karnataka",
+      "flood": "Medium",
+      "heat": "Low",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Low",
+      "cyclone": "Low",
+      "waterlogging": "High",
+      "recommendations": [
+        "Ensure good drainage and rainwater harvesting",
+        "Waterproofing for roofs and lower levels",
+        "Use moderate insulation"
+      ]
+    },
+    "Chennai": {
+      "state": "Tamil Nadu",
+      "flood": "High",
+      "heat": "High",
+      "rainfall": "High",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "High",
+      "cyclone": "High",
+      "waterlogging": "High",
+      "recommendations": [
+        "Raise plinth level significantly above road",
+        "Install storm shutters and use heavy duty roof fasteners",
+        "Ensure structural resistance to cyclones",
+        "Corrosion-resistant materials for coastal environment"
+      ]
+    },
+    "Hyderabad": {
+      "state": "Telangana",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Low",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Use thermal insulation and shading for high heat",
+        "Implement rainwater harvesting",
+        "Ensure proper city drainage connections"
+      ]
+    },
+    "Kolkata": {
+      "state": "West Bengal",
+      "flood": "High",
+      "heat": "High",
+      "rainfall": "High",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "High",
+      "cyclone": "High",
+      "waterlogging": "High",
+      "recommendations": [
+        "Raise plinth level and ensure excellent drainage",
+        "Ensure cyclone-resistant design for roofs and windows",
+        "Use damp-proof courses extensively"
+      ]
+    },
+    "Pune": {
+      "state": "Maharashtra",
+      "flood": "Medium",
+      "heat": "Medium",
+      "rainfall": "High",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Low",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Good waterproofing for monsoon season",
+        "Adequate drainage systems"
+      ]
+    },
+    "Ahmedabad": {
+      "state": "Gujarat",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Medium",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Heavy thermal insulation for extreme summer heat",
+        "Seismic Zone III design compliance",
+        "Rainwater harvesting systems recommended"
+      ]
+    },
+    "Jaipur": {
+      "state": "Rajasthan",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Use thick walls or thermal insulation for extreme heat",
+        "Provide courtyards or ventilation for passive cooling",
+        "Dust-resistant finishes"
+      ]
+    },
+    "Surat": {
+      "state": "Gujarat",
+      "flood": "High",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Medium",
+      "waterlogging": "High",
+      "recommendations": [
+        "Raise plinth level due to flood history",
+        "Seismic Zone III compliance",
+        "Waterproofing and robust drainage"
+      ]
+    },
+    "Lucknow": {
+      "state": "Uttar Pradesh",
+      "flood": "Medium",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Thermal insulation for summers",
+        "Seismic Zone III structural design",
+        "Proper drainage for monsoon waterlogging"
+      ]
+    },
+    "Kanpur": {
+      "state": "Uttar Pradesh",
+      "flood": "Medium",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Thermal insulation for heat",
+        "Seismic Zone III structural design",
+        "Address local waterlogging with raised plinths"
+      ]
+    },
+    "Nagpur": {
+      "state": "Maharashtra",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Extreme heat requires robust thermal insulation",
+        "Cool roof coatings and shading",
+        "Standard structural design"
+      ]
+    },
+    "Indore": {
+      "state": "Madhya Pradesh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Thermal insulation",
+        "Standard drainage and waterproofing",
+        "Standard foundations generally suffice"
+      ]
+    },
+    "Thane": {
+      "state": "Maharashtra",
+      "flood": "High",
+      "heat": "Medium",
+      "rainfall": "High",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Medium",
+      "waterlogging": "High",
+      "recommendations": [
+        "High rainfall requires excellent waterproofing",
+        "Seismic Zone III compliance",
+        "Raised plinths to avoid waterlogging"
+      ]
+    },
+    "Bhopal": {
+      "state": "Madhya Pradesh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Cool roofs and thermal insulation",
+        "Standard waterproofing",
+        "Rainwater harvesting"
+      ]
+    },
+    "Visakhapatnam": {
+      "state": "Andhra Pradesh",
+      "flood": "High",
+      "heat": "High",
+      "rainfall": "High",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "High",
+      "cyclone": "High",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Cyclone-resistant structural design is essential",
+        "Corrosion-resistant materials near the sea",
+        "Storm shutters and robust roofing"
+      ]
+    },
+    "Pimpri-Chinchwad": {
+      "state": "Maharashtra",
+      "flood": "Medium",
+      "heat": "Medium",
+      "rainfall": "High",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Low",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Good waterproofing for monsoon season",
+        "Adequate drainage systems"
+      ]
+    },
+    "Patna": {
+      "state": "Bihar",
+      "flood": "High",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "High",
+      "recommendations": [
+        "Seismic Zone IV compliance is critical",
+        "Raise plinth level to protect against floods",
+        "Thermal insulation for heat"
+      ]
+    },
+    "Vadodara": {
+      "state": "Gujarat",
+      "flood": "Medium",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Medium",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone III design compliance",
+        "Thermal insulation for extreme heat",
+        "Adequate drainage for monsoon"
+      ]
+    },
+    "Ghaziabad": {
+      "state": "Uttar Pradesh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone IV structural design compliance",
+        "Use thermal insulation to counter high heat",
+        "Air purifiers and tight sealing for dust/pollution"
+      ]
+    },
+    "Ludhiana": {
+      "state": "Punjab",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone IV compliance",
+        "Thick walls and insulation for extreme temperature variations (hot summer, cold winter)",
+        "Standard drainage"
+      ]
+    },
+    "Agra": {
+      "state": "Uttar Pradesh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Heavy thermal insulation for extreme summer heat",
+        "Standard waterproofing"
+      ]
+    },
+    "Nashik": {
+      "state": "Maharashtra",
+      "flood": "Medium",
+      "heat": "Medium",
+      "rainfall": "High",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Good waterproofing and sloped roofs if possible",
+        "Standard drainage"
+      ]
+    },
+    "Faridabad": {
+      "state": "Haryana",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone IV structural design compliance",
+        "Thermal insulation for high heat",
+        "Dust-resistant design"
+      ]
+    },
+    "Meerut": {
+      "state": "Uttar Pradesh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone IV structural design compliance",
+        "Thermal insulation",
+        "Adequate drainage"
+      ]
+    },
+    "Rajkot": {
+      "state": "Gujarat",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Medium",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Thermal insulation and passive cooling techniques",
+        "Rainwater harvesting is highly recommended"
+      ]
+    },
+    "Varanasi": {
+      "state": "Uttar Pradesh",
+      "flood": "Medium",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Thermal insulation for summer heat",
+        "Raised plinths in low-lying areas near the river"
+      ]
+    },
+    "Srinagar": {
+      "state": "Jammu and Kashmir",
+      "flood": "High",
+      "heat": "Low",
+      "rainfall": "Medium",
+      "seismic_zone": "V",
+      "seismic_risk": "Very High",
+      "wind": "High",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone V compliance is absolutely critical",
+        "Heavy insulation for freezing winters",
+        "Sloped roofs for snow load",
+        "Flood mitigation measures if near river"
+      ]
+    },
+    "Aurangabad": {
+      "state": "Maharashtra",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Thermal insulation for heat",
+        "Rainwater harvesting"
+      ]
+    },
+    "Dhanbad": {
+      "state": "Jharkhand",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Consider soil testing carefully due to mining region",
+        "Thermal insulation"
+      ]
+    },
+    "Amritsar": {
+      "state": "Punjab",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone IV compliance",
+        "Thick walls and insulation for extreme temperature variations",
+        "Standard drainage"
+      ]
+    },
+    "Allahabad": {
+      "state": "Uttar Pradesh",
+      "flood": "High",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Raised plinths for flood protection if near rivers",
+        "Thermal insulation"
+      ]
+    },
+    "Ranchi": {
+      "state": "Jharkhand",
+      "flood": "Low",
+      "heat": "Medium",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Standard structural design",
+        "Good waterproofing",
+        "Moderate insulation"
+      ]
+    },
+    "Coimbatore": {
+      "state": "Tamil Nadu",
+      "flood": "Low",
+      "heat": "Medium",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Standard waterproofing and drainage",
+        "Good cross-ventilation"
+      ]
+    },
+    "Jabalpur": {
+      "state": "Madhya Pradesh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Thermal insulation for high heat",
+        "Standard drainage"
+      ]
+    },
+    "Gwalior": {
+      "state": "Madhya Pradesh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "High heat requires heavy thermal insulation",
+        "Standard structural design",
+        "Rainwater harvesting"
+      ]
+    },
+    "Vijayawada": {
+      "state": "Andhra Pradesh",
+      "flood": "High",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "High",
+      "cyclone": "High",
+      "waterlogging": "High",
+      "recommendations": [
+        "Cyclone-resistant structural design is essential",
+        "Seismic Zone III compliance",
+        "Raise plinths and ensure excellent drainage"
+      ]
+    },
+    "Jodhpur": {
+      "state": "Rajasthan",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Thick stone/brick walls for extreme heat",
+        "Reflective roof paints and heavy insulation",
+        "Rainwater harvesting is critical"
+      ]
+    },
+    "Madurai": {
+      "state": "Tamil Nadu",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Thermal insulation and shading for high heat",
+        "Standard structural design",
+        "Good cross-ventilation"
+      ]
+    },
+    "Raipur": {
+      "state": "Chhattisgarh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Thermal insulation for heat",
+        "Standard waterproofing",
+        "Standard foundations"
+      ]
+    },
+    "Kota": {
+      "state": "Rajasthan",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Use thick walls or thermal insulation for extreme heat",
+        "Use local stone effectively",
+        "Rainwater harvesting"
+      ]
+    },
+    "Chandigarh": {
+      "state": "Chandigarh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone IV compliance is critical",
+        "Thermal insulation for extreme temperature variations",
+        "Standard drainage"
+      ]
+    },
+    "Guwahati": {
+      "state": "Assam",
+      "flood": "High",
+      "heat": "Medium",
+      "rainfall": "High",
+      "seismic_zone": "V",
+      "seismic_risk": "Very High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "High",
+      "recommendations": [
+        "Seismic Zone V compliance is absolutely critical (highest risk)",
+        "Raise plinths or use stilt parking to mitigate frequent flooding",
+        "Excellent waterproofing and sloped roofs for heavy rain"
+      ]
+    },
+    "Solapur": {
+      "state": "Maharashtra",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Low",
+      "seismic_zone": "III",
+      "seismic_risk": "Moderate",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Seismic Zone III compliance",
+        "Thermal insulation for heat",
+        "Rainwater harvesting"
+      ]
+    },
+    "Hubli-Dharwad": {
+      "state": "Karnataka",
+      "flood": "Low",
+      "heat": "Medium",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Standard structural design",
+        "Good waterproofing",
+        "Moderate insulation"
+      ]
+    },
+    "Mysuru": {
+      "state": "Karnataka",
+      "flood": "Low",
+      "heat": "Low",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Low",
+      "recommendations": [
+        "Standard structural design",
+        "Standard waterproofing",
+        "Moderate insulation"
+      ]
+    },
+    "Tiruchirappalli": {
+      "state": "Tamil Nadu",
+      "flood": "Medium",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "II",
+      "seismic_risk": "Low",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Thermal insulation and shading for high heat",
+        "Standard structural design",
+        "Good drainage"
+      ]
+    },
+    "Bareilly": {
+      "state": "Uttar Pradesh",
+      "flood": "Medium",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone IV compliance",
+        "Thermal insulation",
+        "Adequate drainage"
+      ]
+    },
+    "Aligarh": {
+      "state": "Uttar Pradesh",
+      "flood": "Low",
+      "heat": "High",
+      "rainfall": "Medium",
+      "seismic_zone": "IV",
+      "seismic_risk": "High",
+      "wind": "Medium",
+      "cyclone": "Low",
+      "waterlogging": "Medium",
+      "recommendations": [
+        "Seismic Zone IV compliance",
+        "Thermal insulation",
+        "Adequate drainage"
+      ]
+    }
+  },
+  "seismic_zones": {
+    "II": {"risk": "Low", "description": "Low seismic hazard zone"},
+    "III": {"risk": "Moderate", "description": "Moderate seismic hazard zone"},
+    "IV": {"risk": "High", "description": "High seismic hazard zone — special structural design required"},
+    "V": {"risk": "Very High", "description": "Very high seismic hazard — maximum earthquake-resistant design required"}
+  },
+  "general_recommendations": {
+    "High flood": "Raise plinth level by at least 600mm above road level. Install proper drainage. Use water-resistant materials.",
+    "High heat": "Use thermal insulation. Install ventilation shafts. Plan shading with overhangs/trees. Consider reflective roof paint.",
+    "High rainfall": "Ensure steep roof slope. Use waterproofing membrane. Plan proper eave overhangs.",
+    "High seismic": "Consult a structural engineer for earthquake-resistant design. Follow IS:1893 codes.",
+    "High wind": "Use appropriate roof fastening. Avoid large overhangs. Plant windbreak trees.",
+    "High cyclone": "Use reinforced concrete structure. Secure roof properly. Install storm shutters."
+  },
+  "disclaimer": "This risk information is for educational planning purposes only. It is based on publicly available NDMA and IMD zone data and does not constitute a professional engineering or government-certified risk assessment. Always consult licensed engineers, architects, and local municipal authorities before construction."
+}

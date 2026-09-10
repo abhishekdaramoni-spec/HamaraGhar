@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Welcome back, {{ current_user.name }}!</h1>
+    </header>
+    
+    <section class="stats-row">
+        <div class="stat-card">
+            <h3>Total Projects</h3>
+            <p class="stat-value" id="statTotalProjects">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Total Rooms Planned</h3>
+            <p class="stat-value" id="statTotalRooms">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Budget Range</h3>
+            <p class="stat-value" id="statBudgetRange">₹0 - ₹0</p>
+        </div>
+    </section>
+
+    <section class="projects-section">
+        <div class="section-header">
+            <h2>My Projects</h2>
+            <a href="{{ url_for('requirements') }}" class="btn btn-primary">+ New Project</a>
+        </div>
+        
+        <!-- Hook for JS to load projects -->
+        <div id="projectGrid" class="project-grid">
+            <div class="empty-state">
+                <p>No projects yet. Start designing your dream home!</p>
+            </div>
+            <!-- Example of what a project card will look like (populated by JS):
+            <article class="project-card">
+                <h3>My Villa</h3>
+                <p>Plot: 40x50 ft | 3 BHK</p>
+                <p>Estimated Cost: ₹45,00,000</p>
+                <p>Style: Modern</p>
+                <p class="date">Updated: 2023-10-15</p>
+                <div class="card-actions">
+                    <button class="btn btn-outline">Open</button>
+                    <button class="btn btn-ghost">Edit</button>
+                    <button class="btn btn-ghost text-danger">Delete</button>
+                </div>
+            </article>
+            -->
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}

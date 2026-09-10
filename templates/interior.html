@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Interior Design{% endblock %}
+
+{% block content %}
+<div class="interior-layout">
+    <div class="room-selector">
+        <div class="tabs">
+            <button class="tab-btn active" data-room="living">Living Room</button>
+            <button class="tab-btn" data-room="bed1">Bedroom 1</button>
+            <button class="tab-btn" data-room="bed2">Bedroom 2</button>
+            <button class="tab-btn" data-room="kitchen">Kitchen</button>
+            <button class="tab-btn" data-room="bathroom">Bathroom</button>
+        </div>
+    </div>
+
+    <div class="interior-main">
+        <div class="viewport-container">
+            <div class="interior-scene">
+                <div class="room-3d" id="currentRoom">
+                    <div class="wall back-wall"></div>
+                    <div class="wall left-wall"></div>
+                    <div class="wall right-wall"></div>
+                    <div class="floor"></div>
+                    <div class="ceiling"></div>
+                </div>
+            </div>
+        </div>
+        
+        <aside class="furniture-panel">
+            <h3>Room Settings</h3>
+            
+            <div class="settings-group">
+                <label>Interior Style</label>
+                <select id="interiorStyle" class="form-control">
+                    <option value="modern">Modern</option>
+                    <option value="minimal">Minimal</option>
+                    <option value="traditional">Traditional</option>
+                    <option value="luxury">Luxury</option>
+                </select>
+            </div>
+            
+            <div class="settings-group">
+                <label>Wall Color</label>
+                <input type="color" id="roomWallColor" value="#f8fafc">
+            </div>
+            
+            <div class="settings-group">
+                <label>Floor Material</label>
+                <select id="roomFloorMaterial" class="form-control">
+                    <option value="wood">Hardwood</option>
+                    <option value="tile">Ceramic Tile</option>
+                    <option value="carpet">Carpet</option>
+                    <option value="marble">Marble</option>
+                </select>
+            </div>
+            
+            <div class="checkbox-group my-3">
+                <label><input type="checkbox" id="applyAllRooms"> Apply to All Rooms</label>
+            </div>
+
+            <hr>
+
+            <h3>Add Furniture</h3>
+            <p class="text-sm text-muted mb-3">Click to add to room</p>
+            
+            <div class="furniture-grid">
+                <button class="furniture-item" data-type="sofa">
+                    <span>🛋️</span> Sofa
+                </button>
+                <button class="furniture-item" data-type="bed">
+                    <span>🛏️</span> Bed
+                </button>
+                <button class="furniture-item" data-type="table">
+                    <span>🪑</span> Dining Table
+                </button>
+                <button class="furniture-item" data-type="tv">
+                    <span>📺</span> TV Unit
+                </button>
+                <button class="furniture-item" data-type="plant">
+                    <span>🪴</span> Plant
+                </button>
+                <button class="furniture-item" data-type="lamp">
+                    <span>💡</span> Lamp
+                </button>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/builder/interior.js') }}"></script>
+{% endblock %}

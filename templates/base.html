@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SmartBuild 3D{% endblock %} | SmartBuild 3D</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="brand">🏠 SmartBuild 3D</a>
+            
+            <nav class="nav-links">
+                {% if current_user %}
+                    <a href="{{ url_for('dashboard') }}" class="{% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
+                    <a href="{{ url_for('builder') }}" class="{% if page == 'builder' %}active{% endif %}">Builder</a>
+                    <a href="{{ url_for('cost') }}" class="{% if page == 'cost' %}active{% endif %}">Cost</a>
+                    <a href="{{ url_for('risk') }}" class="{% if page == 'risk' %}active{% endif %}">Risk</a>
+                {% endif %}
+            </nav>
+            
+            <div class="nav-right">
+                {% if current_user %}
+                    <span class="user-name">Welcome, {{ current_user.name }}</span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-ghost">Login</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>&copy; 2026 SmartBuild 3D. All rights reserved.</p>
+            <a href="{{ url_for('data_sources') }}">Data Sources</a>
+        </div>
+    </footer>
+
+    <!-- Global core helpers -->
+    <script src="{{ url_for('static', filename='js/core/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/api.js') }}"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

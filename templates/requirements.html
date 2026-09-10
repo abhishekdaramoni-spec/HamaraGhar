@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Requirements{% endblock %}
+
+{% block content %}
+<div class="requirements-container">
+    <div class="step-indicator">
+        <div class="step-dot active" data-step="1">1</div>
+        <div class="step-dot" data-step="2">2</div>
+        <div class="step-dot" data-step="3">3</div>
+        <div class="step-dot" data-step="4">4</div>
+        <div class="step-dot" data-step="5">5</div>
+    </div>
+    
+    <div class="step-labels">
+        <span>Location</span>
+        <span>Plot</span>
+        <span>Rooms</span>
+        <span>Style</span>
+        <span>Budget</span>
+    </div>
+
+    <form id="requirementsForm" class="requirements-form">
+        <!-- Step 1: Location -->
+        <div class="form-step active" id="step1">
+            <h2>Where are you building?</h2>
+            <p class="step-desc">Location affects material costs and environmental considerations.</p>
+            
+            <div class="form-group">
+                <label for="country">Country</label>
+                <input type="text" id="country" name="country" value="India" readonly>
+            </div>
+            <div class="form-group">
+                <label for="state">State</label>
+                <input type="text" id="state" name="state" required placeholder="e.g. Karnataka">
+            </div>
+            <div class="form-group">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" required placeholder="e.g. Bangalore">
+            </div>
+        </div>
+
+        <!-- Step 2: Plot Dimensions -->
+        <div class="form-step" id="step2" style="display: none;">
+            <h2>Plot Dimensions</h2>
+            <p class="step-desc">Enter the dimensions of your land in feet.</p>
+            
+            <div class="plot-inputs">
+                <div class="form-group">
+                    <label for="plotLength">Length (ft)</label>
+                    <input type="number" id="plotLength" name="plotLength" min="10" max="200" required>
+                </div>
+                <div class="form-group">
+                    <label for="plotWidth">Width (ft)</label>
+                    <input type="number" id="plotWidth" name="plotWidth" min="10" max="200" required>
+                </div>
+            </div>
+            
+            <div class="calculator-display">
+                Total Area = <span id="areaDisplay">0</span> sq.ft
+            </div>
+            
+            <div class="plot-preview-container">
+                <div id="plotPreview" class="plot-preview"></div>
+            </div>
+        </div>
+
+        <!-- Step 3: Rooms & Family -->
+        <div class="form-step" id="step3" style="display: none;">
+            <h2>Family & Rooms</h2>
+            
+            <div class="form-group">
+                <label for="familySize">Family Size</label>
+                <input type="number" id="familySize" name="familySize" min="1" max="20" required>
+            </div>
+            
+            <div class="recommendation-note" id="ruleEngineNote">
+                <p>💡 Tip: For your family size, we recommend <span id="recBHK">...</span></p>
+            </div>
+
+            <div class="grid-inputs">
+                <div class="form-group">
+                    <label for="bedrooms">Bedrooms</label>
+                    <input type="number" id="bedrooms" name="bedrooms" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="bathrooms">Bathrooms</label>
+                    <input type="number" id="bathrooms" name="bathrooms" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="floors">Floors</label>
+                    <input type="number" id="floors" name="floors" min="1" max="5" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="roomsPerFloor">Rooms per Floor</label>
+                    <input type="number" id="roomsPerFloor" name="roomsPerFloor" min="1" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Style & Features -->
+        <div class="form-step" id="step4" style="display: none;">
+            <h2>Style & Features</h2>
+            
+            <div class="form-group">
+                <label>House Style</label>
+                <div class="style-cards" id="houseStyle">
+                    <label class="style-card">
+                        <input type="radio" name="style" value="Modern" checked>
+                        <div class="card-content">Modern</div>
+                    </label>
+                    <label class="style-card">
+                        <input type="radio" name="style" value="Minimal">
+                        <div class="card-content">Minimal</div>
+                    </label>
+                    <label class="style-card">
+                        <input type="radio" name="style" value="Traditional">
+                        <div class="card-content">Traditional</div>
+                    </label>
+                    <label class="style-card">
+                        <input type="radio" name="style" value="Luxury">
+                        <div class="card-content">Luxury</div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="features-checkboxes">
+                <label><input type="checkbox" name="features" value="Parking"> Parking</label>
+                <label><input type="checkbox" name="features" value="Balcony"> Balcony</label>
+                <label><input type="checkbox" name="features" value="Garden"> Garden</label>
+                <label><input type="checkbox" name="features" value="Compound Wall"> Compound Wall</label>
+            </div>
+
+            <div class="form-group">
+                <label for="kitchenType">Kitchen Type</label>
+                <select id="kitchenType" name="kitchenType">
+                    <option value="Open">Open</option>
+                    <option value="Closed">Closed</option>
+                    <option value="Island">Island</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Step 5: Budget -->
+        <div class="form-step" id="step5" style="display: none;">
+            <h2>Budget & Project Details</h2>
+            
+            <div class="form-group">
+                <label for="projectName">Project Name <span class="text-danger">*</span></label>
+                <input type="text" id="projectName" name="projectName" required placeholder="e.g. My Dream Villa">
+            </div>
+
+            <div class="form-group">
+                <label for="budget">Construction Budget (₹)</label>
+                <input type="range" id="budget" name="budget" min="500000" max="50000000" step="100000" value="5000000">
+                <div class="budget-display">
+                    <h3 id="budgetAmount">₹50,00,000</h3>
+                    <span class="budget-category badge" id="budgetCategory">Standard</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="landCost">Land Cost (Optional, ₹)</label>
+                <input type="number" id="landCost" name="landCost" placeholder="0">
+            </div>
+        </div>
+
+        <div class="form-navigation">
+            <button type="button" id="btnPrev" class="btn btn-outline" style="display: none;">Previous</button>
+            <button type="button" id="btnNext" class="btn btn-primary">Next</button>
+            <button type="submit" id="btnSubmit" class="btn btn-success" style="display: none;">Generate House Plan</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/data/rule-engine.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/pages/requirements.js') }}"></script>
+{% endblock %}
