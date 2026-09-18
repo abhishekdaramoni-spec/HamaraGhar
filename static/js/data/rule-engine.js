@@ -80,3 +80,6 @@ const RuleEngine = {
     return 'estate';
   }
 };
+
+window.RuleEngine = RuleEngine;
+

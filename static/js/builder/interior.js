@@ -40,7 +40,7 @@ const Interior = {
   
   renderInterior(roomType) {
       if (!this.sceneEl) return;
-      this.sceneEl.innerHTML = `<div>Interior view for ${roomType}</div>`;
+      this.sceneEl.textContent = `Interior view for ${roomType}`;
       // Would use HouseBuilder.createCuboid to render an inverted room
   },
   
@@ -49,7 +49,7 @@ const Interior = {
       const item = items.find(i => i.id === furnitureId);
       if (item && window.HouseBuilder && this.sceneEl) {
           const fObj = window.HouseBuilder.createCuboid(0, 0, 0, item.width, item.height, item.depth, item.color, 'full');
-          this.sceneEl.appendChild(fObj.element);
+          this.sceneEl.appendChild(fObj);
       }
   },
   
@@ -61,3 +61,6 @@ const Interior = {
       // Update floor
   }
 };
+
+window.Interior = Interior;
+

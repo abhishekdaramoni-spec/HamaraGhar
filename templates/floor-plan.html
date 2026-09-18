@@ -54,6 +54,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script type="module" src="{{ url_for('static', filename='js/planner/plan-generator.js') }}"></script>
-<script type="module" src="{{ url_for('static', filename='js/planner/floor-plan.js') }}"></script>
+<script src="{{ url_for('static', filename='js/planner/plan-generator.js') }}"></script>
+<script src="{{ url_for('static', filename='js/planner/floor-plan.js') }}"></script>
 {% endblock %}

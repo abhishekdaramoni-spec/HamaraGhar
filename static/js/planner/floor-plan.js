@@ -115,3 +115,6 @@ FloorPlan.ROOM_COLORS = {
   garden: '#dcedc8',
   staircase: '#e0e0e0'
 };
+
+window.FloorPlan = FloorPlan;
+

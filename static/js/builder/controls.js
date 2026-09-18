@@ -16,6 +16,7 @@ const Controls = {
        // Handled in HouseBuilder
   },
   setupKeyboard() {
+      if (!document.getElementById('scene')) return;  // Only on builder page
       document.addEventListener('keydown', (e) => {
           if (e.key === 'r' || e.key === 'R') {
               if (window.HouseBuilder) window.HouseBuilder.resetCamera();

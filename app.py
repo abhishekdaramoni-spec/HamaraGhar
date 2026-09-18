@@ -1,17 +1,32 @@
+"""HamaraGhar — Legacy entry point.
+This file preserves backward compatibility.
+The modular application lives in backend/app/.
+"""
 import os
 import json
 from functools import wraps
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, session, redirect, url_for, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 
+load_dotenv()
+
 app = Flask(__name__)
-app.secret_key = 'smartbuild-secret-key-2024'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///smartbuild.db'
+# Stable secret key fallback for serverless functions (Vercel/Lambda)
+app.secret_key = os.environ.get('SECRET_KEY', 'hamaraghar-session-secret-key-prod-2024')
+
+# Database URI: serverless instances have a read-only filesystem except for /tmp
+default_db_uri = 'sqlite:////tmp/smartbuild.db' if (os.environ.get('VERCEL') == '1' or os.environ.get('AWS_LAMBDA_FUNCTION_NAME')) else 'sqlite:///smartbuild.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', default_db_uri)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Models
 class User(db.Model):
@@ -19,15 +34,16 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    data_json = db.Column(db.Text, nullable=False)  # Store project config as JSON string
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    data_json = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc),
+                           onupdate=lambda: datetime.now(timezone.utc))
 
 with app.app_context():
     db.create_all()
@@ -102,7 +118,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         session['user_id'] = new_user.id
-        flash(f'Welcome to SmartBuild 3D, {name}! Your account has been created.', 'success')
+        flash(f'Welcome to HamaraGhar, {name}! Your account has been created.', 'success')
         return redirect(url_for('dashboard'))
     return render_template('register.html', current_user=get_current_user(), page='register')
 
@@ -156,16 +172,14 @@ def summary():
 def data_sources():
     return render_template('data-sources.html', current_user=get_current_user(), page='data-sources')
 
-
+# --- API AUTH ---
 @app.route('/api/auth/register', methods=['POST'])
 def api_register():
     data = request.json
     if not data or not all(k in data for k in ('name', 'email', 'password')):
         return jsonify({'error': 'Missing data'}), 400
-    
     if User.query.filter_by(email=data['email']).first():
         return jsonify({'error': 'User already exists'}), 400
-    
     user = User(
         name=data['name'],
         email=data['email'],
@@ -181,12 +195,10 @@ def api_login():
     data = request.json
     if not data or not all(k in data for k in ('email', 'password')):
         return jsonify({'error': 'Missing data'}), 400
-    
     user = User.query.filter_by(email=data['email']).first()
     if user and check_password_hash(user.password_hash, data['password']):
         session['user_id'] = user.id
         return jsonify({'message': 'Login successful', 'user': {'id': user.id, 'name': user.name}})
-    
     return jsonify({'error': 'Invalid credentials'}), 401
 
 @app.route('/api/auth/logout', methods=['GET'])
@@ -201,6 +213,7 @@ def api_me():
         return jsonify({'id': user.id, 'name': user.name, 'email': user.email})
     return jsonify({'error': 'Not authenticated'}), 401
 
+# --- API PROJECTS ---
 @app.route('/api/projects', methods=['GET'])
 @login_required
 def api_get_projects():
@@ -208,7 +221,7 @@ def api_get_projects():
     return jsonify([{
         'id': p.id,
         'name': p.name,
-        'data': json.loads(p.data_json),
+        'data': json.loads(p.data_json) if p.data_json else {},
         'created_at': p.created_at.isoformat() if p.created_at else None,
         'updated_at': p.updated_at.isoformat() if p.updated_at else None
     } for p in projects])
@@ -219,7 +232,6 @@ def api_create_project():
     data = request.json
     if not data or 'name' not in data or 'data' not in data:
         return jsonify({'error': 'Missing name or data'}), 400
-    
     project = Project(
         user_id=session['user_id'],
         name=data['name'],
@@ -235,7 +247,7 @@ def api_get_project(project_id):
     project = Project.query.filter_by(id=project_id, user_id=session['user_id']).first()
     if not project:
         return jsonify({'error': 'Not found'}), 404
-    return jsonify({'id': project.id, 'name': project.name, 'data': json.loads(project.data_json)})
+    return jsonify({'id': project.id, 'name': project.name, 'data': json.loads(project.data_json) if project.data_json else {}})
 
 @app.route('/api/projects/<int:project_id>', methods=['PUT'])
 @login_required
@@ -243,13 +255,11 @@ def api_update_project(project_id):
     project = Project.query.filter_by(id=project_id, user_id=session['user_id']).first()
     if not project:
         return jsonify({'error': 'Not found'}), 404
-    
     data = request.json
     if 'name' in data:
         project.name = data['name']
     if 'data' in data:
         project.data_json = json.dumps(data['data'])
-    
     db.session.commit()
     return jsonify({'message': 'Project updated'})
 
@@ -259,11 +269,11 @@ def api_delete_project(project_id):
     project = Project.query.filter_by(id=project_id, user_id=session['user_id']).first()
     if not project:
         return jsonify({'error': 'Not found'}), 404
-    
     db.session.delete(project)
     db.session.commit()
     return jsonify({'message': 'Project deleted'})
 
+# --- API DATA ---
 @app.route('/api/data/materials', methods=['GET'])
 def api_materials():
     return jsonify(read_json_data('materials.json'))
@@ -276,8 +286,10 @@ def api_cost_rates():
 def api_risk(city):
     risk_data = read_json_data('location_risk.json')
     cities = risk_data.get('cities', {})
-    if city in cities:
-        return jsonify(cities[city])
+    # Case-insensitive lookup
+    for key, value in cities.items():
+        if key.lower() == city.lower():
+            return jsonify(value)
     return jsonify({'error': 'City not found'}), 404
 
 @app.route('/api/data/layouts', methods=['GET'])
@@ -285,4 +297,7 @@ def api_layouts():
     return jsonify(read_json_data('house_layouts.json'))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    debug = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
+    host = os.environ.get('HOST', '127.0.0.1')
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host=host, port=port, debug=debug)

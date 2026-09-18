@@ -61,3 +61,6 @@ const RiskEngine = {
     return Math.round(total / 4);
   }
 };
+
+window.RiskEngine = RiskEngine;
+

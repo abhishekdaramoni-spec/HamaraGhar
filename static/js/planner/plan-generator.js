@@ -10,8 +10,8 @@ const PlanGenerator = {
     const windows = [];
     
     const margin = 2; // offset from boundary
-    const lW = config.plotWidth - margin*2;
-    const lL = config.plotLength - margin*2;
+    const lW = Math.max(10, (config.plotWidth || 30) - margin * 2);
+    const lL = Math.max(10, (config.plotLength || 40) - margin * 2);
     
     // Simplistic layout generator for demonstration
     // Living Room (Front)
@@ -41,3 +41,6 @@ const PlanGenerator = {
     };
   }
 };
+
+window.PlanGenerator = PlanGenerator;
+

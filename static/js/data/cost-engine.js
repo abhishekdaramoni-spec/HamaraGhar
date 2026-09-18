@@ -68,3 +68,6 @@ const CostEngine = {
     return { status: 'over', label: 'Over budget', color: 'danger' };
   }
 };
+
+window.CostEngine = CostEngine;
+

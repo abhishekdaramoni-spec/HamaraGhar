@@ -561,15 +561,21 @@ const HouseBuilder = {
     this.updateTransform();
   },
 
+  escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  },
+
   showProperties(title, details) {
     const container = document.getElementById('propertiesContent');
     if (!container) return;
 
-    let html = `<h4 style="margin: 0 0 10px 0; color: var(--color-primary);">${title}</h4><ul style="list-style: none; padding: 0; margin: 0; font-size: 13px;">`;
+    let html = `<h4 style="margin: 0 0 10px 0; color: var(--color-primary);">${this.escapeHtml(title)}</h4><ul style="list-style: none; padding: 0; margin: 0; font-size: 13px;">`;
     for (const [key, value] of Object.entries(details)) {
       html += `<li style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--color-gray-200);">
-        <strong style="text-transform: capitalize; color: var(--color-gray-600);">${key}:</strong>
-        <span>${value}</span>
+        <strong style="text-transform: capitalize; color: var(--color-gray-600);">${this.escapeHtml(key)}:</strong>
+        <span>${this.escapeHtml(value)}</span>
       </li>`;
     }
     html += '</ul>';
