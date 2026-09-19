@@ -4,16 +4,21 @@
 
 {% block content %}
 <div class="floor-plan-page">
+    <!-- Server Data Embedding -->
+    <script id="server-project-data" type="application/json">
+        {{ (project_dict | tojson) if project_dict else 'null' }}
+    </script>
+
     <!-- Header -->
     <header class="floor-plan-header">
         <div class="floor-plan-title">
             <h1>2D CAD Architectural Blueprint</h1>
             <div class="floor-plan-meta">
-                <span id="displayProjectName" style="font-weight: 600; color: var(--color-text);">House Plan</span>
+                <span id="displayProjectName" style="font-weight: 600; color: var(--color-text);">{{ project.name if project else 'Residential Plan' }}</span>
                 <span>&bull;</span>
                 <span id="displayPlotSize">Plot: 40 × 50 ft (2,000 sq ft)</span>
                 <span>&bull;</span>
-                <span class="badge badge-outline">Scale 1:100 (1ft = 8px)</span>
+                <span class="badge badge-outline" id="badgeVariant">Vastu-Aligned Classic</span>
             </div>
         </div>
 
@@ -26,7 +31,7 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                 <span>Print</span>
             </button>
-            <a href="{{ url_for('builder') }}" class="btn btn-primary">
+            <a href="{{ url_for('builder', project_id=project.id) if project else url_for('builder') }}" class="btn btn-primary" id="btnGo3D">
                 <span>Enter 3D Studio</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             </a>
@@ -40,7 +45,7 @@
             <div class="cad-card">
                 <div class="cad-card-header">
                     <h3>Room Schedule</h3>
-                    <span class="badge badge-accent" id="badgeRoomCount">5 Rooms</span>
+                    <span class="badge badge-accent" id="badgeRoomCount">0 Spaces</span>
                 </div>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
@@ -52,7 +57,7 @@
                             </tr>
                         </thead>
                         <tbody id="roomScheduleBody">
-                            <!-- Populated dynamically by FloorPlan -->
+                            <!-- Populated dynamically by FloorPlanStudio -->
                         </tbody>
                     </table>
                 </div>
@@ -73,14 +78,14 @@
                     <li>
                         <div class="legend-item-info">
                             <span class="color-box" style="background: #0d9488;"></span>
-                            <span>Master Bedroom</span>
+                            <span>Master Suite</span>
                         </div>
                         <span class="legend-dim">Private</span>
                     </li>
                     <li>
                         <div class="legend-item-info">
                             <span class="color-box" style="background: #0284c7;"></span>
-                            <span>Guest / Kid Bed</span>
+                            <span>Guest / Children Bed</span>
                         </div>
                         <span class="legend-dim">Private</span>
                     </li>
@@ -93,10 +98,31 @@
                     </li>
                     <li>
                         <div class="legend-item-info">
-                            <span class="color-box" style="background: #64748b;"></span>
-                            <span>Bath & Utilities</span>
+                            <span class="color-box" style="background: #475569;"></span>
+                            <span>Bath & Wet Areas</span>
                         </div>
                         <span class="legend-dim">Wet Zone</span>
+                    </li>
+                    <li>
+                        <div class="legend-item-info">
+                            <span class="color-box" style="background: #7c3aed;"></span>
+                            <span>Pooja Mandir</span>
+                        </div>
+                        <span class="legend-dim">Ishanya</span>
+                    </li>
+                    <li>
+                        <div class="legend-item-info">
+                            <span class="color-box" style="background: #334155;"></span>
+                            <span>Car Porch / Parking</span>
+                        </div>
+                        <span class="legend-dim">Stilt / Drive</span>
+                    </li>
+                    <li>
+                        <div class="legend-item-info">
+                            <span class="color-box" style="background: #059669;"></span>
+                            <span>Balcony / Deck</span>
+                        </div>
+                        <span class="legend-dim">Outdoor</span>
                     </li>
                 </ul>
             </div>
@@ -107,7 +133,7 @@
             <div class="canvas-viewport">
                 <!-- Floating Toolbar -->
                 <div class="canvas-toolbar">
-                    <button class="cad-tool-btn" id="btnRegenerate" title="Generate Alternative Layout Pattern">
+                    <button class="cad-tool-btn" id="btnRegenerate" title="Generate Alternative Architectural Pattern">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                         <span>Alternative Layout</span>
                     </button>
@@ -124,11 +150,11 @@
             <!-- Bottom Status Strip -->
             <div class="info-bar">
                 <div>
-                    <span>Carpet Area: <b id="barCarpetArea">1,400 sq ft</b></span>
+                    <span>Carpet Area: <b id="barCarpetArea">0 sq ft</b></span>
                     <span style="margin: 0 8px; color: rgba(255,255,255,0.2);">|</span>
-                    <span>Built-up Footprint: <b id="barBuiltupArea">1,600 sq ft</b></span>
+                    <span>Built-up Footprint: <b id="barBuiltupArea">0 sq ft</b></span>
                     <span style="margin: 0 8px; color: rgba(255,255,255,0.2);">|</span>
-                    <span>Efficiency: <b id="barEfficiency">87.5%</b></span>
+                    <span>Efficiency: <b id="barEfficiency">0%</b></span>
                 </div>
                 <div class="compliance-badge" id="barCompliance">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -158,19 +184,19 @@
                 <div class="stats-grid">
                     <div class="stat-mini-box">
                         <span class="stat-mini-label">Total Rooms</span>
-                        <div class="stat-mini-val" id="statRooms">5</div>
+                        <div class="stat-mini-val" id="statRooms">0</div>
                     </div>
                     <div class="stat-mini-box">
                         <span class="stat-mini-label">Doors / Openings</span>
-                        <div class="stat-mini-val" id="statDoors">6</div>
+                        <div class="stat-mini-val" id="statDoors">0</div>
                     </div>
                     <div class="stat-mini-box">
                         <span class="stat-mini-label">Windows (Vent.)</span>
-                        <div class="stat-mini-val" id="statWindows">7</div>
+                        <div class="stat-mini-val" id="statWindows">0</div>
                     </div>
                     <div class="stat-mini-box">
                         <span class="stat-mini-label">Outer Walls</span>
-                        <div class="stat-mini-val">9" AAC Block</div>
+                        <div class="stat-mini-val" id="statWalls">9" AAC Block</div>
                     </div>
                 </div>
             </div>
@@ -181,14 +207,14 @@
                     <h3>Project Next Steps</h3>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: var(--space-2);">
-                    <a href="{{ url_for('builder') }}" class="btn btn-primary btn-block" style="font-size: var(--text-xs); padding: 8px 12px;">
+                    <a href="{{ url_for('builder', project_id=project.id) if project else url_for('builder') }}" class="btn btn-primary btn-block" style="font-size: var(--text-xs); padding: 8px 12px;" id="linkBuilder">
                         <span>Open 3D Elevation Studio</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </a>
-                    <a href="{{ url_for('cost') }}" class="btn btn-outline btn-block" style="font-size: var(--text-xs); padding: 8px 12px;">
+                    <a href="{{ url_for('cost', project_id=project.id) if project else url_for('cost') }}" class="btn btn-outline btn-block" style="font-size: var(--text-xs); padding: 8px 12px;" id="linkCost">
                         <span>Review Cost BOQ & Budget</span>
                     </a>
-                    <a href="{{ url_for('risk') }}" class="btn btn-outline btn-block" style="font-size: var(--text-xs); padding: 8px 12px;">
+                    <a href="{{ url_for('risk', project_id=project.id) if project else url_for('risk') }}" class="btn btn-outline btn-block" style="font-size: var(--text-xs); padding: 8px 12px;" id="linkRisk">
                         <span>IS 1893 Hazard Audit</span>
                     </a>
                 </div>

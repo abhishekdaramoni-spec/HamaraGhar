@@ -409,9 +409,14 @@ const RequirementsWizard = {
             window.Utils.notify('Requirements saved! Generating your 2D CAD blueprint...', 'success');
         }
 
-        // Navigate to 2D Floor Plan CAD Studio
+        // Navigate to 2D Floor Plan CAD Studio with created project ID
         setTimeout(() => {
-            window.location.href = '/floor-plan';
+            const currentId = window.Utils?.loadLocal ? window.Utils.loadLocal('current_project_id') : localStorage.getItem('current_project_id');
+            if (currentId) {
+                window.location.href = `/floor-plan?project_id=${currentId}`;
+            } else {
+                window.location.href = '/floor-plan';
+            }
         }, 600);
     }
 };

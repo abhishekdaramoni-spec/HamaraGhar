@@ -1,63 +1,123 @@
-// HamaraGhar — 2D CAD Blueprint Floor Plan Studio Logic
+// HamaraGhar — 2D CAD Blueprint Floor Plan Studio Controller
+// Synchronizes project data, deterministic CAD geometry, room schedule, technical specs, and multi-floor views.
+
 const FloorPlanStudio = {
     canvas: null,
     ctx: null,
+    projectId: null,
+    projectName: '',
     config: {},
     currentPlan: null,
     activeFloor: 0,
+    activeVariant: 0,
     showDimensions: true,
     scale: 8, // pixels per foot
     offsetX: 60,
     offsetY: 60,
 
-    init() {
+    async init() {
         this.canvas = document.getElementById('floorPlanCanvas');
         if (this.canvas) {
             this.ctx = this.canvas.getContext('2d');
         }
 
-        // Load project data
-        let saved = null;
-        if (window.Utils && typeof window.Utils.loadLocal === 'function') {
-            saved = window.Utils.loadLocal('house_data') || window.Utils.loadLocal('smartbuild_config');
-        } else {
-            const raw = localStorage.getItem('house_data') || localStorage.getItem('smartbuild_config');
-            if (raw) {
-                try { saved = JSON.parse(raw); } catch(e) {}
+        // 1. Resolve active project from:
+        // a) URL query parameter (?project_id=...)
+        // b) Server-rendered JSON element (#server-project-data)
+        // c) Local storage / Utils
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramId = urlParams.get('project_id');
+
+        let serverData = null;
+        const serverScript = document.getElementById('server-project-data');
+        if (serverScript && serverScript.textContent.trim()) {
+            try {
+                serverData = JSON.parse(serverScript.textContent);
+            } catch (e) {
+                console.warn('Could not parse server project data:', e);
             }
         }
-        this.config = saved || {
-            plot_width: 40,
-            plot_length: 50,
-            plotWidth: 40,
-            plotLength: 50,
-            bhk: 3,
-            bedrooms: 3,
-            floors: 2,
-            projectName: 'Greenwood Villa'
-        };
+
+        if (serverData && (!paramId || String(serverData.id) === String(paramId))) {
+            this.projectId = serverData.id;
+            this.projectName = serverData.name || 'House Plan';
+            this.config = serverData.data || {};
+        } else if (paramId) {
+            this.projectId = parseInt(paramId, 10);
+            try {
+                if (window.API && typeof window.API.getProject === 'function') {
+                    const res = await window.API.getProject(this.projectId);
+                    const p = res.data || res;
+                    this.projectName = p.name || 'House Plan';
+                    this.config = p.data || {};
+                }
+            } catch (e) {
+                console.warn('Failed to fetch project via API:', e);
+            }
+        }
+
+        // Fallback if no project in server data or URL
+        if (!this.config || Object.keys(this.config).length === 0) {
+            let saved = null;
+            if (window.Utils && typeof window.Utils.loadLocal === 'function') {
+                saved = window.Utils.loadLocal('house_data') || window.Utils.loadLocal('smartbuild_config');
+            } else {
+                const raw = localStorage.getItem('house_data') || localStorage.getItem('smartbuild_config');
+                if (raw) {
+                    try { saved = JSON.parse(raw); } catch (e) {}
+                }
+            }
+            this.config = saved || {
+                plot_width: 40,
+                plot_length: 50,
+                plotWidth: 40,
+                plotLength: 50,
+                bhk: 3,
+                bedrooms: 3,
+                floors: 2,
+                projectName: 'Modern Residence'
+            };
+            this.projectName = this.config.projectName || this.config.name || 'House Plan';
+        }
+
+        // Synchronize local storage so downstream pages share active project
+        if (window.Utils && typeof window.Utils.saveConfig === 'function') {
+            window.Utils.saveConfig(this.config);
+            if (this.projectId) window.Utils.saveLocal('current_project_id', this.projectId);
+        }
 
         this.setupUI();
-        this.renderFloor(0);
+        await this.loadFloorPlan(this.activeFloor, this.activeVariant);
     },
 
     setupUI() {
-        // Populate header metadata
+        // Metadata in header
         const nameEl = document.getElementById('displayProjectName');
         const plotEl = document.getElementById('displayPlotSize');
-        const pName = this.config.projectName || this.config.name || 'Residential Plan';
         const pW = this.config.plotWidth || this.config.plot_width || 40;
         const pL = this.config.plotLength || this.config.plot_length || 50;
 
-        if (nameEl) nameEl.textContent = pName;
+        if (nameEl) nameEl.textContent = this.projectName || this.config.projectName || 'House Plan';
         if (plotEl) plotEl.textContent = `Plot: ${pW} × ${pL} ft (${Math.round(pW * pL).toLocaleString('en-IN')} sq ft)`;
 
-        // Setup toolbar buttons
+        // Update links with project_id
+        if (this.projectId) {
+            ['btnGo3D', 'linkBuilder'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.href = `/builder?project_id=${this.projectId}`;
+            });
+            const linkCost = document.getElementById('linkCost');
+            if (linkCost) linkCost.href = `/cost?project_id=${this.projectId}`;
+            const linkRisk = document.getElementById('linkRisk');
+            if (linkRisk) linkRisk.href = `/risk?project_id=${this.projectId}`;
+        }
+
+        // Toolbar buttons
         const btnRegen = document.getElementById('btnRegenerate');
         if (btnRegen) {
-            btnRegen.addEventListener('click', () => {
-                this.renderFloor(this.activeFloor);
-                if (window.Utils?.notify) window.Utils.notify('Layout refreshed', 'info');
+            btnRegen.addEventListener('click', async () => {
+                this.activeVariant = (this.activeVariant + 1) % 3;
+                await this.regenerateVariant(this.activeVariant);
             });
         }
 
@@ -75,7 +135,7 @@ const FloorPlanStudio = {
             btnDownload.addEventListener('click', () => this.downloadPNG());
         }
 
-        // Check if project has multiple floors to show/hide first floor tab
+        // Floors configuration
         const totalFloors = Number(this.config.floors) || 1;
         const btnFloor1 = document.getElementById('btnFloor1');
         if (btnFloor1 && totalFloors < 2) {
@@ -83,21 +143,69 @@ const FloorPlanStudio = {
         }
     },
 
-    switchFloor(floorIndex) {
+    async switchFloor(floorIndex) {
         this.activeFloor = floorIndex;
         document.querySelectorAll('.segmented-option').forEach((btn, idx) => {
             btn.classList.toggle('active', idx === floorIndex);
         });
-        this.renderFloor(floorIndex);
+        await this.loadFloorPlan(floorIndex, this.activeVariant);
     },
 
-    renderFloor(floorIndex) {
-        if (!window.PlanGenerator) return;
+    async loadFloorPlan(floorIndex, variant = 0) {
+        let layout = null;
+        if (this.projectId && window.API) {
+            try {
+                const res = await window.API.get(`/api/projects/${this.projectId}/floor-plan?floor=${floorIndex}&variant=${variant}`);
+                if (res && res.layout) {
+                    layout = res.layout;
+                }
+            } catch (e) {
+                console.warn('Could not fetch layout from API, using client PlanGenerator:', e);
+            }
+        }
 
-        this.currentPlan = window.PlanGenerator.generate(this.config, floorIndex);
-        this.updateScheduleAndStats(this.currentPlan);
+        // Fallback to client PlanGenerator
+        if (!layout && window.PlanGenerator) {
+            layout = window.PlanGenerator.generate(this.config, floorIndex, variant);
+        }
+
+        if (!layout) return;
+
+        this.currentPlan = layout;
+        this.updateScheduleAndStats(layout);
         this.adjustScaleAndOffsets();
         this.draw();
+    },
+
+    async regenerateVariant(variant) {
+        let layout = null;
+        if (this.projectId && window.API) {
+            try {
+                const res = await window.API.post(`/api/projects/${this.projectId}/floor-plan/generate`, {
+                    floor: this.activeFloor,
+                    variant: variant
+                });
+                if (res && res.layout) {
+                    layout = res.layout;
+                }
+            } catch (e) {
+                console.warn('API regenerate failed, using client generator:', e);
+            }
+        }
+
+        if (!layout && window.PlanGenerator) {
+            layout = window.PlanGenerator.generate(this.config, this.activeFloor, variant);
+        }
+
+        if (layout) {
+            this.currentPlan = layout;
+            this.updateScheduleAndStats(layout);
+            this.adjustScaleAndOffsets();
+            this.draw();
+            if (window.Utils?.notify) {
+                window.Utils.notify(`Switched to: ${layout.variantName || 'Alternative Layout'}`, 'info');
+            }
+        }
     },
 
     adjustScaleAndOffsets() {
@@ -106,12 +214,11 @@ const FloorPlanStudio = {
         const pW = dims.width;
         const pL = dims.length;
 
-        // Calculate responsive scale to fit canvas with padding
         const availableW = this.canvas.width - 140;
         const availableH = this.canvas.height - 120;
         const scaleX = availableW / pW;
         const scaleY = availableH / pL;
-        this.scale = Math.min(scaleX, scaleY, 12); // clamp max scale
+        this.scale = Math.min(scaleX, scaleY, 12);
 
         this.offsetX = Math.round((this.canvas.width - pW * this.scale) / 2);
         this.offsetY = Math.round((this.canvas.height - pL * this.scale) / 2) + 10;
@@ -123,7 +230,7 @@ const FloorPlanStudio = {
         const plan = this.currentPlan;
         const dims = plan.dimensions;
 
-        // 1. Clear & Background
+        // 1. Clear & Blueprint Dark Background
         ctx.fillStyle = '#0b1120';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -133,7 +240,7 @@ const FloorPlanStudio = {
         // 3. Outer Plot Boundary (Dashed line)
         this.drawPlotBoundary(ctx, dims);
 
-        // 4. Rooms (Fill & Thick Walls)
+        // 4. Rooms (Fill & Architectural Walls)
         this.drawRooms(ctx, plan.rooms);
 
         // 5. Doors & Windows
@@ -196,11 +303,11 @@ const FloorPlanStudio = {
             // Room Background Fill
             ctx.save();
             ctx.fillStyle = r.color || 'rgba(30, 41, 59, 0.6)';
-            ctx.globalAlpha = 0.45;
+            ctx.globalAlpha = 0.50;
             ctx.fillRect(rx, ry, rw, rh);
             ctx.restore();
 
-            // Wall Outline (Outer perimeter / Inner walls)
+            // Wall Outline
             ctx.save();
             ctx.strokeStyle = '#f8fafc';
             ctx.lineWidth = 2.5;
@@ -214,110 +321,114 @@ const FloorPlanStudio = {
 
             // Room Name
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 12px Inter, sans-serif';
-            ctx.fillText(r.name, rx + rw / 2, ry + rh / 2 - 10);
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.fillText(r.name, rx + rw / 2, ry + rh / 2 - 8);
 
             // Dimension String
-            ctx.fillStyle = '#cbd5e1';
-            ctx.font = '11px "SF Mono", monospace';
-            ctx.fillText(`${r.width}'0" × ${r.height}'0"`, rx + rw / 2, ry + rh / 2 + 6);
-
-            // Area (Sq Ft)
-            ctx.fillStyle = '#f97316';
-            ctx.font = '10px Inter, sans-serif';
-            ctx.fillText(`${Math.round(r.width * r.height)} sq ft`, rx + rw / 2, ry + rh / 2 + 20);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px monospace';
+            ctx.fillText(`${r.width}' × ${r.height}' (${Math.round(r.width * r.height)} sq ft)`, rx + rw / 2, ry + rh / 2 + 8);
             ctx.restore();
         });
     },
 
     drawDoors(ctx, doors) {
-        ctx.save();
-        ctx.strokeStyle = '#d97706'; // brass/door color
-        ctx.lineWidth = 2;
-
         doors.forEach(d => {
             const dx = this.offsetX + d.x * this.scale;
             const dy = this.offsetY + d.y * this.scale;
-            const radius = (d.width || 3) * this.scale;
+            const dw = (d.width || 3) * this.scale;
 
-            ctx.beginPath();
-            ctx.arc(dx, dy, radius, 0, Math.PI / 2);
-            ctx.stroke();
+            ctx.save();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.75;
 
-            // Door leaf line
+            // Door Opening Line
             ctx.beginPath();
             ctx.moveTo(dx, dy);
-            ctx.lineTo(dx + radius, dy);
+            ctx.lineTo(dx + dw, dy);
             ctx.stroke();
+
+            // Door Swing Arc
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            ctx.arc(dx, dy, dw, 0, Math.PI / 2, false);
+            ctx.stroke();
+
+            ctx.restore();
         });
-        ctx.restore();
     },
 
     drawWindows(ctx, windows) {
-        ctx.save();
-        ctx.strokeStyle = '#38bdf8'; // glass cyan
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
-        ctx.lineWidth = 3;
-
         windows.forEach(w => {
             const wx = this.offsetX + w.x * this.scale;
             const wy = this.offsetY + w.y * this.scale;
-            const span = (w.width || 3.5) * this.scale;
+            const ww = (w.width || 4) * this.scale;
+
+            ctx.save();
+            ctx.fillStyle = '#38bdf8';
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 2;
 
             if (w.wall === 'north' || w.wall === 'south') {
-                ctx.strokeRect(wx, wy - 2, span, 4);
-                ctx.fillRect(wx, wy - 2, span, 4);
+                ctx.fillRect(wx - ww / 2, wy - 2, ww, 4);
+                ctx.strokeRect(wx - ww / 2, wy - 2, ww, 4);
             } else {
-                ctx.strokeRect(wx - 2, wy, 4, span);
-                ctx.fillRect(wx - 2, wy, 4, span);
+                ctx.fillRect(wx - 2, wy - ww / 2, 4, ww);
+                ctx.strokeRect(wx - 2, wy - ww / 2, 4, ww);
             }
+            ctx.restore();
         });
-        ctx.restore();
     },
 
     drawDimensions(ctx, dims, rooms) {
         ctx.save();
         ctx.strokeStyle = '#94a3b8';
         ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px monospace';
         ctx.lineWidth = 1;
-        ctx.font = '11px monospace';
 
-        const bx = this.offsetX + (plan => plan.setbacks.side * this.scale)(this.currentPlan);
-        const by = this.offsetY + (plan => plan.setbacks.front * this.scale)(this.currentPlan);
-        const bw = this.currentPlan.dimensions.buildWidth * this.scale;
-        const bh = this.currentPlan.dimensions.buildLength * this.scale;
+        // Top build width dimension
+        const topY = this.offsetY - 20;
+        const bStartX = this.offsetX + (dims.width - dims.buildWidth) / 2 * this.scale;
+        const bEndX = bStartX + dims.buildWidth * this.scale;
 
-        // Top dimension line
-        const topY = by - 16;
         ctx.beginPath();
-        ctx.moveTo(bx, topY);
-        ctx.lineTo(bx + bw, topY);
+        ctx.moveTo(bStartX, topY);
+        ctx.lineTo(bEndX, topY);
         ctx.stroke();
-        // Tick marks
+
         ctx.beginPath();
-        ctx.moveTo(bx, topY - 5); ctx.lineTo(bx, topY + 5);
-        ctx.moveTo(bx + bw, topY - 5); ctx.lineTo(bx + bw, topY + 5);
+        ctx.moveTo(bStartX, topY - 4);
+        ctx.lineTo(bStartX, topY + 4);
+        ctx.moveTo(bEndX, topY - 4);
+        ctx.lineTo(bEndX, topY + 4);
         ctx.stroke();
+
         ctx.textAlign = 'center';
-        ctx.fillText(`${this.currentPlan.dimensions.buildWidth}'0" BUILD SPAN`, bx + bw / 2, topY - 6);
+        ctx.fillText(`${dims.buildWidth}'0" BUILDABLE SPAN`, (bStartX + bEndX) / 2, topY - 6);
 
-        // Left dimension line
-        const leftX = bx - 16;
+        // Left build length dimension
+        const leftX = this.offsetX - 24;
+        const bStartY = this.offsetY + (dims.length - dims.buildLength) / 2 * this.scale;
+        const bEndY = bStartY + dims.buildLength * this.scale;
+
         ctx.beginPath();
-        ctx.moveTo(leftX, by);
-        ctx.lineTo(leftX, by + bh);
+        ctx.moveTo(leftX, bStartY);
+        ctx.lineTo(leftX, bEndY);
         ctx.stroke();
-        // Tick marks
+
         ctx.beginPath();
-        ctx.moveTo(leftX - 5, by); ctx.lineTo(leftX + 5, by);
-        ctx.moveTo(leftX - 5, by + bh); ctx.lineTo(leftX + 5, by + bh);
+        ctx.moveTo(leftX - 4, bStartY);
+        ctx.lineTo(leftX + 4, bStartY);
+        ctx.moveTo(leftX - 4, bEndY);
+        ctx.lineTo(leftX + 4, bEndY);
         ctx.stroke();
 
         ctx.save();
-        ctx.translate(leftX - 8, by + bh / 2);
+        ctx.translate(leftX - 8, (bStartY + bEndY) / 2);
         ctx.rotate(-Math.PI / 2);
         ctx.textAlign = 'center';
-        ctx.fillText(`${this.currentPlan.dimensions.buildLength}'0" DEPTH`, 0, 0);
+        ctx.fillText(`${dims.buildLength}'0" DEPTH`, 0, 0);
         ctx.restore();
 
         ctx.restore();
@@ -332,7 +443,6 @@ const FloorPlanStudio = {
         ctx.lineWidth = 1.5;
         ctx.fillStyle = '#c2410c'; // Terracotta north arrow
 
-        // North arrow head
         ctx.beginPath();
         ctx.moveTo(cx, cy - 20);
         ctx.lineTo(cx + 8, cy + 8);
@@ -340,7 +450,6 @@ const FloorPlanStudio = {
         ctx.closePath();
         ctx.fill();
 
-        // South arrow tail
         ctx.fillStyle = '#94a3b8';
         ctx.beginPath();
         ctx.moveTo(cx, cy - 20);
@@ -358,18 +467,18 @@ const FloorPlanStudio = {
 
     drawTitleBlock(ctx, dims) {
         ctx.save();
-        const boxW = 200;
-        const boxH = 64;
+        const boxW = 210;
+        const boxH = 68;
         const tx = this.canvas.width - boxW - 16;
         const ty = this.canvas.height - boxH - 16;
 
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
         ctx.fillRect(tx, ty, boxW, boxH);
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         ctx.lineWidth = 1;
         ctx.strokeRect(tx, ty, boxW, boxH);
 
-        const pName = this.config.projectName || 'House Plan';
+        const pName = this.projectName || 'House Plan';
         const floorName = this.activeFloor === 0 ? 'GROUND FLOOR' : 'FIRST FLOOR';
 
         ctx.fillStyle = '#ffffff';
@@ -380,12 +489,18 @@ const FloorPlanStudio = {
         ctx.font = '10px monospace';
         ctx.fillText(`PLAN: ${pName.toUpperCase()}`, tx + 10, ty + 30);
         ctx.fillText(`LEVEL: ${floorName} (1:100)`, tx + 10, ty + 44);
-        ctx.fillText(`DATE: ${new Date().toLocaleDateString('en-IN')}`, tx + 10, ty + 56);
+        ctx.fillText(`STYLE: ${this.currentPlan?.variantName || 'Vastu Classic'}`, tx + 10, ty + 58);
 
         ctx.restore();
     },
 
     updateScheduleAndStats(plan) {
+        // Variant badge
+        const badgeVar = document.getElementById('badgeVariant');
+        if (badgeVar && plan.variantName) {
+            badgeVar.textContent = plan.variantName;
+        }
+
         // Room Schedule Table
         const tbody = document.getElementById('roomScheduleBody');
         const badgeCount = document.getElementById('badgeRoomCount');
@@ -396,7 +511,10 @@ const FloorPlanStudio = {
                 const area = Math.round(r.width * r.height);
                 return `
                     <tr style="border-bottom: 1px solid var(--color-border); height: 28px;">
-                        <td style="padding: 4px 2px; font-weight: 500;">${r.name}</td>
+                        <td style="padding: 4px 2px; font-weight: 500;">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:2px; background:${r.color}; margin-right:4px;"></span>
+                            ${r.name}
+                        </td>
                         <td style="padding: 4px 2px; font-family: monospace; color: var(--color-text-muted);">${r.width}'×${r.height}'</td>
                         <td style="padding: 4px 2px; text-align: right; font-weight: 600; color: var(--color-accent);">${area} sq ft</td>
                     </tr>
@@ -423,7 +541,7 @@ const FloorPlanStudio = {
     downloadPNG() {
         if (!this.canvas) return;
         const link = document.createElement('a');
-        link.download = `HamaraGhar-Blueprint-${this.config.projectName || 'Plan'}-Level${this.activeFloor}.png`;
+        link.download = `HamaraGhar-Blueprint-${this.projectName || 'Plan'}-Level${this.activeFloor}.png`;
         link.href = this.canvas.toDataURL('image/png');
         link.click();
     }

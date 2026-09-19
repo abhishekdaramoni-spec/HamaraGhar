@@ -452,6 +452,9 @@ function openProject(id, targetPage) {
     
     if (window.Utils) {
         window.Utils.saveConfig(p.data || {});
+        if (typeof window.Utils.saveLocal === 'function') {
+            window.Utils.saveLocal('current_project_id', id);
+        }
     }
     
     const routes = {
@@ -462,8 +465,8 @@ function openProject(id, targetPage) {
         'summary': '/summary'
     };
     
-    const url = routes[targetPage] || '/builder';
-    window.location.href = url;
+    const base = routes[targetPage] || '/floor-plan';
+    window.location.href = `${base}?project_id=${id}`;
 }
 
 async function duplicateProjectPrompt(id) {
