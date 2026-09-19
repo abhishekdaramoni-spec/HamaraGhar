@@ -29,9 +29,18 @@ const API = {
   
   // Projects
   async getProjects() { return this.get('/api/projects'); },
-  async getProject(id) { return this.get(`/api/projects/${id}`); },
-  async createProject(name, data) { return this.post('/api/projects', {name, data}); },
-  async updateProject(id, name, data) { return this.put(`/api/projects/${id}`, {name, data}); },
+  async createProject(nameOrPayload, data) {
+    if (typeof nameOrPayload === 'object' && nameOrPayload !== null) {
+      return this.post('/api/projects', nameOrPayload);
+    }
+    return this.post('/api/projects', { name: nameOrPayload, data });
+  },
+  async updateProject(id, nameOrPayload, data) {
+    if (typeof nameOrPayload === 'object' && nameOrPayload !== null) {
+      return this.put(`/api/projects/${id}`, nameOrPayload);
+    }
+    return this.put(`/api/projects/${id}`, { name: nameOrPayload, data });
+  },
   async deleteProject(id) { return this.delete(`/api/projects/${id}`); },
   
   // Data

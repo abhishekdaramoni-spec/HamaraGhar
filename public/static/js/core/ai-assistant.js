@@ -182,10 +182,10 @@ const HamaraAI = {
 
     generateResponse(prompt, key) {
         const ctx = this.projectContext;
-        const pW = ctx.plot_width || ctx.plotWidth || 40;
-        const pL = ctx.plot_length || ctx.plotLength || 50;
-        const city = ctx.city || 'Bengaluru';
-        const bhk = ctx.bhk || ctx.bedrooms || 3;
+        const pW = this.escapeHtml(ctx.plot_width || ctx.plotWidth || 40);
+        const pL = this.escapeHtml(ctx.plot_length || ctx.plotLength || 50);
+        const city = this.escapeHtml(ctx.city || 'Bengaluru');
+        const bhk = this.escapeHtml(ctx.bhk || ctx.bedrooms || 3);
         const lowPrompt = prompt.toLowerCase();
 
         if (key === 'vastu' || lowPrompt.includes('vastu')) {

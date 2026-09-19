@@ -431,10 +431,13 @@ function renderProjectCard(project) {
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>
                         <span>2D Plan</span>
                     </button>
-                    <button class="btn btn-ghost btn-icon-only" onclick="renameProjectPrompt('${id}', '${name.replace(/'/g, "\\'")}')">
+                    <button class="btn btn-ghost btn-icon-only" onclick="duplicateProjectPrompt('${id}')" title="Duplicate Project">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                    <button class="btn btn-ghost btn-icon-only" onclick="renameProjectPrompt('${id}', '${name.replace(/'/g, "\\'")}')" title="Rename Project">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                     </button>
-                    <button class="btn btn-ghost btn-icon-only text-danger" onclick="deleteProjectPrompt('${id}')">
+                    <button class="btn btn-ghost btn-icon-only text-danger" onclick="deleteProjectPrompt('${id}')" title="Delete Project">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </div>
@@ -461,6 +464,22 @@ function openProject(id, targetPage) {
     
     const url = routes[targetPage] || '/builder';
     window.location.href = url;
+}
+
+async function duplicateProjectPrompt(id) {
+    const p = allProjects.find(item => item.id == id);
+    if (!p) return;
+    const dupName = `${p.name} (Copy)`;
+    try {
+        await window.API.createProject({
+            name: dupName,
+            data: p.data || {}
+        });
+        if (window.Utils?.notify) window.Utils.notify(`Created duplicate: "${dupName}"`, 'success');
+        await loadProjects();
+    } catch (err) {
+        alert('Failed to duplicate project: ' + (err.message || 'Unknown error'));
+    }
 }
 
 async function renameProjectPrompt(id, currentName) {

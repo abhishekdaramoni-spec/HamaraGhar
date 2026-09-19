@@ -53,13 +53,15 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            if request.path.startswith('/api/'):
+                return jsonify({'error': 'Authentication required'}), 401
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
 def get_current_user():
     if 'user_id' in session:
-        return User.query.get(session['user_id'])
+        return db.session.get(User, session['user_id'])
     return None
 
 def read_json_data(filename):
@@ -175,31 +177,53 @@ def data_sources():
 # --- API AUTH ---
 @app.route('/api/auth/register', methods=['POST'])
 def api_register():
-    data = request.json
-    if not data or not all(k in data for k in ('name', 'email', 'password')):
-        return jsonify({'error': 'Missing data'}), 400
-    if User.query.filter_by(email=data['email']).first():
-        return jsonify({'error': 'User already exists'}), 400
+    data = request.json or {}
+    name = str(data.get('name', '')).strip()
+    email = str(data.get('email', '')).strip().lower()
+    password = str(data.get('password', ''))
+    
+    if not name or not email or not password:
+        return jsonify({'error': 'Name, email, and password are required'}), 400
+    if len(name) < 2 or len(name) > 100:
+        return jsonify({'error': 'Name must be between 2 and 100 characters'}), 400
+    import re
+    if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+        return jsonify({'error': 'Invalid email address format'}), 400
+    if len(password) < 6:
+        return jsonify({'error': 'Password must be at least 6 characters'}), 400
+    if len(password) > 128:
+        return jsonify({'error': 'Password exceeds maximum length'}), 400
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({'error': 'An account with this email already exists'}), 400
     user = User(
-        name=data['name'],
-        email=data['email'],
-        password_hash=generate_password_hash(data['password'])
+        name=name,
+        email=email,
+        password_hash=generate_password_hash(password)
     )
     db.session.add(user)
     db.session.commit()
     session['user_id'] = user.id
-    return jsonify({'message': 'Registration successful', 'user': {'id': user.id, 'name': user.name}})
+    return jsonify({
+        'message': 'Registration successful',
+        'user': {'id': user.id, 'name': user.name, 'email': user.email}
+    }), 201
 
 @app.route('/api/auth/login', methods=['POST'])
 def api_login():
-    data = request.json
-    if not data or not all(k in data for k in ('email', 'password')):
-        return jsonify({'error': 'Missing data'}), 400
-    user = User.query.filter_by(email=data['email']).first()
-    if user and check_password_hash(user.password_hash, data['password']):
+    data = request.json or {}
+    email = str(data.get('email', '')).strip().lower()
+    password = str(data.get('password', ''))
+    if not email or not password:
+        return jsonify({'error': 'Email and password are required'}), 400
+    user = User.query.filter_by(email=email).first()
+    if user and check_password_hash(user.password_hash, password):
         session['user_id'] = user.id
-        return jsonify({'message': 'Login successful', 'user': {'id': user.id, 'name': user.name}})
-    return jsonify({'error': 'Invalid credentials'}), 401
+        return jsonify({
+            'message': 'Login successful',
+            'user': {'id': user.id, 'name': user.name, 'email': user.email}
+        }), 200
+    return jsonify({'error': 'Invalid email or password'}), 401
 
 @app.route('/api/auth/logout', methods=['GET'])
 def api_logout():
@@ -229,17 +253,35 @@ def api_get_projects():
 @app.route('/api/projects', methods=['POST'])
 @login_required
 def api_create_project():
-    data = request.json
-    if not data or 'name' not in data or 'data' not in data:
+    data = request.json or {}
+    if 'name' not in data or 'data' not in data:
         return jsonify({'error': 'Missing name or data'}), 400
+    name = str(data.get('name', '')).strip()
+    if not name:
+        return jsonify({'error': 'Project name cannot be empty'}), 400
+    if len(name) > 100:
+        return jsonify({'error': 'Project name cannot exceed 100 characters'}), 400
+    
+    project_data = data.get('data')
+    if not isinstance(project_data, (dict, list)):
+        return jsonify({'error': 'Project data must be a valid JSON object or array'}), 400
+        
+    raw_json = json.dumps(project_data)
+    if len(raw_json) > 5 * 1024 * 1024:
+        return jsonify({'error': 'Project payload exceeds size limit (5MB)'}), 413
+        
     project = Project(
         user_id=session['user_id'],
-        name=data['name'],
-        data_json=json.dumps(data['data'])
+        name=name,
+        data_json=raw_json
     )
     db.session.add(project)
     db.session.commit()
-    return jsonify({'message': 'Project created', 'id': project.id})
+    return jsonify({
+        'message': 'Project created',
+        'id': project.id,
+        'project': {'id': project.id, 'name': project.name}
+    }), 201
 
 @app.route('/api/projects/<int:project_id>', methods=['GET'])
 @login_required
@@ -247,7 +289,11 @@ def api_get_project(project_id):
     project = Project.query.filter_by(id=project_id, user_id=session['user_id']).first()
     if not project:
         return jsonify({'error': 'Not found'}), 404
-    return jsonify({'id': project.id, 'name': project.name, 'data': json.loads(project.data_json) if project.data_json else {}})
+    return jsonify({
+        'id': project.id,
+        'name': project.name,
+        'data': json.loads(project.data_json) if project.data_json else {}
+    })
 
 @app.route('/api/projects/<int:project_id>', methods=['PUT'])
 @login_required
@@ -255,13 +301,26 @@ def api_update_project(project_id):
     project = Project.query.filter_by(id=project_id, user_id=session['user_id']).first()
     if not project:
         return jsonify({'error': 'Not found'}), 404
-    data = request.json
+    data = request.json or {}
     if 'name' in data:
-        project.name = data['name']
+        name = str(data['name']).strip()
+        if not name:
+            return jsonify({'error': 'Project name cannot be empty'}), 400
+        if len(name) > 100:
+            return jsonify({'error': 'Project name cannot exceed 100 characters'}), 400
+        project.name = name
     if 'data' in data:
-        project.data_json = json.dumps(data['data'])
+        project_data = data['data']
+        if not isinstance(project_data, (dict, list)):
+            return jsonify({'error': 'Project data must be a valid JSON object or array'}), 400
+        project.data_json = json.dumps(project_data)
+    project.updated_at = datetime.now(timezone.utc)
     db.session.commit()
-    return jsonify({'message': 'Project updated'})
+    return jsonify({
+        'message': 'Project updated',
+        'id': project.id,
+        'project': {'id': project.id, 'name': project.name}
+    }), 200
 
 @app.route('/api/projects/<int:project_id>', methods=['DELETE'])
 @login_required

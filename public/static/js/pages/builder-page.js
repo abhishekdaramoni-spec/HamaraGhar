@@ -1,7 +1,14 @@
 // =========================================================================
 // HamaraGhar — Architectural 3D Studio Controller
-// Synchronizes CAD Toolbars, Camera Presets, Inspector, and Cost Strip
+// Synchronizes CAD Toolbars, Camera Presets, Inspector, Undo/Redo & Autosave
 // =========================================================================
+
+const StudioState = {
+    undoStack: [],
+    redoStack: [],
+    autosaveTimer: null,
+    isDirty: false
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     const sceneEl = document.getElementById('scene');
@@ -43,6 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
         window.HouseBuilder.init(sceneEl, houseEl);
         window.HouseBuilder.buildHouse(config);
 
+        // Record initial state in undo stack
+        pushUndoState(config);
+
         // Setup Studio Controls
         setupCADToolbar();
         setupCameraControls();
@@ -51,8 +61,96 @@ document.addEventListener('DOMContentLoaded', () => {
         setupFloatingBadges(config);
         setupSaveAndShare();
         setupFloatingRoomClose();
+        setupUndoRedo();
+        setupEditRoom();
+        setupView3DButton();
     }
 });
+
+function pushUndoState(cfg) {
+    try {
+        const copy = JSON.parse(JSON.stringify(cfg || window.HouseBuilder.config));
+        StudioState.undoStack.push(copy);
+        if (StudioState.undoStack.length > 25) StudioState.undoStack.shift();
+        StudioState.redoStack = [];
+    } catch(e) {}
+}
+
+function scheduleAutosave() {
+    const saveIndicator = document.getElementById('saveStatusIndicator');
+    if (saveIndicator) {
+        saveIndicator.innerHTML = '<span style="color:#b45309;">Saving...</span>';
+    }
+    clearTimeout(StudioState.autosaveTimer);
+    StudioState.autosaveTimer = setTimeout(() => {
+        const cfg = window.HouseBuilder ? window.HouseBuilder.getConfig() : {};
+        if (window.Utils && typeof window.Utils.saveLocal === 'function') {
+            window.Utils.saveLocal('house_data', cfg);
+        } else {
+            localStorage.setItem('house_data', JSON.stringify(cfg));
+        }
+        if (saveIndicator) {
+            saveIndicator.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Autosaved</span>
+            `;
+        }
+    }, 1200);
+}
+
+function setupUndoRedo() {
+    const btnUndo = document.getElementById('btnUndo');
+    const btnRedo = document.getElementById('btnRedo');
+
+    if (btnUndo) {
+        btnUndo.addEventListener('click', () => performUndo());
+    }
+    if (btnRedo) {
+        btnRedo.addEventListener('click', () => performRedo());
+    }
+
+    // Keyboard shortcuts: Ctrl+Z and Ctrl+Y
+    window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            performUndo();
+        } else if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) {
+            e.preventDefault();
+            performRedo();
+        }
+    });
+}
+
+function performUndo() {
+    if (StudioState.undoStack.length > 1) {
+        const current = StudioState.undoStack.pop();
+        StudioState.redoStack.push(current);
+        const previous = StudioState.undoStack[StudioState.undoStack.length - 1];
+        if (previous && window.HouseBuilder) {
+            window.HouseBuilder.config = JSON.parse(JSON.stringify(previous));
+            window.HouseBuilder.buildHouse(window.HouseBuilder.config);
+            updateFloatingBadges(window.HouseBuilder.config);
+            scheduleAutosave();
+        }
+    } else {
+        if (window.Utils?.notify) window.Utils.notify('No more undo steps available', 'info');
+    }
+}
+
+function performRedo() {
+    if (StudioState.redoStack.length > 0) {
+        const next = StudioState.redoStack.pop();
+        StudioState.undoStack.push(next);
+        if (next && window.HouseBuilder) {
+            window.HouseBuilder.config = JSON.parse(JSON.stringify(next));
+            window.HouseBuilder.buildHouse(window.HouseBuilder.config);
+            updateFloatingBadges(window.HouseBuilder.config);
+            scheduleAutosave();
+        }
+    } else {
+        if (window.Utils?.notify) window.Utils.notify('No more redo steps available', 'info');
+    }
+}
 
 function setupCADToolbar() {
     const toolButtons = document.querySelectorAll('.cad-tool-btn');
@@ -91,12 +189,43 @@ function setupCameraControls() {
     }
 }
 
+function setupView3DButton() {
+    const btn3D = document.getElementById('sbsView3D');
+    if (btn3D) {
+        btn3D.addEventListener('click', () => {
+            if (window.HouseBuilder) {
+                window.HouseBuilder.resetCamera();
+            }
+        });
+    }
+}
+
+function setupEditRoom() {
+    const btnEdit = document.getElementById('btnEditRoom');
+    if (btnEdit) {
+        btnEdit.addEventListener('click', () => {
+            const flName = document.getElementById('flRoomName');
+            const cur = flName ? flName.textContent : 'Room';
+            const renamed = prompt('Enter customized room title:', cur);
+            if (renamed && renamed.trim() && flName) {
+                flName.textContent = renamed.trim().toUpperCase();
+                pushUndoState();
+                scheduleAutosave();
+            }
+        });
+    }
+}
+
 function setupFloorControls() {
     const floorPills = document.querySelectorAll('.sbs-floor-pill');
     floorPills.forEach(pill => {
         pill.addEventListener('click', () => {
             floorPills.forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
+            const fNum = pill.getAttribute('data-floor') || '1';
+            if (window.Utils?.notify) {
+                window.Utils.notify(`Inspecting Floor Level ${fNum}`, 'info');
+            }
         });
     });
 
@@ -105,9 +234,11 @@ function setupFloorControls() {
         btnAddFloor.addEventListener('click', () => {
             const currentFloors = parseInt(window.HouseBuilder.config.floors) || 2;
             if (currentFloors < 4) {
+                pushUndoState();
                 window.HouseBuilder.config.floors = currentFloors + 1;
                 window.HouseBuilder.buildHouse(window.HouseBuilder.config);
                 updateFloatingBadges(window.HouseBuilder.config);
+                scheduleAutosave();
             } else {
                 alert('Maximum 4 residential floor levels supported in standard zone.');
             }
@@ -123,7 +254,9 @@ function setupColorSwatches() {
             swatch.classList.add('active');
             const color = swatch.getAttribute('data-color');
             if (window.HouseBuilder && color) {
+                pushUndoState();
                 window.HouseBuilder.setWallColor(color);
+                scheduleAutosave();
             }
         });
     });
@@ -184,7 +317,7 @@ function setupSaveAndShare() {
             const projName = document.getElementById('builderProjectName')?.textContent || 'Modern Residence';
 
             if (saveIndicator) {
-                saveIndicator.innerHTML = '<span style="color:#b45309;">Saving...</span>';
+                saveIndicator.innerHTML = '<span style="color:#b45309;">Saving to Cloud...</span>';
             }
 
             try {
@@ -204,10 +337,13 @@ function setupSaveAndShare() {
                         <span>Saved</span>
                     `;
                 }
+                if (window.Utils?.notify) {
+                    window.Utils.notify('Project snapshot saved to cloud!', 'success');
+                }
             } catch (err) {
-                console.error('Save error:', err);
+                console.warn('Cloud save skipped or failed, saved locally:', err);
                 if (saveIndicator) {
-                    saveIndicator.innerHTML = '<span style="color:#b91c1c;">Saved locally</span>';
+                    saveIndicator.innerHTML = '<span style="color:#15803d;">Saved locally</span>';
                 }
             }
         });

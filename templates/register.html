@@ -188,6 +188,23 @@
             }
         }
 
+        const toggleRegPass = document.getElementById('toggleRegPassword');
+        if (toggleRegPass && passInput) {
+            toggleRegPass.addEventListener('click', () => {
+                const isPass = passInput.type === 'password';
+                passInput.type = isPass ? 'text' : 'password';
+                toggleRegPass.classList.toggle('active', isPass);
+            });
+        }
+        const toggleRegConf = document.getElementById('toggleRegConfirm');
+        if (toggleRegConf && confirmInput) {
+            toggleRegConf.addEventListener('click', () => {
+                const isPass = confirmInput.type === 'password';
+                confirmInput.type = isPass ? 'text' : 'password';
+                toggleRegConf.classList.toggle('active', isPass);
+            });
+        }
+
         passInput.addEventListener('input', () => {
             updateStrength();
             if (confirmInput.value) updateMatch();
