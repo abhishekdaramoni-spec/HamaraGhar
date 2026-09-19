@@ -1,174 +1,360 @@
 {% extends 'base.html' %}
 
-{% block title %}Requirements{% endblock %}
+{% block title %}House Planning Requirements Wizard — HamaraGhar{% endblock %}
 
 {% block content %}
 <div class="requirements-container">
+    <header class="wizard-header">
+        <h1>Define Your House Plan</h1>
+        <p>Step-by-step architectural configuration for your plot, living spaces, and budget.</p>
+    </header>
+
+    <!-- Step Progress Indicator -->
     <div class="step-indicator">
-        <div class="step-dot active" data-step="1">1</div>
-        <div class="step-dot" data-step="2">2</div>
-        <div class="step-dot" data-step="3">3</div>
-        <div class="step-dot" data-step="4">4</div>
-        <div class="step-dot" data-step="5">5</div>
-    </div>
-    
-    <div class="step-labels">
-        <span>Location</span>
-        <span>Plot</span>
-        <span>Rooms</span>
-        <span>Style</span>
-        <span>Budget</span>
+        <div class="step-dot-wrapper active" data-step="1" onclick="RequirementsWizard.goToStep(1)">
+            <div class="step-dot">1</div>
+            <span class="step-label">Location</span>
+        </div>
+        <div class="step-dot-wrapper" data-step="2" onclick="RequirementsWizard.goToStep(2)">
+            <div class="step-dot">2</div>
+            <span class="step-label">Plot & Setback</span>
+        </div>
+        <div class="step-dot-wrapper" data-step="3" onclick="RequirementsWizard.goToStep(3)">
+            <div class="step-dot">3</div>
+            <span class="step-label">Rooms</span>
+        </div>
+        <div class="step-dot-wrapper" data-step="4" onclick="RequirementsWizard.goToStep(4)">
+            <div class="step-dot">4</div>
+            <span class="step-label">Style</span>
+        </div>
+        <div class="step-dot-wrapper" data-step="5" onclick="RequirementsWizard.goToStep(5)">
+            <div class="step-dot">5</div>
+            <span class="step-label">Budget</span>
+        </div>
     </div>
 
     <form id="requirementsForm" class="requirements-form">
-        <!-- Step 1: Location -->
-        <div class="form-step active" id="step1">
-            <h2>Where are you building?</h2>
-            <p class="step-desc">Location affects material costs and environmental considerations.</p>
+        <!-- Step 1: Location & Regional Context -->
+        <div class="form-step" id="step1">
+            <div class="form-step-header">
+                <h2>1. Building Location & Regional Context</h2>
+                <p class="step-desc">Your location informs IS 1893 seismic criteria, rainfall waterproofing guidelines, and regional CPWD construction costs.</p>
+            </div>
             
+            <div class="preset-chips-label">Quick Select City:</div>
+            <div class="preset-chips">
+                <button type="button" class="chip-btn" onclick="RequirementsWizard.setCity('Bengaluru', 'Karnataka')">Bengaluru</button>
+                <button type="button" class="chip-btn" onclick="RequirementsWizard.setCity('Hyderabad', 'Telangana')">Hyderabad</button>
+                <button type="button" class="chip-btn" onclick="RequirementsWizard.setCity('Mumbai', 'Maharashtra')">Mumbai</button>
+                <button type="button" class="chip-btn" onclick="RequirementsWizard.setCity('Delhi', 'Delhi NCR')">Delhi NCR</button>
+                <button type="button" class="chip-btn" onclick="RequirementsWizard.setCity('Chennai', 'Tamil Nadu')">Chennai</button>
+                <button type="button" class="chip-btn" onclick="RequirementsWizard.setCity('Pune', 'Maharashtra')">Pune</button>
+                <button type="button" class="chip-btn" onclick="RequirementsWizard.setCity('Ahmedabad', 'Gujarat')">Ahmedabad</button>
+                <button type="button" class="chip-btn" onclick="RequirementsWizard.setCity('Kolkata', 'West Bengal')">Kolkata</button>
+            </div>
+
+            <div class="grid-2col">
+                <div class="form-group">
+                    <label for="city">City / Municipal Area</label>
+                    <input type="text" id="city" name="city" required placeholder="e.g. Bengaluru" value="Bengaluru">
+                </div>
+                <div class="form-group">
+                    <label for="state">State / Region</label>
+                    <input type="text" id="state" name="state" required placeholder="e.g. Karnataka" value="Karnataka">
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="country">Country</label>
-                <input type="text" id="country" name="country" value="India" readonly>
+                <input type="text" id="country" name="country" value="India (NBC 2016 Compliant)" readonly style="background: var(--color-bg); cursor: not-allowed;">
             </div>
-            <div class="form-group">
-                <label for="state">State</label>
-                <input type="text" id="state" name="state" required placeholder="e.g. Karnataka">
-            </div>
-            <div class="form-group">
-                <label for="city">City</label>
-                <input type="text" id="city" name="city" required placeholder="e.g. Bangalore">
+
+            <div class="recommendation-note" id="climateNote">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                <span>Automated climate and IS:1893 seismic zoning data will load for this region.</span>
             </div>
         </div>
 
-        <!-- Step 2: Plot Dimensions -->
+        <!-- Step 2: Plot Dimensions & Setbacks -->
         <div class="form-step" id="step2" style="display: none;">
-            <h2>Plot Dimensions</h2>
-            <p class="step-desc">Enter the dimensions of your land in feet.</p>
-            
-            <div class="plot-inputs">
-                <div class="form-group">
-                    <label for="plotLength">Length (ft)</label>
-                    <input type="number" id="plotLength" name="plotLength" min="10" max="200" required>
-                </div>
-                <div class="form-group">
-                    <label for="plotWidth">Width (ft)</label>
-                    <input type="number" id="plotWidth" name="plotWidth" min="10" max="200" required>
-                </div>
+            <div class="form-step-header">
+                <h2>2. Plot Dimensions & Setback Calculator</h2>
+                <p class="step-desc">Enter your surveyed land dimensions. Setbacks ensure natural ventilation, municipal fire buffers, and structural stability.</p>
             </div>
             
-            <div class="calculator-display">
-                Total Area = <span id="areaDisplay">0</span> sq.ft
+            <div class="plot-grid">
+                <div class="form-group">
+                    <label for="plotLength">Plot Length / Depth (ft)</label>
+                    <input type="number" id="plotLength" name="plotLength" min="20" max="250" value="50" required>
+                    <span class="form-hint">Front-to-back boundary dimension</span>
+                </div>
+                <div class="form-group">
+                    <label for="plotWidth">Plot Width / Road Frontage (ft)</label>
+                    <input type="number" id="plotWidth" name="plotWidth" min="15" max="200" value="40" required>
+                    <span class="form-hint">Side-to-side road-facing dimension</span>
+                </div>
             </div>
-            
-            <div class="plot-preview-container">
-                <div id="plotPreview" class="plot-preview"></div>
+
+            <div class="plot-calc-summary">
+                <div class="plot-calc-item">
+                    <span class="plot-calc-label">Total Plot Area</span>
+                    <span class="plot-calc-val" id="plotAreaVal">2,000 sq ft</span>
+                </div>
+                <div class="plot-calc-item">
+                    <span class="plot-calc-label">Max Ground Coverage</span>
+                    <span class="plot-calc-val" id="groundCoverageVal">1,400 sq ft (70%)</span>
+                </div>
+                <div class="plot-calc-item">
+                    <span class="plot-calc-label">Recommended Setbacks</span>
+                    <span class="plot-calc-val">F: 5ft | S: 3ft | R: 4ft</span>
+                </div>
+            </div>
+
+            <div class="plot-diagram-wrapper">
+                <div class="plot-diagram-canvas" id="plotDiagram">
+                    <!-- SVG Plot Rendered by JS -->
+                </div>
+                <span style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Plot Boundary (white) vs. Maximum Permissible Building Footprint (terracotta)</span>
             </div>
         </div>
 
-        <!-- Step 3: Rooms & Family -->
+        <!-- Step 3: Family & Room Configuration -->
         <div class="form-step" id="step3" style="display: none;">
-            <h2>Family & Rooms</h2>
-            
-            <div class="form-group">
-                <label for="familySize">Family Size</label>
-                <input type="number" id="familySize" name="familySize" min="1" max="20" required>
+            <div class="form-step-header">
+                <h2>3. Family Needs & Living Spaces</h2>
+                <p class="step-desc">Specify the number of occupants and dedicated spaces. The rule engine validates room adjacency.</p>
             </div>
             
             <div class="recommendation-note" id="ruleEngineNote">
-                <p>💡 Tip: For your family size, we recommend <span id="recBHK">...</span></p>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                <span>Architectural Rule: <b id="recBHK">Recommended 3 BHK on G+1 for a family of 4.</b></span>
             </div>
 
-            <div class="grid-inputs">
-                <div class="form-group">
-                    <label for="bedrooms">Bedrooms</label>
-                    <input type="number" id="bedrooms" name="bedrooms" min="1" required>
+            <div class="counters-grid">
+                <div class="counter-card">
+                    <div class="counter-info">
+                        <span class="counter-name">Family Size</span>
+                        <span class="counter-hint">Number of regular occupants</span>
+                    </div>
+                    <div class="counter-controls">
+                        <button type="button" class="btn-counter" onclick="RequirementsWizard.stepCounter('familySize', -1)">-</button>
+                        <span class="counter-value" id="val_familySize">4</span>
+                        <button type="button" class="btn-counter" onclick="RequirementsWizard.stepCounter('familySize', 1)">+</button>
+                        <input type="hidden" id="familySize" name="familySize" value="4">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="bathrooms">Bathrooms</label>
-                    <input type="number" id="bathrooms" name="bathrooms" min="1" required>
+
+                <div class="counter-card">
+                    <div class="counter-info">
+                        <span class="counter-name">Bedrooms (BHK)</span>
+                        <span class="counter-hint">Master + Guest + Kid bedrooms</span>
+                    </div>
+                    <div class="counter-controls">
+                        <button type="button" class="btn-counter" onclick="RequirementsWizard.stepCounter('bedrooms', -1)">-</button>
+                        <span class="counter-value" id="val_bedrooms">3</span>
+                        <button type="button" class="btn-counter" onclick="RequirementsWizard.stepCounter('bedrooms', 1)">+</button>
+                        <input type="hidden" id="bedrooms" name="bedrooms" value="3">
+                    </div>
                 </div>
+
+                <div class="counter-card">
+                    <div class="counter-info">
+                        <span class="counter-name">Bathrooms</span>
+                        <span class="counter-hint">Attached & common toilets</span>
+                    </div>
+                    <div class="counter-controls">
+                        <button type="button" class="btn-counter" onclick="RequirementsWizard.stepCounter('bathrooms', -1)">-</button>
+                        <span class="counter-value" id="val_bathrooms">3</span>
+                        <button type="button" class="btn-counter" onclick="RequirementsWizard.stepCounter('bathrooms', 1)">+</button>
+                        <input type="hidden" id="bathrooms" name="bathrooms" value="3">
+                    </div>
+                </div>
+
+                <div class="counter-card">
+                    <div class="counter-info">
+                        <span class="counter-name">Number of Floors</span>
+                        <span class="counter-hint">G (1), G+1 (2), G+2 (3)</span>
+                    </div>
+                    <div class="counter-controls">
+                        <button type="button" class="btn-counter" onclick="RequirementsWizard.stepCounter('floors', -1)">-</button>
+                        <span class="counter-value" id="val_floors">2</span>
+                        <button type="button" class="btn-counter" onclick="RequirementsWizard.stepCounter('floors', 1)">+</button>
+                        <input type="hidden" id="floors" name="floors" value="2">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2col mt-6">
                 <div class="form-group">
-                    <label for="floors">Floors</label>
-                    <input type="number" id="floors" name="floors" min="1" max="5" value="1" required>
+                    <label for="vastuDirection">Entrance Orientation (Vastu Shastra)</label>
+                    <select id="vastuDirection" name="vastuDirection">
+                        <option value="East">East Facing (Recommended: Positive Solar Dawn)</option>
+                        <option value="North">North Facing (Recommended: Kubera Direction)</option>
+                        <option value="North-East">North-East Facing (Ishan Corner)</option>
+                        <option value="West">West Facing (Varuna)</option>
+                        <option value="South">South Facing (Yama - Requires Specific Setback)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="roomsPerFloor">Rooms per Floor</label>
-                    <input type="number" id="roomsPerFloor" name="roomsPerFloor" min="1" required>
+                    <input type="number" id="roomsPerFloor" name="roomsPerFloor" min="1" max="8" value="3">
                 </div>
             </div>
         </div>
 
-        <!-- Step 4: Style & Features -->
+        <!-- Step 4: Architectural Style & Features -->
         <div class="form-step" id="step4" style="display: none;">
-            <h2>Style & Features</h2>
+            <div class="form-step-header">
+                <h2>4. Architectural Style & Exterior Elements</h2>
+                <p class="step-desc">Select an elevation style and desired architectural features to configure the 3D studio materials.</p>
+            </div>
             
-            <div class="form-group">
-                <label>House Style</label>
-                <div class="style-cards" id="houseStyle">
-                    <label class="style-card">
-                        <input type="radio" name="style" value="Modern" checked>
-                        <div class="card-content">Modern</div>
-                    </label>
-                    <label class="style-card">
-                        <input type="radio" name="style" value="Minimal">
-                        <div class="card-content">Minimal</div>
-                    </label>
-                    <label class="style-card">
-                        <input type="radio" name="style" value="Traditional">
-                        <div class="card-content">Traditional</div>
-                    </label>
-                    <label class="style-card">
-                        <input type="radio" name="style" value="Luxury">
-                        <div class="card-content">Luxury</div>
-                    </label>
-                </div>
+            <label class="preset-chips-label">Elevation Design Style</label>
+            <div class="style-cards-grid">
+                <label class="style-card-option">
+                    <input type="radio" name="style" value="Modern" checked>
+                    <div class="style-card-box">
+                        <div class="style-card-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                        </div>
+                        <span class="style-card-title">Contemporary</span>
+                        <span class="style-card-desc">Clean geometric lines, large glass facades & flat roof.</span>
+                    </div>
+                </label>
+
+                <label class="style-card-option">
+                    <input type="radio" name="style" value="Minimal">
+                    <div class="style-card-box">
+                        <div class="style-card-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
+                        <span class="style-card-title">Minimalist</span>
+                        <span class="style-card-desc">Muted tones, zero clutter, high spatial efficiency.</span>
+                    </div>
+                </label>
+
+                <label class="style-card-option">
+                    <input type="radio" name="style" value="Traditional">
+                    <div class="style-card-box">
+                        <div class="style-card-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 12 22 12 12 2"></polygon><rect x="5" y="12" width="14" height="10"></rect></svg>
+                        </div>
+                        <span class="style-card-title">Vernacular</span>
+                        <span class="style-card-desc">Sloped clay tile roofs, courtyard airflow & wood tones.</span>
+                    </div>
+                </label>
+
+                <label class="style-card-option">
+                    <input type="radio" name="style" value="Luxury">
+                    <div class="style-card-box">
+                        <div class="style-card-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </div>
+                        <span class="style-card-title">Neo-Classical</span>
+                        <span class="style-card-desc">Double-height foyer, natural stone & grand balcony.</span>
+                    </div>
+                </label>
             </div>
 
-            <div class="features-checkboxes">
-                <label><input type="checkbox" name="features" value="Parking"> Parking</label>
-                <label><input type="checkbox" name="features" value="Balcony"> Balcony</label>
-                <label><input type="checkbox" name="features" value="Garden"> Garden</label>
-                <label><input type="checkbox" name="features" value="Compound Wall"> Compound Wall</label>
+            <label class="preset-chips-label">Exterior & Structural Additions</label>
+            <div class="feature-chips-grid">
+                <label class="feature-chip-label">
+                    <input type="checkbox" name="features" value="Parking" checked>
+                    <span>Covered Car Porch</span>
+                </label>
+                <label class="feature-chip-label">
+                    <input type="checkbox" name="features" value="Balcony" checked>
+                    <span>Sit-out Balcony</span>
+                </label>
+                <label class="feature-chip-label">
+                    <input type="checkbox" name="features" value="Garden" checked>
+                    <span>Landscaped Lawn</span>
+                </label>
+                <label class="feature-chip-label">
+                    <input type="checkbox" name="features" value="Compound Wall" checked>
+                    <span>Boundary Compound Wall</span>
+                </label>
+                <label class="feature-chip-label">
+                    <input type="checkbox" name="features" value="Pooja Room" checked>
+                    <span>Dedicated Pooja Room</span>
+                </label>
+                <label class="feature-chip-label">
+                    <input type="checkbox" name="features" value="Solar Provision">
+                    <span>Solar Rooftop Provision</span>
+                </label>
             </div>
 
             <div class="form-group">
-                <label for="kitchenType">Kitchen Type</label>
+                <label for="kitchenType">Kitchen Layout</label>
                 <select id="kitchenType" name="kitchenType">
-                    <option value="Open">Open</option>
-                    <option value="Closed">Closed</option>
-                    <option value="Island">Island</option>
+                    <option value="Closed">Closed Modular Kitchen (Traditional Indian Cooking)</option>
+                    <option value="Open">Open Concept Kitchen (Integrated with Dining)</option>
+                    <option value="Island">Center Island Kitchen (Premium Social Space)</option>
                 </select>
             </div>
         </div>
 
-        <!-- Step 5: Budget -->
+        <!-- Step 5: Budget & Project Finalization -->
         <div class="form-step" id="step5" style="display: none;">
-            <h2>Budget & Project Details</h2>
+            <div class="form-step-header">
+                <h2>5. Project Setup & Construction Budget</h2>
+                <p class="step-desc">Set your total target investment. The budget breakdown automatically distributes funds according to CPWD benchmarks.</p>
+            </div>
             
             <div class="form-group">
-                <label for="projectName">Project Name <span class="text-danger">*</span></label>
-                <input type="text" id="projectName" name="projectName" required placeholder="e.g. My Dream Villa">
+                <label for="projectName">Project Plan Name <span class="text-danger">*</span></label>
+                <input type="text" id="projectName" name="projectName" required placeholder="e.g. Greenwood Villa 3BHK" value="Greenwood Villa">
             </div>
 
-            <div class="form-group">
-                <label for="budget">Construction Budget (₹)</label>
-                <input type="range" id="budget" name="budget" min="500000" max="50000000" step="100000" value="5000000">
-                <div class="budget-display">
-                    <h3 id="budgetAmount">₹50,00,000</h3>
-                    <span class="budget-category badge" id="budgetCategory">Standard</span>
+            <div class="budget-slider-wrapper">
+                <div class="budget-val-row">
+                    <div>
+                        <span class="preset-chips-label">Target Construction Budget</span>
+                        <div class="budget-amount-display" id="budgetAmount">₹45,00,000</div>
+                    </div>
+                    <div>
+                        <span class="badge badge-accent" id="budgetCategory">Standard Tier (~₹1,800/sqft)</span>
+                    </div>
+                </div>
+
+                <input type="range" id="budget" name="budget" min="1500000" max="25000000" step="250000" value="4500000" style="width: 100%;">
+
+                <div class="budget-breakdown-bar">
+                    <div class="breakdown-seg-civil" title="Civil Structure (55%)"></div>
+                    <div class="breakdown-seg-finishes" title="Finishes & Flooring (25%)"></div>
+                    <div class="breakdown-seg-mep" title="Electrical & Plumbing (12%)"></div>
+                    <div class="breakdown-seg-cont" title="Contingency (8%)"></div>
+                </div>
+
+                <div class="budget-breakdown-legend">
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0284c7;margin-right:6px;vertical-align:middle;"></span>Civil Structure: 55%</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#c2410c;margin-right:6px;vertical-align:middle;"></span>Finishes & Flooring: 25%</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#d97706;margin-right:6px;vertical-align:middle;"></span>MEP & Fittings: 12%</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#cbd5e1;margin-right:6px;vertical-align:middle;"></span>Contingency: 8%</span>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="landCost">Land Cost (Optional, ₹)</label>
-                <input type="number" id="landCost" name="landCost" placeholder="0">
+                <label for="landCost">Land Purchase Cost (Optional, ₹)</label>
+                <input type="number" id="landCost" name="landCost" placeholder="Optional for total capital estimation">
             </div>
         </div>
 
+        <!-- Sticky Form Navigation Controls -->
         <div class="form-navigation">
-            <button type="button" id="btnPrev" class="btn btn-outline" style="display: none;">Previous</button>
-            <button type="button" id="btnNext" class="btn btn-primary">Next</button>
-            <button type="submit" id="btnSubmit" class="btn btn-success" style="display: none;">Generate House Plan</button>
+            <button type="button" id="btnPrev" class="btn btn-outline" style="display: none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <span>Previous Step</span>
+            </button>
+            <div style="flex: 1;"></div>
+            <button type="button" id="btnNext" class="btn btn-primary">
+                <span>Continue to Step 2</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+            <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg" style="display: none; background: var(--color-accent); border-color: var(--color-accent);">
+                <span>Generate 2D CAD Blueprint & 3D Model</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </button>
         </div>
     </form>
 </div>

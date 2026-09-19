@@ -1,45 +1,111 @@
 {% extends 'base.html' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Create Your Workspace — HamaraGhar{% endblock %}
 
 {% block content %}
 <div class="split-layout">
     <div class="split-left dark-panel">
-        <div class="branding">
-            <h1>SmartBuild 3D</h1>
-            <p>Create an account to save your dream home designs.</p>
+        <div class="auth-brand-content">
+            <div class="brand mb-4">
+                <span class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </span>
+                <span>HamaraGhar</span>
+            </div>
+            
+            <h1 class="auth-brand-title">Start Designing Your Home with Complete Clarity.</h1>
+            <p class="auth-brand-desc">
+                Join thousands of homeowners and architects planning residential projects with precise 2D blueprints, real-time 3D elevation, and itemized CPWD-benchmarked cost intelligence.
+            </p>
+
+            <div class="auth-value-props mt-6">
+                <div class="avp-item">
+                    <span class="avp-check">✓</span>
+                    <span>Instant 2D CAD blueprint & floor-plan generation</span>
+                </div>
+                <div class="avp-item">
+                    <span class="avp-check">✓</span>
+                    <span>Real-time 3D elevation studio with material testing</span>
+                </div>
+                <div class="avp-item">
+                    <span class="avp-check">✓</span>
+                    <span>Automated CPWD bill of quantities & labor estimations</span>
+                </div>
+                <div class="avp-item">
+                    <span class="avp-check">✓</span>
+                    <span>IS 1893 regional seismic & hazard risk auditing</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-brand-footer">
+            <p>&copy; 2026 HamaraGhar Technologies &bull; Residential Architectural Suite</p>
         </div>
     </div>
+
     <div class="split-right form-panel">
-        <div class="card clean-card">
-            <h2>Create an Account</h2>
-            <form action="{{ url_for('register') }}" method="POST" class="auth-form">
+        <div class="card clean-card auth-card">
+            <div class="auth-card-header mb-6">
+                <h2>Create your workspace</h2>
+                <p class="subtitle">Set up your free account to begin drafting your residential project.</p>
+            </div>
+
+            <form action="{{ url_for('register') }}" method="POST" class="auth-form" id="registerForm">
                 <div class="form-group">
                     <label for="regName">Full Name</label>
-                    <input type="text" id="regName" name="name" required placeholder="John Doe">
+                    <input type="text" id="regName" name="name" required placeholder="e.g. Ramesh Kumar" autocomplete="name">
                 </div>
                 
                 <div class="form-group">
                     <label for="regEmail">Email Address</label>
-                    <input type="email" id="regEmail" name="email" required placeholder="you@example.com">
+                    <input type="email" id="regEmail" name="email" required placeholder="name@example.com" autocomplete="email">
                 </div>
                 
                 <div class="form-group">
                     <label for="regPassword">Password</label>
-                    <input type="password" id="regPassword" name="password" required>
-                    <div id="passwordStrength" class="password-strength-indicator"></div>
+                    <div class="password-wrapper">
+                        <input type="password" id="regPassword" name="password" required placeholder="At least 6 characters" autocomplete="new-password">
+                        <button type="button" class="btn-toggle-password" id="toggleRegPassword" title="Toggle password visibility">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
+                    
+                    <div class="password-meter" id="passwordMeter">
+                        <div class="password-meter-bars">
+                            <div class="meter-segment" id="meterSeg1"></div>
+                            <div class="meter-segment" id="meterSeg2"></div>
+                            <div class="meter-segment" id="meterSeg3"></div>
+                        </div>
+                        <div class="password-feedback">
+                            <span id="strengthText">Min. 6 characters</span>
+                            <span id="strengthAdvice">Include uppercase & number</span>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="form-group">
                     <label for="regConfirm">Confirm Password</label>
-                    <input type="password" id="regConfirm" name="confirm_password" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="regConfirm" name="confirm_password" required placeholder="Re-enter password" autocomplete="new-password">
+                        <button type="button" class="btn-toggle-password" id="toggleRegConfirm" title="Toggle password visibility">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
+                    <div id="matchFeedback" class="password-match-indicator"></div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block">Register</button>
+                <button type="submit" class="btn btn-primary btn-block btn-lg mt-4" id="submitBtn">
+                    <span>Create Free Workspace</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
             </form>
             
             <p class="form-footer">
-                Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+                Already have an account? <a href="{{ url_for('login') }}">Sign in to your workspace</a>
             </p>
         </div>
     </div>
@@ -48,28 +114,85 @@
 
 {% block scripts %}
 <script>
-    const passInput = document.getElementById('regPassword');
-    const strengthIndicator = document.getElementById('passwordStrength');
-    
-    passInput.addEventListener('input', function() {
-        const val = this.value;
-        let strength = 'Weak';
-        let color = '#ef4444';
-        
-        if(val.length > 8 && /[A-Z]/.test(val) && /[0-9]/.test(val)) {
-            strength = 'Strong';
-            color = '#22c55e';
-        } else if(val.length > 5) {
-            strength = 'Medium';
-            color = '#eab308';
+    document.addEventListener('DOMContentLoaded', () => {
+        // Toggle helper
+        function setupToggle(btnId, inputId) {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            if (btn && input) {
+                btn.addEventListener('click', () => {
+                    const isPass = input.type === 'password';
+                    input.type = isPass ? 'text' : 'password';
+                    btn.classList.toggle('active', isPass);
+                });
+            }
         }
-        
-        if (val.length === 0) {
-            strengthIndicator.textContent = '';
-        } else {
-            strengthIndicator.textContent = `Strength: ${strength}`;
-            strengthIndicator.style.color = color;
+        setupToggle('toggleRegPassword', 'regPassword');
+        setupToggle('toggleRegConfirm', 'regConfirm');
+
+        // Password strength & matching
+        const passInput = document.getElementById('regPassword');
+        const confirmInput = document.getElementById('regConfirm');
+        const seg1 = document.getElementById('meterSeg1');
+        const seg2 = document.getElementById('meterSeg2');
+        const seg3 = document.getElementById('meterSeg3');
+        const strengthText = document.getElementById('strengthText');
+        const matchFeedback = document.getElementById('matchFeedback');
+
+        function updateStrength() {
+            const val = passInput.value;
+            seg1.className = 'meter-segment';
+            seg2.className = 'meter-segment';
+            seg3.className = 'meter-segment';
+
+            if (!val) {
+                strengthText.textContent = 'Min. 6 characters';
+                strengthText.style.color = 'var(--color-text-muted)';
+                return;
+            }
+
+            const len = val.length;
+            const hasUpper = /[A-Z]/.test(val);
+            const hasNum = /[0-9]/.test(val);
+            const hasSpecial = /[^A-Za-z0-9]/.test(val);
+
+            if (len >= 8 && hasUpper && (hasNum || hasSpecial)) {
+                seg1.classList.add('active-strong');
+                seg2.classList.add('active-strong');
+                seg3.classList.add('active-strong');
+                strengthText.textContent = 'Strong password';
+                strengthText.style.color = 'var(--color-success)';
+            } else if (len >= 6) {
+                seg1.classList.add('active-medium');
+                seg2.classList.add('active-medium');
+                strengthText.textContent = 'Medium password';
+                strengthText.style.color = 'var(--color-warning)';
+            } else {
+                seg1.classList.add('active-weak');
+                strengthText.textContent = 'Too short (min 6 chars)';
+                strengthText.style.color = 'var(--color-danger)';
+            }
         }
+
+        function updateMatch() {
+            if (!confirmInput.value) {
+                matchFeedback.textContent = '';
+                return;
+            }
+            if (passInput.value === confirmInput.value) {
+                matchFeedback.textContent = '✓ Passwords match';
+                matchFeedback.style.color = 'var(--color-success)';
+            } else {
+                matchFeedback.textContent = '✕ Passwords do not match';
+                matchFeedback.style.color = 'var(--color-danger)';
+            }
+        }
+
+        passInput.addEventListener('input', () => {
+            updateStrength();
+            if (confirmInput.value) updateMatch();
+        });
+        confirmInput.addEventListener('input', updateMatch);
     });
 </script>
 {% endblock %}

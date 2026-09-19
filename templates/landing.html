@@ -1,157 +1,510 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Design Your Home Before You Build It{% endblock %}
 
 {% block content %}
+<!-- HERO SECTION -->
 <section class="hero-section">
-    <div class="hero-content">
-        <h1 class="hero-title">SmartBuild 3D</h1>
-        <p class="hero-subtitle">Design your dream home before you build it.</p>
-        <p class="hero-desc">Plan your space, visualize it in 3D, estimate construction costs, customize interiors, and understand location-related risks — all before breaking ground.</p>
-        
-        <div class="hero-ctas">
-            <a href="{{ url_for('register') }}" class="btn btn-primary btn-large">Start Designing</a>
-            <a href="#features" class="btn btn-outline btn-large">Explore Features</a>
+    <div class="hero-container container">
+        <div class="hero-content">
+            <div class="hero-eyebrow">
+                <span class="hero-pill">ARCHITECTURAL PLANNING PLATFORM</span>
+                <span class="hero-eyebrow-text">2D Blueprinting &bull; 3D Elevation &bull; Costing</span>
+            </div>
+            
+            <h1 class="hero-title">DESIGN YOUR HOME BEFORE YOU BUILD IT.</h1>
+            <p class="hero-subtitle">Plan your home in 2D. Explore it in 3D. Understand what it will cost.</p>
+            <p class="hero-desc">
+                An integrated platform for residential planning in India. Draft compliant floor layouts, visualize massing and materials in real-time 3D, and generate itemized CPWD-benchmarked cost breakdowns before breaking ground.
+            </p>
+            
+            <div class="hero-ctas">
+                <a href="{{ url_for('requirements') if current_user else url_for('register') }}" class="btn btn-primary btn-large">
+                    <span>Start Designing</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+                <a href="{{ url_for('builder') }}" class="btn btn-outline btn-large">
+                    <span>Explore 3D Studio</span>
+                </a>
+            </div>
+
+            <div class="hero-metrics-strip">
+                <div class="metric-item">
+                    <span class="metric-val">100%</span>
+                    <span class="metric-lbl">Rule-Based Precision</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-item">
+                    <span class="metric-val">CPWD</span>
+                    <span class="metric-lbl">Benchmark Costing</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-item">
+                    <span class="metric-val">IS 1893</span>
+                    <span class="metric-lbl">Seismic Hazard Check</span>
+                </div>
+            </div>
         </div>
-    </div>
-    
-    <div class="hero-visual">
-        <div class="animated-house-wrapper">
-            <div class="house-3d">
-                <div class="face front"></div>
-                <div class="face back"></div>
-                <div class="face left"></div>
-                <div class="face right"></div>
-                <div class="face top"></div>
-                <div class="face bottom"></div>
-                <div class="roof left"></div>
-                <div class="roof right"></div>
+        
+        <div class="hero-visual">
+            <div class="hero-cad-card">
+                <div class="cad-header">
+                    <div class="cad-dots">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                    </div>
+                    <span class="cad-title">Villa Modernist // 30' × 50' Plot</span>
+                    <div class="cad-status-tag">3D ACTIVE</div>
+                </div>
+
+                <div class="cad-viewport">
+                    <div class="cad-grid-lines"></div>
+                    <div class="animated-house-wrapper">
+                        <div class="house-3d">
+                            <div class="face front"></div>
+                            <div class="face back"></div>
+                            <div class="face left"></div>
+                            <div class="face right"></div>
+                            <div class="face top"></div>
+                            <div class="face bottom"></div>
+                            <div class="roof left"></div>
+                            <div class="roof right"></div>
+                        </div>
+                    </div>
+
+                    <div class="cad-dimension-badge top-right">
+                        <span>Plot: 1,500 sq.ft</span>
+                    </div>
+                    <div class="cad-dimension-badge bottom-left">
+                        <span>Ground + 1 Floor</span>
+                    </div>
+                </div>
+
+                <div class="cad-footer-bar">
+                    <div class="cad-spec">
+                        <span class="spec-lbl">Built-Up Area</span>
+                        <span class="spec-val">2,100 sq.ft</span>
+                    </div>
+                    <div class="cad-spec">
+                        <span class="spec-lbl">Configuration</span>
+                        <span class="spec-val">3 BHK + Study</span>
+                    </div>
+                    <div class="cad-spec">
+                        <span class="spec-lbl">Est. Construction</span>
+                        <span class="spec-val text-accent">₹46,20,000</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<style>
-/* CSS-only 3D animated house for hero */
-.hero-section {
-    background-color: #0B1120;
-    background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
-    color: white;
-    padding: 100px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.animated-house-wrapper {
-    perspective: 1000px;
-    width: 200px;
-    height: 200px;
-    margin: 0 auto;
-}
-.house-3d {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    animation: rotateHouse 15s infinite linear;
-}
-.house-3d .face {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid #3b82f6;
-    top: 50px;
-    left: 50px;
-}
-.house-3d .front  { transform: translateZ(50px); }
-.house-3d .back   { transform: rotateY(180deg) translateZ(50px); }
-.house-3d .left   { transform: rotateY(-90deg) translateZ(50px); }
-.house-3d .right  { transform: rotateY(90deg) translateZ(50px); }
-.house-3d .top    { transform: rotateX(90deg) translateZ(50px); background: #1e40af; }
-.house-3d .bottom { transform: rotateX(-90deg) translateZ(50px); }
-@keyframes rotateHouse {
-    0% { transform: rotateY(0deg) rotateX(10deg); }
-    100% { transform: rotateY(360deg) rotateX(10deg); }
-}
-</style>
+<!-- CAPABILITIES & METHODOLOGY STRIP -->
+<section class="trust-strip">
+    <div class="container">
+        <div class="trust-header text-center">
+            <span class="eyebrow-accent">COMPREHENSIVE ARCHITECTURAL PIPELINE</span>
+            <h2>Plan &rarr; Design &rarr; Estimate &rarr; Visualize</h2>
+            <p class="text-secondary max-text-center">
+                HamaraGhar connects spatial requirements with real civil engineering cost models and regional hazard data.
+            </p>
+        </div>
 
-<section id="features" class="features-section">
-    <h2>Powerful Features</h2>
-    <div class="features-grid">
-        <article class="feature-card">
-            <span class="feature-icon">🏠</span>
-            <h3>Smart Planning</h3>
-            <p>Enter requirements and get an intelligent room layout.</p>
-        </article>
-        <article class="feature-card">
-            <span class="feature-icon">📐</span>
-            <h3>2D Floor Plan</h3>
-            <p>Visualize your floor plan before construction.</p>
-        </article>
-        <article class="feature-card">
-            <span class="feature-icon">🎮</span>
-            <h3>3D Visualization</h3>
-            <p>Explore your house from every angle.</p>
-        </article>
-        <article class="feature-card">
-            <span class="feature-icon">🛋</span>
-            <h3>Interior Design</h3>
-            <p>Customize every room's furniture and style.</p>
-        </article>
-        <article class="feature-card">
-            <span class="feature-icon">🎨</span>
-            <h3>Materials</h3>
-            <p>Choose from a professional material catalog.</p>
-        </article>
-        <article class="feature-card">
-            <span class="feature-icon">💰</span>
-            <h3>Cost Estimation</h3>
-            <p>Get a detailed construction cost breakdown.</p>
-        </article>
-        <article class="feature-card">
-            <span class="feature-icon">🌍</span>
-            <h3>Location Analysis</h3>
-            <p>Understand environmental and geographic risks.</p>
-        </article>
-        <article class="feature-card">
-            <span class="feature-icon">💾</span>
-            <h3>Project Save</h3>
-            <p>Save, reload, and share your projects.</p>
-        </article>
-    </div>
-</section>
+        <div class="pillars-grid">
+            <div class="pillar-card">
+                <div class="pillar-num">01</div>
+                <h3>2D Blueprinting</h3>
+                <p>Calculates plot setbacks, structural room partitions, and standard doorway circulation paths automatically.</p>
+                <div class="pillar-tag">Grid Aligned</div>
+            </div>
 
-<section class="how-it-works">
-    <h2>How It Works</h2>
-    <div class="steps-container">
-        <div class="step">
-            <div class="step-number">1</div>
-            <h4>Enter Requirements</h4>
-        </div>
-        <div class="step">
-            <div class="step-number">2</div>
-            <h4>Generate Floor Plan</h4>
-        </div>
-        <div class="step">
-            <div class="step-number">3</div>
-            <h4>View in 3D</h4>
-        </div>
-        <div class="step">
-            <div class="step-number">4</div>
-            <h4>Estimate Costs</h4>
-        </div>
-        <div class="step">
-            <div class="step-number">5</div>
-            <h4>Save Project</h4>
+            <div class="pillar-card">
+                <div class="pillar-num">02</div>
+                <h3>3D Elevation Studio</h3>
+                <p>CSS 3D spatial massing lets you inspect building volume, floor heights, compound walls, and roof profiles from any angle.</p>
+                <div class="pillar-tag">Isometric & Orbit</div>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-num">03</div>
+                <h3>Itemized Costing</h3>
+                <p>Calculates built-up area and breaks costs into Civil, Finishes, Electrical & Plumbing, and Contingencies.</p>
+                <div class="pillar-tag">CPWD Benchmarks</div>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-num">04</div>
+                <h3>Hazard Intelligence</h3>
+                <p>Regional lookup for seismic vulnerability (IS 1893), flood susceptibility, and soil considerations.</p>
+                <div class="pillar-tag">Indian Code Data</div>
+            </div>
         </div>
     </div>
 </section>
 
-<section class="bottom-cta">
-    <h2>Ready to design your dream home?</h2>
-    <a href="{{ url_for('register') }}" class="btn btn-primary btn-large">Get Started Free</a>
+<!-- PRODUCT WORKFLOW SECTION -->
+<section id="workflow" class="workflow-section">
+    <div class="container">
+        <div class="section-intro text-center">
+            <span class="eyebrow-accent">STRUCTURED PROCESS</span>
+            <h2>How HamaraGhar Works</h2>
+            <p class="text-secondary max-text-center">
+                From initial land dimensions to an executive construction dossier in six transparent steps.
+            </p>
+        </div>
+
+        <div class="workflow-pipeline">
+            <div class="workflow-step">
+                <div class="wf-circle">01</div>
+                <h4>Specify Plot & Family</h4>
+                <p>Input length, width, location, floors, and bedroom count.</p>
+            </div>
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+                <div class="wf-circle">02</div>
+                <h4>Generate Floor Layout</h4>
+                <p>Receive compliant room zones, dimension labels, and setbacks.</p>
+            </div>
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+                <div class="wf-circle">03</div>
+                <h4>Build in 3D</h4>
+                <p>Inspect exterior massing, compound walls, gardens, and roofs.</p>
+            </div>
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+                <div class="wf-circle">04</div>
+                <h4>Select Materials</h4>
+                <p>Choose exterior brick, concrete, wood, tiles, and roof style.</p>
+            </div>
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+                <div class="wf-circle">05</div>
+                <h4>Calculate Budget</h4>
+                <p>Review real-time rates and itemized Bill of Quantities.</p>
+            </div>
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+                <div class="wf-circle">06</div>
+                <h4>Audit Regional Risks</h4>
+                <p>Review seismic, flood, and weather precautions before building.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- DEEP DIVE FEATURE STORIES -->
+<section id="features" class="feature-stories-section">
+    <div class="container">
+        <!-- Story 1: Requirements -->
+        <article class="feature-story">
+            <div class="story-copy">
+                <span class="story-step-badge">STEP 01 // INPUT PARAMETERS</span>
+                <h2>Start with your exact plot and requirements.</h2>
+                <p>
+                    Avoid unrealistic generic floor plans. HamaraGhar takes your exact plot length and width, family requirements, and budget constraints to calculate viable floor configurations.
+                </p>
+                <ul class="story-points">
+                    <li><strong>Plot Dimension Calculator:</strong> Live square footage and setback constraints.</li>
+                    <li><strong>BHK & Family Optimization:</strong> Automatic recommendations for floor count and room distribution.</li>
+                    <li><strong>Architectural Style Selector:</strong> Modern Minimalist, Contemporary Indian, or Traditional Vernacular.</li>
+                </ul>
+                <div class="mt-4">
+                    <a href="{{ url_for('requirements') if current_user else url_for('register') }}" class="btn btn-outline">
+                        <span>Launch Requirements Wizard</span> &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="story-visual">
+                <div class="mockup-window">
+                    <div class="mockup-header">
+                        <span class="mockup-title">Project Requirements &bull; Plot Setup</span>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="mockup-form-grid">
+                            <div class="mockup-field">
+                                <label>Plot Length</label>
+                                <div class="mockup-input font-mono">50 ft</div>
+                            </div>
+                            <div class="mockup-field">
+                                <label>Plot Width</label>
+                                <div class="mockup-input font-mono">30 ft</div>
+                            </div>
+                            <div class="mockup-field full-width">
+                                <label>Total Ground Area</label>
+                                <div class="mockup-badge-area font-mono">1,500 sq.ft &bull; 166.6 sq.yards</div>
+                            </div>
+                            <div class="mockup-field">
+                                <label>Bedrooms</label>
+                                <div class="mockup-input font-mono">3 BHK</div>
+                            </div>
+                            <div class="mockup-field">
+                                <label>Floors</label>
+                                <div class="mockup-input font-mono">G + 1 (2 Floors)</div>
+                            </div>
+                        </div>
+                        <div class="mockup-recommendation-box mt-3">
+                            <span class="rec-icon">✓</span>
+                            <span>Optimal for a family of 4–6 with front setback & stilt parking space.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- Story 2: 2D Floor Plan -->
+        <article class="feature-story reverse">
+            <div class="story-copy">
+                <span class="story-step-badge">STEP 02 // DRAFTING</span>
+                <h2>Turn ideas into functional, dimensioned 2D blueprints.</h2>
+                <p>
+                    Visualize your room layout on an engineering grid. Each room is color-coded by function, with clear measurement labels in feet, door swing clearances, and window placements.
+                </p>
+                <ul class="story-points">
+                    <li><strong>Room Function Coding:</strong> Distinct architectural zoning for living, bedrooms, kitchen, baths, and circulation.</li>
+                    <li><strong>Dimensional Integrity:</strong> Direct room scaling relative to your perimeter boundary.</li>
+                    <li><strong>One-Click Export:</strong> Download high-resolution PNG blueprints for discussions with your contractor.</li>
+                </ul>
+                <div class="mt-4">
+                    <a href="{{ url_for('floor_plan') if current_user else url_for('register') }}" class="btn btn-outline">
+                        <span>Open 2D Floor Plan Studio</span> &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="story-visual">
+                <div class="mockup-window blueprint-theme">
+                    <div class="mockup-header">
+                        <span class="mockup-title">2D Blueprint View &bull; Ground Floor (1,200 sq.ft)</span>
+                    </div>
+                    <div class="mockup-blueprint-canvas">
+                        <div class="bp-grid-pattern"></div>
+                        <div class="bp-room living" style="top:15%; left:10%; width:45%; height:40%;">
+                            <span class="bp-room-name">Living Room</span>
+                            <span class="bp-room-dim font-mono">15' × 18'</span>
+                        </div>
+                        <div class="bp-room kitchen" style="top:15%; left:60%; width:30%; height:30%;">
+                            <span class="bp-room-name">Kitchen</span>
+                            <span class="bp-room-dim font-mono">10' × 12'</span>
+                        </div>
+                        <div class="bp-room bedroom" style="top:60%; left:10%; width:40%; height:30%;">
+                            <span class="bp-room-name">Master Bed</span>
+                            <span class="bp-room-dim font-mono">13' × 14'</span>
+                        </div>
+                        <div class="bp-room bath" style="top:60%; left:55%; width:20%; height:20%;">
+                            <span class="bp-room-name">Bath</span>
+                            <span class="bp-room-dim font-mono">6' × 8'</span>
+                        </div>
+                        <div class="bp-room parking" style="top:60%; left:80%; width:15%; height:30%;">
+                            <span class="bp-room-name">Entry</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- Story 3: 3D Builder -->
+        <article class="feature-story">
+            <div class="story-copy">
+                <span class="story-step-badge">STEP 03 // 3D ELEVATION</span>
+                <h2>Inspect your building massing, finishes, and roof from any angle.</h2>
+                <p>
+                    Step into an interactive 3D studio. Manipulate floor counts, switch between flat and sloped roofs, toggle compound walls and gardens, and swap wall and flooring materials in real time.
+                </p>
+                <ul class="story-points">
+                    <li><strong>Full Orbit Navigation:</strong> Rotate horizontally and vertically with fluid mouse or touch gestures.</li>
+                    <li><strong>Material Palettes:</strong> Test brick, concrete, wood siding, and color swatches.</li>
+                    <li><strong>Real-Time Synchronization:</strong> Structural changes update estimated costs immediately in the top status bar.</li>
+                </ul>
+                <div class="mt-4">
+                    <a href="{{ url_for('builder') }}" class="btn btn-outline">
+                        <span>Launch 3D Builder</span> &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="story-visual">
+                <div class="mockup-window">
+                    <div class="mockup-header">
+                        <span class="mockup-title">3D Studio &bull; Isometric Elevation</span>
+                    </div>
+                    <div class="mockup-3d-scene">
+                        <div class="cad-toolbar-preview">
+                            <span class="tool-dot active" title="Select"></span>
+                            <span class="tool-dot" title="Add Room"></span>
+                            <span class="tool-dot" title="Materials"></span>
+                            <span class="tool-dot" title="Measure"></span>
+                        </div>
+                        <div class="animated-house-wrapper sm-house">
+                            <div class="house-3d">
+                                <div class="face front"></div>
+                                <div class="face back"></div>
+                                <div class="face left"></div>
+                                <div class="face right"></div>
+                                <div class="face top"></div>
+                                <div class="face bottom"></div>
+                                <div class="roof left"></div>
+                                <div class="roof right"></div>
+                            </div>
+                        </div>
+                        <div class="mockup-cam-controls">
+                            <span class="cam-btn font-mono">Orbit: 45&deg;</span>
+                            <span class="cam-btn font-mono">Elevation: 25&deg;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- Story 4: Cost Intelligence -->
+        <article class="feature-story reverse">
+            <div class="story-copy">
+                <span class="story-step-badge">STEP 04 // ESTIMATION</span>
+                <h2>Understand itemized construction costs before signing contracts.</h2>
+                <p>
+                    Never rely on vague lump-sum quotes. HamaraGhar uses CPWD base rates to calculate expected expenditure across civil foundation, masonry, electrical, plumbing, and finishing.
+                </p>
+                <ul class="story-points">
+                    <li><strong>Scenario Modeling:</strong> Low, Expected, and High cost range estimates based on finish quality.</li>
+                    <li><strong>Trade Breakdown:</strong> Separate line items for Civil Structure, MEP, and Architectural Finishes.</li>
+                    <li><strong>Contingency Reserve:</strong> Built-in 10% inflation and contingency buffer for realistic budget planning.</li>
+                </ul>
+                <div class="mt-4">
+                    <a href="{{ url_for('cost') }}" class="btn btn-outline">
+                        <span>View Cost Estimator</span> &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="story-visual">
+                <div class="mockup-window">
+                    <div class="mockup-header">
+                        <span class="mockup-title">Construction Cost Intelligence &bull; Summary</span>
+                    </div>
+                    <div class="mockup-cost-card">
+                        <div class="cost-stat-header">
+                            <div>
+                                <span class="cost-stat-lbl">Expected Total Construction Cost</span>
+                                <div class="cost-hero-num text-accent font-display">₹46,20,000</div>
+                            </div>
+                            <span class="badge badge-success">On Budget</span>
+                        </div>
+
+                        <div class="cost-range-bar mt-3">
+                            <div class="range-labels font-mono">
+                                <span>Low: ₹41.5 L</span>
+                                <span class="text-accent font-semibold">Expected: ₹46.2 L</span>
+                                <span>High: ₹51.8 L</span>
+                            </div>
+                            <div class="range-track">
+                                <div class="range-fill" style="width: 60%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="cost-items-list mt-4">
+                            <div class="cost-item-row">
+                                <span>Foundation & Civil Works</span>
+                                <span class="font-mono font-semibold">₹21,80,000</span>
+                            </div>
+                            <div class="cost-item-row">
+                                <span>Wall Masonry & Exterior Finishes</span>
+                                <span class="font-mono font-semibold">₹11,40,000</span>
+                            </div>
+                            <div class="cost-item-row">
+                                <span>Electrical, Plumbing & Sanitation</span>
+                                <span class="font-mono font-semibold">₹4,80,000</span>
+                            </div>
+                            <div class="cost-item-row">
+                                <span>Flooring, Doors & Windows</span>
+                                <span class="font-mono font-semibold">₹5,20,000</span>
+                            </div>
+                            <div class="cost-item-row highlight">
+                                <span>Contingency Buffer (10%)</span>
+                                <span class="font-mono font-semibold">₹3,00,000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- Story 5: Location Risk -->
+        <article class="feature-story">
+            <div class="story-copy">
+                <span class="story-step-badge">STEP 05 // SITE INTELLIGENCE</span>
+                <h2>Evaluate environmental & seismic hazards at your site.</h2>
+                <p>
+                    Check location-specific hazard factors according to Indian Standard codes. Discover seismic zone ratings, flood susceptibility, and soil considerations to ensure durable construction.
+                </p>
+                <ul class="story-points">
+                    <li><strong>IS 1893 Seismic Mapping:</strong> Know if your district falls under Zone II, III, IV, or V.</li>
+                    <li><strong>Foundation & Plinth Guidance:</strong> Elevation recommendations for flood-prone regions.</li>
+                    <li><strong>Objective & Non-Alarmist:</strong> Clear engineering guidelines to share with your structural consultant.</li>
+                </ul>
+                <div class="mt-4">
+                    <a href="{{ url_for('risk') }}" class="btn btn-outline">
+                        <span>Explore Risk Intelligence</span> &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="story-visual">
+                <div class="mockup-window">
+                    <div class="mockup-header">
+                        <span class="mockup-title">Location Risk Analysis &bull; City Audit</span>
+                    </div>
+                    <div class="mockup-risk-grid">
+                        <div class="risk-mini-card">
+                            <div class="rmc-header">
+                                <span>Seismic Zone</span>
+                                <span class="badge badge-warning">Zone III</span>
+                            </div>
+                            <p class="rmc-desc">Moderate earthquake zone. Tie beams and RCC column ductile detailing required (IS 13920).</p>
+                        </div>
+                        <div class="risk-mini-card">
+                            <div class="rmc-header">
+                                <span>Flood Risk</span>
+                                <span class="badge badge-success">Low</span>
+                            </div>
+                            <p class="rmc-desc">Standard plinth height (3 ft above natural ground level) is recommended.</p>
+                        </div>
+                        <div class="risk-mini-card">
+                            <div class="rmc-header">
+                                <span>Soil Recommendation</span>
+                                <span class="badge badge-neutral">Clayey / Loam</span>
+                            </div>
+                            <p class="rmc-desc">Conduct standard plate load or SPT soil test before sizing isolated footings.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
+
+<!-- BOTTOM CALL TO ACTION -->
+<section class="bottom-cta-section">
+    <div class="container text-center">
+        <span class="eyebrow-accent text-white">START YOUR RESIDENTIAL PROJECT</span>
+        <h2 class="cta-heading">Ready to design your home with engineering clarity?</h2>
+        <p class="cta-sub">Join thousands of home builders designing with 2D precision, 3D visualization, and real construction cost models.</p>
+        <div class="cta-actions">
+            <a href="{{ url_for('requirements') if current_user else url_for('register') }}" class="btn btn-primary btn-large">
+                <span>Start Designing Free</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+            <a href="{{ url_for('data_sources') }}" class="btn btn-outline-white btn-large">
+                <span>Review Engineering Standards</span>
+            </a>
+        </div>
+    </div>
 </section>
 {% endblock %}
+

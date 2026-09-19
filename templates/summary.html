@@ -1,16 +1,20 @@
 {% extends 'base.html' %}
 
-{% block title %}Project Summary{% endblock %}
+{% block title %}Executive Architectural Plan Summary — HamaraGhar{% endblock %}
 
 {% block content %}
 <div class="summary-page">
-    <header class="summary-header text-center mb-5">
-        <h1 id="sumProjectName">My Project</h1>
-        <p class="text-muted"><span id="sumStyle">Modern</span> Style | Created on <span id="sumDate">--</span></p>
+    <header class="summary-header text-center mb-6">
+        <div style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: var(--space-2);">
+            <span class="badge badge-accent">Architectural Executive Summary</span>
+        </div>
+        <h1 id="sumProjectName" style="font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 800; color: var(--color-text);">Greenwood Villa</h1>
+        <p class="text-muted" style="font-size: var(--text-sm);"><span id="sumStyle">Contemporary</span> Architecture &bull; Location: <strong id="sumLocation">Bengaluru, Karnataka</strong> &bull; Generated <span id="sumDate">Today</span></p>
     </header>
 
-    <div class="summary-top mb-5">
-        <div class="mini-3d-preview">
+    <!-- Scorecards Strip -->
+    <div class="summary-top mb-8">
+        <div class="mini-3d-preview" style="background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); border: 1px solid var(--color-border); border-radius: var(--radius-2xl);">
             <div class="animated-house-wrapper">
                 <div class="house-3d">
                     <div class="face front"></div>
@@ -27,106 +31,97 @@
         
         <div class="analysis-scores grid-2x2">
             <div class="score-card">
-                <h4>Space Utilization</h4>
-                <div class="score-value" id="scoreSpace">--/10</div>
+                <h4>Spatial Efficiency</h4>
+                <div class="score-value" id="scoreSpace" style="color: var(--color-accent);">8.8 / 10</div>
+                <span style="font-size: 10px; color: var(--color-text-muted);">87.5% Carpet-to-builtup ratio</span>
             </div>
             <div class="score-card">
                 <h4>Budget Suitability</h4>
-                <div class="score-value" id="scoreBudget">--/10</div>
+                <div class="score-value" id="scoreBudget" style="color: #22c55e;">9.2 / 10</div>
+                <span style="font-size: 10px; color: var(--color-text-muted);">Within CPWD target envelope</span>
             </div>
             <div class="score-card">
-                <h4>Design Suitability</h4>
-                <div class="score-value" id="scoreDesign">--/10</div>
+                <h4>NBC & Vastu Audit</h4>
+                <div class="score-value" id="scoreDesign" style="color: #0284c7;">9.5 / 10</div>
+                <span style="font-size: 10px; color: var(--color-text-muted);">Optimal SW Master & SE Kitchen</span>
             </div>
             <div class="score-card">
-                <h4>Climate Readiness</h4>
-                <div class="score-value" id="scoreClimate">--/10</div>
+                <h4>Climate & Seismic</h4>
+                <div class="score-value" id="scoreClimate" style="color: #eab308;">8.8 / 10</div>
+                <span style="font-size: 10px; color: var(--color-text-muted);">IS 1893 Zone II compliant</span>
             </div>
         </div>
     </div>
 
-    <div class="summary-details grid-2col mb-5">
-        <div class="card">
-            <h3>Cost Summary</h3>
-            <ul class="simple-list mt-3">
-                <li><strong>Estimated Cost:</strong> <span id="sumCost">₹ --</span></li>
-                <li><strong>Your Budget:</strong> <span id="sumTargetBudget">₹ --</span></li>
-                <li><strong>Built-up Area:</strong> <span id="sumArea">--</span> sq.ft</li>
-                <li><strong>Cost per sq.ft:</strong> <span id="sumCostPerSqft">₹ --</span></li>
+    <!-- Details Grid -->
+    <div class="summary-details grid-2col mb-6">
+        <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
+            <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3); margin-bottom: var(--space-4);">
+                Cost & Investment Forecast
+            </h3>
+            <ul class="simple-list">
+                <li><span>Target Budget:</span> <strong id="sumTargetBudget">₹ 50,00,000</strong></li>
+                <li><span>CPWD Estimated Cost:</span> <strong id="sumCost" style="color: var(--color-accent);">₹ 44,20,000</strong></li>
+                <li><span>Planned Built-up Area:</span> <strong id="sumArea">2,400 sq ft</strong></li>
+                <li><span>Effective Rate / sq ft:</span> <strong id="sumCostPerSqft">₹ 1,842 / sq ft</strong></li>
             </ul>
         </div>
         
-        <div class="card">
-            <h3>Risk Overview</h3>
-            <ul class="simple-list mt-3" id="sumRiskList">
-                <li>Analyzing risks...</li>
+        <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
+            <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3); margin-bottom: var(--space-4);">
+                Structural & Hazard Audit
+            </h3>
+            <ul class="simple-list" id="sumRiskList">
+                <li><span>Seismic Hazard:</span> <strong id="sumSeismic">Zone II (Low Activity)</strong></li>
+                <li><span>Flood Vulnerability:</span> <strong id="sumFlood">Moderate (Elevate Plinth)</strong></li>
+                <li><span>Wind Velocity:</span> <strong id="sumWind">Basic (33 m/s)</strong></li>
+                <li><span>Rainfall Intensity:</span> <strong id="sumRain">950 mm Annual</strong></li>
             </ul>
         </div>
     </div>
 
-    <div class="card mb-5">
-        <h3>Final Recommendations</h3>
-        <ul class="recommendation-list mt-3" id="finalRecommendations">
-            <li>Reviewing your project...</li>
+    <!-- Final Checklist Card -->
+    <div class="card mb-6" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
+        <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3); margin-bottom: var(--space-4);">
+            Final Architectural Execution Directives
+        </h3>
+        <ul class="recommendation-list" id="finalRecommendations">
+            <li>
+                <span class="rec-bullet">✓</span>
+                <div><strong>Geotechnical Soil Borings:</strong> Commission 2 borehole soil tests to calculate actual safe bearing capacity (SBC) before footing excavation.</div>
+            </li>
+            <li>
+                <span class="rec-bullet">✓</span>
+                <div><strong>Municipal Sanction Drawings:</strong> Submit 2D blueprint drawings to the local urban development authority for building plan permit.</div>
+            </li>
+            <li>
+                <span class="rec-bullet">✓</span>
+                <div><strong>Contractor Bill of Quantities (BOQ):</strong> Issue the itemized CPWD rate schedule as the baseline tender document for contractor bids.</div>
+            </li>
         </ul>
     </div>
 
-    <div class="disclaimer-box warning mb-5">
-        <p><strong>Disclaimer:</strong> The scores and recommendations above are planning indicators only — they are not professional certifications. Always engage certified architects and engineers before beginning construction.</p>
+    <div class="disclaimer-box warning mb-6">
+        <p><strong>Statutory Notice:</strong> These scores, calculations, and recommendations represent automated educational planning assessments. Always engage certified architects, chartered structural engineers, and local municipal authorities before initiating physical excavation or construction.</p>
     </div>
 
-    <div class="summary-actions text-center">
-        <button class="btn btn-primary" id="btnFinalSave">Save Project</button>
-        <button class="btn btn-outline" id="btnPrint">Print / Download PDF</button>
-        <a href="{{ url_for('requirements') }}" class="btn btn-ghost">Start New Project</a>
+    <!-- Action Toolbar -->
+    <div class="summary-actions text-center" style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-primary btn-lg" id="btnFinalSave">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            <span>Save Complete Plan</span>
+        </button>
+        <button class="btn btn-outline btn-lg" id="btnPrint" onclick="window.print()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Export Executive Dossier</span>
+        </button>
+        <a href="{{ url_for('requirements') }}" class="btn btn-ghost btn-lg">Start Another House Plan</a>
     </div>
 </div>
-
-<style>
-/* Mini 3D house for preview */
-.mini-3d-preview {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 200px;
-    background: #f8fafc;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-.animated-house-wrapper {
-    perspective: 800px;
-    width: 100px;
-    height: 100px;
-}
-.house-3d {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    animation: rotateHouse 15s infinite linear;
-}
-.house-3d .face {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid #3b82f6;
-    top: 25px;
-    left: 25px;
-}
-.house-3d .front  { transform: translateZ(25px); }
-.house-3d .back   { transform: rotateY(180deg) translateZ(25px); }
-.house-3d .left   { transform: rotateY(-90deg) translateZ(25px); }
-.house-3d .right  { transform: rotateY(90deg) translateZ(25px); }
-.house-3d .top    { transform: rotateX(90deg) translateZ(25px); background: #1e40af; }
-.house-3d .bottom { transform: rotateX(-90deg) translateZ(25px); }
-@keyframes rotateHouse {
-    0% { transform: rotateY(0deg) rotateX(15deg); }
-    100% { transform: rotateY(360deg) rotateX(15deg); }
-}
-</style>
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/data/cost-engine.js') }}"></script>
+<script src="{{ url_for('static', filename='js/data/risk-engine.js') }}"></script>
 <script src="{{ url_for('static', filename='js/pages/summary-page.js') }}"></script>
 {% endblock %}

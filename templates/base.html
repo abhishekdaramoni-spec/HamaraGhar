@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SmartBuild 3D{% endblock %} | SmartBuild 3D</title>
+    <title>{% block title %}Home{% endblock %} | HamaraGhar — Architectural Home Planning & Estimation</title>
     
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Inter & DM Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
@@ -18,24 +18,42 @@
 <body>
     <header class="navbar">
         <div class="nav-container">
-            <a href="{{ url_for('index') }}" class="brand">🏠 SmartBuild 3D</a>
+            <a href="{{ url_for('index') }}" class="brand">
+                <span class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </span>
+                <span>HamaraGhar</span>
+            </a>
             
             <nav class="nav-links">
                 {% if current_user %}
                     <a href="{{ url_for('dashboard') }}" class="{% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
-                    <a href="{{ url_for('builder') }}" class="{% if page == 'builder' %}active{% endif %}">Builder</a>
-                    <a href="{{ url_for('cost') }}" class="{% if page == 'cost' %}active{% endif %}">Cost</a>
-                    <a href="{{ url_for('risk') }}" class="{% if page == 'risk' %}active{% endif %}">Risk</a>
+                    <a href="{{ url_for('builder') }}" class="{% if page == 'builder' %}active{% endif %}">3D Studio</a>
+                    <a href="{{ url_for('floor_plan') }}" class="{% if page == 'floor-plan' %}active{% endif %}">2D Floor Plan</a>
+                    <a href="{{ url_for('cost') }}" class="{% if page == 'cost' %}active{% endif %}">Cost Estimator</a>
+                    <a href="{{ url_for('risk') }}" class="{% if page == 'risk' %}active{% endif %}">Risk Analysis</a>
+                {% else %}
+                    <a href="/#workflow" class="nav-link">Workflow</a>
+                    <a href="/#features" class="nav-link">Capabilities</a>
+                    <a href="{{ url_for('cost') }}" class="nav-link">Estimator</a>
+                    <a href="{{ url_for('risk') }}" class="nav-link">Risk Intelligence</a>
+                    <a href="{{ url_for('data_sources') }}" class="nav-link">Standards</a>
                 {% endif %}
             </nav>
             
             <div class="nav-right">
                 {% if current_user %}
-                    <span class="user-name">Welcome, {{ current_user.name }}</span>
-                    <a href="{{ url_for('logout') }}" class="btn btn-outline">Logout</a>
+                    <span class="user-name">
+                        <span class="badge badge-neutral" style="text-transform:none; font-weight:500;">{{ current_user.name }}</span>
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Logout</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="btn btn-ghost">Login</a>
-                    <a href="{{ url_for('register') }}" class="btn btn-primary">Register</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">Sign In</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Start Designing</a>
                 {% endif %}
             </div>
         </div>
@@ -46,7 +64,7 @@
             {% if messages %}
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category }}">
-                        {{ message }}
+                        <span>{{ message }}</span>
                     </div>
                 {% endfor %}
             {% endif %}
@@ -57,16 +75,115 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Mobile Bottom App Navigation Bar (Viewports <= 768px) -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
+        <a href="{{ url_for('dashboard') if current_user else url_for('index') }}" class="mobile-nav-item {% if page in ['dashboard', 'landing'] %}active{% endif %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('requirements') if current_user else url_for('register') }}" class="mobile-nav-item {% if page == 'requirements' %}active{% endif %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Wizard</span>
+        </a>
+        <a href="{{ url_for('floor_plan') if current_user else url_for('register') }}" class="mobile-nav-item {% if page == 'floor_plan' %}active{% endif %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="9" y1="21" x2="9" y2="9"></line>
+            </svg>
+            <span>2D CAD</span>
+        </a>
+        <a href="{{ url_for('builder') if current_user else url_for('register') }}" class="mobile-nav-item {% if page == 'builder' %}active{% endif %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+            <span>3D Studio</span>
+        </a>
+        <a href="{{ url_for('cost') if current_user else url_for('register') }}" class="mobile-nav-item {% if page == 'cost' %}active{% endif %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <span>Cost BOQ</span>
+        </a>
+    </nav>
+
     <footer class="site-footer">
-        <div class="footer-content">
-            <p>&copy; 2026 SmartBuild 3D. All rights reserved.</p>
-            <a href="{{ url_for('data_sources') }}">Data Sources</a>
+        <div class="footer-grid container">
+            <div class="footer-col footer-col-brand">
+                <div class="brand mb-3">
+                    <span class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                    </span>
+                    <span>HamaraGhar</span>
+                </div>
+                <p class="footer-desc">
+                    Design your home. Visualize it. Understand the cost. Build with confidence.
+                </p>
+                <div class="footer-status-badge mt-4">
+                    <span class="status-dot"></span> Engineering Engine Online
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Design & Modeling</h4>
+                <ul>
+                    <li><a href="{{ url_for('requirements') if current_user else url_for('register') }}">Multi-Step Planning Wizard</a></li>
+                    <li><a href="{{ url_for('floor_plan') if current_user else url_for('register') }}">2D Blueprint Studio</a></li>
+                    <li><a href="{{ url_for('builder') if current_user else url_for('register') }}">3D Massing & Elevation</a></li>
+                    <li><a href="{{ url_for('interior') if current_user else url_for('register') }}">Interior Space Staging</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Cost & Intelligence</h4>
+                <ul>
+                    <li><a href="{{ url_for('cost') if current_user else url_for('register') }}">Bill of Quantities (BOQ)</a></li>
+                    <li><a href="{{ url_for('cost') if current_user else url_for('register') }}">CPWD Baseline Estimations</a></li>
+                    <li><a href="{{ url_for('risk') if current_user else url_for('register') }}">IS-1893 Seismic & Hazard Analysis</a></li>
+                    <li><a href="{{ url_for('data_sources') }}">Government & Industry Data Sources</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Platform & Standards</h4>
+                <ul>
+                    <li><a href="{{ url_for('data_sources') }}">Indian Standards Code Index</a></li>
+                    <li><a href="{{ url_for('data_sources') }}">Methodology & Calculation Basis</a></li>
+                    <li><a href="{{ url_for('register') }}">Create Workspace Account</a></li>
+                    <li><a href="{{ url_for('login') }}">Sign In to Projects</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom container">
+            <p>&copy; 2026 HamaraGhar Technologies. Architectural precision for residential planning.</p>
+            <div class="footer-bottom-links">
+                <a href="{{ url_for('data_sources') }}">Data Provenance</a>
+                <span>&bull;</span>
+                <span class="text-muted">Educational & Planning Platform</span>
+            </div>
         </div>
     </footer>
 
-    <!-- Global core helpers -->
+    <!-- Global Core Helpers -->
     <script src="{{ url_for('static', filename='js/core/utils.js') }}"></script>
     <script src="{{ url_for('static', filename='js/core/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/ai-assistant.js') }}"></script>
 
     {% block scripts %}{% endblock %}
 </body>

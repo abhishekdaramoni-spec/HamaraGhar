@@ -119,6 +119,12 @@ const HouseBuilder = {
     this.updateTransform();
   },
 
+  setCameraAngle(rx, ry) {
+    this.rotX = rx;
+    this.rotY = ry;
+    this.updateTransform();
+  },
+
   zoomIn() {
     this.zoom = Math.max(500, this.zoom - 200);
     if (this.sceneEl) this.sceneEl.style.perspective = `${this.zoom}px`;

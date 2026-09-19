@@ -1,97 +1,267 @@
 {% extends 'base.html' %}
 
-{% block title %}Location Risk Analysis{% endblock %}
+{% block title %}Location Hazard Intelligence & IS 1893 Audit — HamaraGhar{% endblock %}
 
 {% block content %}
 <div class="risk-page">
-    <header class="page-header text-center">
-        <h1>Location Risk Analysis</h1>
-        <p class="lead-text">Based on your selected location: <strong id="riskLocationDisplay">City, State</strong></p>
-        <button id="btnAnalyze" class="btn btn-primary mt-3">Analyze Location</button>
+    <!-- Header -->
+    <header class="risk-header">
+        <div>
+            <h1>Location Hazard Intelligence & IS 1893 Audit</h1>
+            <p>Regional multi-hazard vulnerability assessment, NDMA guidelines, and IS 1893:2016 structural resilience standards.</p>
+        </div>
+        <div class="cost-top-actions">
+            <button class="btn btn-outline" onclick="window.print()" title="Print Hazard Assessment">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                <span>Export Report</span>
+            </button>
+            <a href="{{ url_for('summary') }}" class="btn btn-primary">
+                <span>Executive Summary →</span>
+            </a>
+        </div>
     </header>
 
-    <div class="disclaimer-box warning my-4">
-        <p><strong>Disclaimer:</strong> This is an educational planning tool only. Risk levels are generalized estimations based on regional data and do not substitute for professional surveying, structural engineering, or official risk assessments.</p>
+    <!-- Engineering Disclaimer Banner -->
+    <div class="disclaimer-box warning mb-6">
+        <p><strong>Statutory Planning Disclaimer:</strong> Regional risk parameters are aggregated from the National Disaster Management Authority (NDMA), India Meteorological Department (IMD), and IS:1893 seismic zoning maps. This serves as an architectural planning guide; localized soil bearing tests and chartered structural engineering approval are legally mandatory before construction.</p>
     </div>
 
-    <div class="risk-dashboard" id="riskDashboard" style="display: none;">
-        <div class="risk-grid">
-            <!-- Flood Risk -->
-            <article class="risk-card" id="cardFlood">
-                <div class="risk-header">
-                    <span class="risk-icon">🌊</span>
-                    <h3>Flood Risk</h3>
-                    <span class="badge" id="badgeFlood">--</span>
-                </div>
-                <p class="risk-desc" id="descFlood">Analyzing topography and historical data...</p>
-            </article>
-
-            <!-- Seismic Risk -->
-            <article class="risk-card" id="cardSeismic">
-                <div class="risk-header">
-                    <span class="risk-icon">🌍</span>
-                    <h3>Seismic Zone</h3>
-                    <span class="badge" id="badgeSeismic">--</span>
-                </div>
-                <p class="risk-desc" id="descSeismic">Checking tectonic activity levels...</p>
-            </article>
-
-            <!-- Heat Risk -->
-            <article class="risk-card" id="cardHeat">
-                <div class="risk-header">
-                    <span class="risk-icon">☀️</span>
-                    <h3>Heat & Sun</h3>
-                    <span class="badge" id="badgeHeat">--</span>
-                </div>
-                <p class="risk-desc" id="descHeat">Evaluating average summer temperatures...</p>
-            </article>
-
-            <!-- Rainfall Risk -->
-            <article class="risk-card" id="cardRainfall">
-                <div class="risk-header">
-                    <span class="risk-icon">🌧️</span>
-                    <h3>Heavy Rainfall</h3>
-                    <span class="badge" id="badgeRainfall">--</span>
-                </div>
-                <p class="risk-desc" id="descRainfall">Assessing monsoon intensity...</p>
-            </article>
-
-            <!-- Wind Risk -->
-            <article class="risk-card" id="cardWind">
-                <div class="risk-header">
-                    <span class="risk-icon">💨</span>
-                    <h3>Wind Speed</h3>
-                    <span class="badge" id="badgeWind">--</span>
-                </div>
-                <p class="risk-desc" id="descWind">Analyzing prevailing wind conditions...</p>
-            </article>
-
-            <!-- Cyclone Risk -->
-            <article class="risk-card" id="cardCyclone">
-                <div class="risk-header">
-                    <span class="risk-icon">🌀</span>
-                    <h3>Cyclone Risk</h3>
-                    <span class="badge" id="badgeCyclone">--</span>
-                </div>
-                <p class="risk-desc" id="descCyclone">Checking coastal proximity and history...</p>
-            </article>
+    <!-- Location Selector & Switcher Toolbar -->
+    <div class="location-search-bar">
+        <div class="location-search-input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-text-muted);">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <input type="text" id="cityInput" placeholder="Enter Indian city (e.g. Bengaluru, Mumbai, Delhi)..." value="Bengaluru">
+            <button type="button" id="btnAnalyze" class="btn btn-primary btn-sm">
+                <span>Analyze City</span>
+            </button>
         </div>
 
-        <div class="recommendations-section mt-5">
-            <div class="card">
-                <h3>Architectural Recommendations</h3>
-                <ul class="recommendation-list" id="riskRecommendations">
-                    <li>Loading recommendations based on analysis...</li>
-                </ul>
-            </div>
+        <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;">Quick Preset:</span>
+            <button type="button" class="chip-btn" onclick="RiskStudio.selectCity('Bengaluru')">Bengaluru</button>
+            <button type="button" class="chip-btn" onclick="RiskStudio.selectCity('Mumbai')">Mumbai</button>
+            <button type="button" class="chip-btn" onclick="RiskStudio.selectCity('Delhi')">Delhi</button>
+            <button type="button" class="chip-btn" onclick="RiskStudio.selectCity('Chennai')">Chennai</button>
+            <button type="button" class="chip-btn" onclick="RiskStudio.selectCity('Hyderabad')">Hyderabad</button>
+            <button type="button" class="chip-btn" onclick="RiskStudio.selectCity('Kolkata')">Kolkata</button>
         </div>
-        
-        <div class="data-attribution mt-4 text-center">
-            <p class="text-sm text-muted">Data aggregated from regional climate profiles and historical zoning data. <a href="{{ url_for('data_sources') }}">View Data Sources</a></p>
-            
-            <div class="mt-4">
-                <a href="{{ url_for('summary') }}" class="btn btn-success btn-large">View Final Summary</a>
+    </div>
+
+    <!-- Resilience Index Hero Card -->
+    <div class="resilience-hero">
+        <div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: var(--space-3);">
+                <span class="badge badge-accent" id="badgeSeismicZone">Seismic Zone II (Low)</span>
+                <span style="font-size: var(--text-xs); color: #cbd5e1;">IS 1893:2016 Part 1</span>
             </div>
+            <h2 id="displayLocationName" style="font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; color: #fff; margin-bottom: var(--space-2);">Bengaluru, Karnataka</h2>
+            <p style="font-size: var(--text-xs); color: #94a3b8; max-width: 580px; line-height: 1.6;">
+                Moderate plateau elevation with low seismic vulnerability and moderate monsoon precipitation. Primary residential risk centers on localized urban waterlogging during torrential spells.
+            </p>
+        </div>
+
+        <div class="resilience-score-box">
+            <div class="resilience-score-val" id="resilienceScoreVal">88</div>
+            <div class="resilience-score-label">Structural Resilience Score</div>
+            <div style="font-size: 10px; color: #4ade80; margin-top: 4px; font-weight: 600;">High Baseline Resilience</div>
+        </div>
+    </div>
+
+    <!-- Hazard Assessment Cards Grid (Clean SVG Icons, NO Emojis!) -->
+    <div class="risk-grid" id="riskGrid">
+        <!-- 1. Seismic Zone -->
+        <article class="risk-card" id="cardSeismic">
+            <div class="risk-header">
+                <div class="risk-title-wrap">
+                    <div class="risk-icon-box">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Seismic Hazard</h3>
+                        <span style="font-size: 10px; color: var(--color-text-muted);">IS 1893:2016</span>
+                    </div>
+                </div>
+                <span class="badge" id="badgeSeismic">Zone II (Low)</span>
+            </div>
+            <p class="risk-desc" id="descSeismic">Low probability of high-magnitude tectonic disturbances. Standard nominal ductile detailing recommended for column-beam junctions.</p>
+            <div class="risk-recommendation-pill" id="recSeismic">
+                Recommendation: Standard RCC frame with Fe550 TMT rebar and 200mm plinth beam tying.
+            </div>
+        </article>
+
+        <!-- 2. Flood & Inundation -->
+        <article class="risk-card" id="cardFlood">
+            <div class="risk-header">
+                <div class="risk-title-wrap">
+                    <div class="risk-icon-box">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Flood & Inundation</h3>
+                        <span style="font-size: 10px; color: var(--color-text-muted);">NDMA Water Index</span>
+                    </div>
+                </div>
+                <span class="badge" id="badgeFlood">Moderate</span>
+            </div>
+            <p class="risk-desc" id="descFlood">Urban waterlogging potential during monsoon cloudbursts. Low-lying plots subject to localized stormwater backflow.</p>
+            <div class="risk-recommendation-pill" id="recFlood">
+                Recommendation: Elevate finished ground floor plinth by min. 600mm above road level.
+            </div>
+        </article>
+
+        <!-- 3. Heavy Monsoon & Rainfall -->
+        <article class="risk-card" id="cardRainfall">
+            <div class="risk-header">
+                <div class="risk-title-wrap">
+                    <div class="risk-icon-box">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="16" y1="13" x2="16" y2="21"></line>
+                            <line x1="8" y1="13" x2="8" y2="21"></line>
+                            <line x1="12" y1="15" x2="12" y2="23"></line>
+                            <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Monsoon Precipitation</h3>
+                        <span style="font-size: 10px; color: var(--color-text-muted);">IMD Annual Average</span>
+                    </div>
+                </div>
+                <span class="badge" id="badgeRainfall">Moderate (950mm)</span>
+            </div>
+            <p class="risk-desc" id="descRainfall">Sustained seasonal rainfall requiring multi-layer terrace waterproofing and stormwater gutter systems.</p>
+            <div class="risk-recommendation-pill" id="recRainfall">
+                Recommendation: Dual-coat elastomeric waterproofing with 1:100 slope to rainwater downspouts.
+            </div>
+        </article>
+
+        <!-- 4. Extreme Heat & Solar Exposure -->
+        <article class="risk-card" id="cardHeat">
+            <div class="risk-header">
+                <div class="risk-title-wrap">
+                    <div class="risk-icon-box">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Thermal & Solar Load</h3>
+                        <span style="font-size: 10px; color: var(--color-text-muted);">ECBC Climate Zone</span>
+                    </div>
+                </div>
+                <span class="badge" id="badgeHeat">Moderate (Max 36°C)</span>
+            </div>
+            <p class="risk-desc" id="descHeat">Temperate climate zone with elevated summer solar insolation on southern and western exterior facades.</p>
+            <div class="risk-recommendation-pill" id="recHeat">
+                Recommendation: Architectural chajja overhangs (600mm) and high-albedo reflective roof coatings.
+            </div>
+        </article>
+
+        <!-- 5. Wind Velocity -->
+        <article class="risk-card" id="cardWind">
+            <div class="risk-header">
+                <div class="risk-title-wrap">
+                    <div class="risk-icon-box">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Wind & Gust Speed</h3>
+                        <span style="font-size: 10px; color: var(--color-text-muted);">IS 875:Part 3</span>
+                    </div>
+                </div>
+                <span class="badge" id="badgeWind">Basic (33 m/s)</span>
+            </div>
+            <p class="risk-desc" id="descWind">Moderate wind pressure zone. Parapets and rooftop solar panels require mechanical structural anchors.</p>
+            <div class="risk-recommendation-pill" id="recWind">
+                Recommendation: Design parapet wall at 1.05m height with solid RCC coping.
+            </div>
+        </article>
+
+        <!-- 6. Cyclone & Coastal Hazard -->
+        <article class="risk-card" id="cardCyclone">
+            <div class="risk-header">
+                <div class="risk-title-wrap">
+                    <div class="risk-icon-box">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Coastal & Cyclone Hazard</h3>
+                        <span style="font-size: 10px; color: var(--color-text-muted);">NDMA Coastal Buffer</span>
+                    </div>
+                </div>
+                <span class="badge" id="badgeCyclone">Inland (Low)</span>
+            </div>
+            <p class="risk-desc" id="descCyclone">Located in inland Deccan plateau with zero marine storm surge or coastal salt-spray corrosion hazard.</p>
+            <div class="risk-recommendation-pill" id="recCyclone">
+                Recommendation: Standard galvanized structural hardware and mild steel fabrication.
+            </div>
+        </article>
+    </div>
+
+    <!-- Architectural & Structural Mitigation Checklist -->
+    <div class="recommendations-card">
+        <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--color-text); margin: 0;">
+            Mandatory Engineering & IS Code Design Checklist
+        </h3>
+        <p style="font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 4px;">
+            Incorporate these structural stipulations into your final architectural drawings and contractor tenders.
+        </p>
+
+        <ul class="recommendation-list" id="recommendationList">
+            <li>
+                <span class="rec-bullet">✓</span>
+                <div>
+                    <strong>Plinth Elevation Buffer:</strong> Raise the finished plinth level at least 600mm above road grade to eliminate urban backwater logging and street runoff inundation.
+                </div>
+            </li>
+            <li>
+                <span class="rec-bullet">✓</span>
+                <div>
+                    <strong>IS 1893:2016 Structural Ductility:</strong> Implement continuous ring beams and tie columns with 135-degree seismic hooks on all structural stirrups.
+                </div>
+            </li>
+            <li>
+                <span class="rec-bullet">✓</span>
+                <div>
+                    <strong>Rooftop Thermal & Waterproofing Matrix:</strong> Apply elastomeric waterproofing topped with high-solar-reflectance (SRI > 78) cool roof tiles to curb summer heat transmission.
+                </div>
+            </li>
+            <li>
+                <span class="rec-bullet">✓</span>
+                <div>
+                    <strong>Recharge Pit & Stormwater Percolation:</strong> Integrate a rainwater harvesting pit (min. 10,000L capacity) connected to downspouts to recharge local ground aquifers.
+                </div>
+            </li>
+        </ul>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-8); padding-top: var(--space-6); border-top: 1px solid var(--color-border); flex-wrap: wrap; gap: var(--space-4);">
+            <a href="{{ url_for('cost') }}" class="btn btn-outline">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <span>Back to Cost BOQ</span>
+            </a>
+            <a href="{{ url_for('summary') }}" class="btn btn-primary btn-lg">
+                <span>View Final Executive Plan Summary</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
         </div>
     </div>
 </div>

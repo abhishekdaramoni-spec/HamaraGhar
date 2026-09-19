@@ -1,41 +1,100 @@
 {% extends 'base.html' %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Sign In to Workspace{% endblock %}
 
 {% block content %}
 <div class="split-layout">
     <div class="split-left dark-panel">
-        <div class="branding">
-            <h1>SmartBuild 3D</h1>
-            <p>Sign in to access your projects and continue designing.</p>
+        <div class="auth-brand-content">
+            <div class="brand mb-4">
+                <span class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </span>
+                <span>HamaraGhar</span>
+            </div>
+            
+            <h1 class="auth-brand-title">Your Residential Planning Workspace.</h1>
+            <p class="auth-brand-desc">
+                Log in to resume designing your home, manage 2D blueprints, inspect 3D elevations, and track real-time construction budgets.
+            </p>
+
+            <div class="auth-value-props mt-6">
+                <div class="avp-item">
+                    <span class="avp-check">✓</span>
+                    <span>Continuous cloud auto-save & version timeline</span>
+                </div>
+                <div class="avp-item">
+                    <span class="avp-check">✓</span>
+                    <span>CPWD-benchmarked material cost estimations</span>
+                </div>
+                <div class="avp-item">
+                    <span class="avp-check">✓</span>
+                    <span>IS 1893 regional seismic & hazard intelligence</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-brand-footer">
+            <p>&copy; 2026 HamaraGhar Technologies &bull; Residential Architectural Suite</p>
         </div>
     </div>
+
     <div class="split-right form-panel">
-        <div class="card clean-card">
-            <h2>Welcome Back</h2>
-            <form action="{{ url_for('login') }}" method="POST" class="auth-form">
+        <div class="card clean-card auth-card">
+            <div class="auth-card-header mb-6">
+                <h2>Sign in to HamaraGhar</h2>
+                <p class="subtitle">Enter your credentials to access your home planning dashboard.</p>
+            </div>
+
+            <form action="{{ url_for('login') }}" method="POST" class="auth-form" id="loginForm">
                 <div class="form-group">
                     <label for="loginEmail">Email Address</label>
-                    <input type="email" id="loginEmail" name="email" required placeholder="you@example.com">
+                    <input type="email" id="loginEmail" name="email" required placeholder="name@example.com" autocomplete="email">
                 </div>
                 
                 <div class="form-group">
-                    <label for="loginPassword">Password</label>
+                    <div class="label-with-aside">
+                        <label for="loginPassword">Password</label>
+                    </div>
                     <div class="password-wrapper">
-                        <input type="password" id="loginPassword" name="password" required>
-                        <button type="button" class="btn-toggle-password">Show</button>
+                        <input type="password" id="loginPassword" name="password" required placeholder="••••••••" autocomplete="current-password">
+                        <button type="button" class="btn-toggle-password" id="togglePasswordBtn" title="Toggle password visibility">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
                     </div>
                 </div>
-                
-                <button type="submit" class="btn btn-primary btn-block">Login</button>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg mt-4">
+                    <span>Sign In to Workspace</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
             </form>
             
             <p class="form-footer">
-                Don't have an account? <a href="{{ url_for('register') }}">Register here</a>
+                Don't have a workspace yet? <a href="{{ url_for('register') }}">Create an account free</a>
             </p>
-            
-            <p class="hidden-info" style="display:none;">Demo: Register a new account to get started</p>
         </div>
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const passInput = document.getElementById('loginPassword');
+        if (toggleBtn && passInput) {
+            toggleBtn.addEventListener('click', () => {
+                const isPassword = passInput.type === 'password';
+                passInput.type = isPassword ? 'text' : 'password';
+                toggleBtn.classList.toggle('active', isPassword);
+            });
+        }
+    });
+</script>
+{% endblock %}
+

@@ -1,122 +1,111 @@
 {% extends 'base.html' %}
 
-{% block title %}Data Sources{% endblock %}
+{% block title %}Data Sources, Standards & Calculation Methodology — HamaraGhar{% endblock %}
 
 {% block content %}
-<div class="data-sources-page container">
-    <header class="page-header mt-5">
-        <h1>Data Sources & Methodology</h1>
-        <p class="lead-text">Transparency is important to us. Below are the public datasets, models, and references used by the SmartBuild 3D rule engines to provide estimates and recommendations.</p>
+<div class="data-sources-page container" style="max-width: 1060px; margin: 0 auto; padding: var(--space-8) var(--space-6) var(--space-16);">
+    <header class="page-header mb-6">
+        <div style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: var(--space-2);">
+            <span class="badge badge-outline">Public Technical Documentation</span>
+        </div>
+        <h1 style="font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 800; color: var(--color-text);">Data Provenance & Calculation Methodology</h1>
+        <p class="lead-text" style="color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.6;">
+            Transparency is a core engineering principle at HamaraGhar. Below are the statutory building codes, government schedule of rates, and meteorological datasets powering our automated planning algorithms.
+        </p>
     </header>
 
-    <div class="disclaimer-box warning my-4">
-        <p><strong>Important Disclaimer:</strong> All data is generalized for educational and planning purposes. Construction costs, local regulations, and geographic risks change frequently. Do not use this tool as a substitute for certified professional assessment.</p>
+    <div class="disclaimer-box warning mb-8">
+        <p><strong>Statutory Disclaimer:</strong> All calculations, models, and estimations are planning heuristics designed for residential pre-construction feasibility. Final engineering drawings, structural stability certificates, and local municipal sanctions must be executed by licensed professionals.</p>
     </div>
 
-    <section class="mb-5">
-        <h2>Datasets Utilized</h2>
-        <div class="table-responsive mt-3">
+    <!-- Datasets Table -->
+    <section class="mb-10">
+        <h2 style="font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; color: var(--color-text); margin-bottom: var(--space-4);">Governing Standards & Reference Datasets</h2>
+        <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Category</th>
-                        <th>Source</th>
-                        <th>Purpose</th>
-                        <th>License / Type</th>
-                        <th>Last Updated</th>
+                        <th style="width: 22%;">Domain</th>
+                        <th style="width: 28%;">Statutory Authority / Standard</th>
+                        <th style="width: 35%;">Implementation in HamaraGhar</th>
+                        <th style="width: 15%;">Reference Year</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong>Housing & Dimensions</strong></td>
-                        <td>National Building Code (NBC) Guidelines</td>
-                        <td>Vastu compliance, standard room dimensions, and structural safety rules.</td>
-                        <td>Public Domain</td>
-                        <td>2023 Guidelines</td>
+                        <td><strong>Architectural & Sizing</strong></td>
+                        <td>National Building Code of India (NBC 2016 Part 3)</td>
+                        <td>Minimum habitable room dimensions (min 9.5 sq.m for bedrooms), window-to-floor area ratios (min 10%), ceiling heights (min 2.75m), and staircase rise/tread proportions.</td>
+                        <td>NBC 2016 (Reaffirmed 2021)</td>
                     </tr>
                     <tr>
-                        <td><strong>Cost Data</strong></td>
-                        <td>CPWD Schedule of Rates (SOR)</td>
-                        <td>Baseline construction costs for civil works, plumbing, and electrical.</td>
-                        <td>Public Data</td>
-                        <td>2024 Reference</td>
+                        <td><strong>Costing & BOQ</strong></td>
+                        <td>Central Public Works Department (CPWD) Schedule of Rates (SOR)</td>
+                        <td>Baseline civil structure, earthwork, Fe550D TMT reinforcement, AAC block masonry, internal/external plastering, plumbing, and electrical item rates for Indian urban centers.</td>
+                        <td>CPWD DSR 2024</td>
                     </tr>
                     <tr>
-                        <td><strong>Market Rates</strong></td>
-                        <td>Aggregated Regional Real Estate Indices</td>
-                        <td>Adjusting base costs for premium materials and current labor market rates.</td>
-                        <td>Proprietary Aggregation</td>
-                        <td>Q4 2025</td>
+                        <td><strong>Earthquake Resilience</strong></td>
+                        <td>Bureau of Indian Standards IS 1893:2016 (Part 1) & IS 13920</td>
+                        <td>Seismic zoning classification (Zones II through V), peak ground acceleration benchmarks, ductile detailing mandates (135° seismic stirrup hooks), and column-beam joints.</td>
+                        <td>IS 1893:2016</td>
                     </tr>
                     <tr>
-                        <td><strong>Seismic Risk</strong></td>
-                        <td>Global Seismic Hazard Assessment Program (GSHAP)</td>
-                        <td>Determining earthquake risk zones and recommending foundation types.</td>
-                        <td>Open Access</td>
-                        <td>Continuous</td>
+                        <td><strong>Wind Loads</strong></td>
+                        <td>Bureau of Indian Standards IS 875:2015 (Part 3)</td>
+                        <td>Basic design wind velocity (33 m/s to 55 m/s) across regional topography for roof truss anchoring, parapet coping, and facade glazing tolerances.</td>
+                        <td>IS 875:2015</td>
                     </tr>
                     <tr>
-                        <td><strong>Flood Risk</strong></td>
-                        <td>Regional Topographical & Floodplain Open Data</td>
-                        <td>Assessing plinth height recommendations and water-logging risks.</td>
-                        <td>Open Data Commons</td>
-                        <td>2024</td>
+                        <td><strong>Flood & Water Hazard</strong></td>
+                        <td>National Disaster Management Authority (NDMA) & IMD Atlas</td>
+                        <td>Monsoon precipitation volumes, coastal storm surge buffers, and minimum 600mm plinth elevation guidelines above municipal road grade.</td>
+                        <td>NDMA Atlas 2023</td>
                     </tr>
                     <tr>
-                        <td><strong>Climate Data</strong></td>
-                        <td>World Meteorological Organization (WMO) Standard Normals</td>
-                        <td>Providing heat, rainfall, and wind speed insights for architectural design.</td>
-                        <td>Open Access</td>
-                        <td>2024</td>
+                        <td><strong>Energy & Thermal</strong></td>
+                        <td>Bureau of Energy Efficiency (BEE) Eco-Niwas Samhita (ENS)</td>
+                        <td>Window overhang shading (chajjas), solar reflectance index (SRI > 78) for roof coatings, and natural stack ventilation pathways.</td>
+                        <td>ENS 2021</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </section>
 
-    <section class="mb-5">
-        <h2>How We Use Data</h2>
+    <!-- Methodology Explanations -->
+    <section class="mb-8">
+        <h2 style="font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; color: var(--color-text); margin-bottom: var(--space-4);">Algorithmic Processing Pipelines</h2>
         
-        <div class="grid-2col mt-4">
-            <div class="card">
-                <h3>Floor Plan Generation</h3>
-                <p>The layout generator uses a rule-based algorithm that optimizes for NBC guidelines, ensuring minimum room sizes, adequate ventilation pathways, and logical flow (e.g., placing the kitchen near the dining area). Vastu compliance algorithms are applied as secondary heuristics.</p>
+        <div class="grid-2col" style="gap: var(--space-6);">
+            <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
+                <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; color: var(--color-text); margin-bottom: var(--space-2);">1. 2D Blueprint Constraint Solver</h3>
+                <p style="font-size: var(--text-xs); color: var(--color-text-secondary); line-height: 1.6;">
+                    When plot dimensions and BHK counts are input, the 2D plan generator first establishes statutory setbacks (front 5ft, sides 3ft, rear 4ft) per municipal bye-laws. It then assigns rooms based on Vastu orientation heuristics (Master Bedroom in SW, Kitchen in SE, Pooja in NE) while enforcing NBC room-size minimums and wall-perimeter circulation.
+                </p>
             </div>
             
-            <div class="card">
-                <h3>Cost Estimation</h3>
-                <p>Cost is calculated using a base rate multiplier method. The total built-up area is multiplied by a regional base rate, which is then adjusted based on the selected material quality, number of floors, and interior finish styles. A standard 5% contingency is added to account for unforeseen expenses.</p>
+            <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
+                <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; color: var(--color-text); margin-bottom: var(--space-2);">2. Bill of Quantities (BOQ) Multiplier</h3>
+                <p style="font-size: var(--text-xs); color: var(--color-text-secondary); line-height: 1.6;">
+                    Total built-up footprint is multiplied by CPWD base rates across 4 material quality tiers (Basic: ₹1,200/sqft, Standard: ₹1,800/sqft, Premium: ₹2,800/sqft, Luxury: ₹4,500/sqft). Civil structure, MEP, openings, and finishes are disaggregated into sub-trade percentages with an 8% inflation and contingency buffer.
+                </p>
             </div>
 
-            <div class="card">
-                <h3>Risk Analysis</h3>
-                <p>Location data is mapped to our regional hazard database. The engine flags any intersections with known high-risk zones (e.g., Seismic Zone IV/V or historical flood plains) and generates automated architectural recommendations like raised plinths or reinforced foundations.</p>
+            <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
+                <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; color: var(--color-text); margin-bottom: var(--space-2);">3. Multi-Hazard Resilience Index</h3>
+                <p style="font-size: var(--text-xs); color: var(--color-text-secondary); line-height: 1.6;">
+                    Our risk engine queries NDMA and IMD regional hazard mappings across 40+ major Indian cities. It cross-references the city's seismic zone (IS 1893) and rainfall flood index to generate a 0–100 Resilience Score, providing specific structural mandates (e.g. 135° ductile ties, plinth elevation) to mitigate vulnerability.
+                </p>
+            </div>
+
+            <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
+                <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; color: var(--color-text); margin-bottom: var(--space-2);">4. Interactive 3D Elevation Studio</h3>
+                <p style="font-size: var(--text-xs); color: var(--color-text-secondary); line-height: 1.6;">
+                    3D house geometry is computed client-side using CSS 3D matrix transformations and HTML5 Canvas rendering. Real-time updates immediately cascade changes in number of floors, wall materials, roof profiles, and color swatches directly into structural volume and budget metrics.
+                </p>
             </div>
         </div>
     </section>
 </div>
-
-<style>
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
-}
-.data-table th, .data-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
-}
-.data-table th {
-    background: #f8fafc;
-    font-weight: 600;
-    color: #1e293b;
-}
-.table-responsive {
-    overflow-x: auto;
-}
-</style>
 {% endblock %}

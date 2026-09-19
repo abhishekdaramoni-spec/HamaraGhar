@@ -1,52 +1,197 @@
 {% extends 'base.html' %}
 
-{% block title %}Floor Plan{% endblock %}
+{% block title %}2D CAD Floor Plan Blueprint — HamaraGhar{% endblock %}
 
 {% block content %}
 <div class="floor-plan-page">
-    <header class="page-header">
-        <h1>Your Floor Plan</h1>
-        <p class="plot-info">Plot: <span id="displayPlotSize">-- x --</span> ft</p>
+    <!-- Header -->
+    <header class="floor-plan-header">
+        <div class="floor-plan-title">
+            <h1>2D CAD Architectural Blueprint</h1>
+            <div class="floor-plan-meta">
+                <span id="displayProjectName" style="font-weight: 600; color: var(--color-text);">House Plan</span>
+                <span>&bull;</span>
+                <span id="displayPlotSize">Plot: 40 × 50 ft (2,000 sq ft)</span>
+                <span>&bull;</span>
+                <span class="badge badge-outline">Scale 1:100 (1ft = 8px)</span>
+            </div>
+        </div>
+
+        <div class="floor-plan-top-actions">
+            <button id="btnDownload" class="btn btn-outline" title="Export High-Resolution Blueprint PNG">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export PNG</span>
+            </button>
+            <button id="btnPrint" class="btn btn-outline" onclick="window.print()" title="Print CAD Drawing">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                <span>Print</span>
+            </button>
+            <a href="{{ url_for('builder') }}" class="btn btn-primary">
+                <span>Enter 3D Studio</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </a>
+        </div>
     </header>
 
+    <!-- Studio Layout -->
     <div class="floor-plan-layout">
+        <!-- Left: Room Schedule & Legend -->
         <aside class="sidebar-left">
-            <div class="legend-card">
-                <h3>Room Legend</h3>
-                <ul class="legend-list">
-                    <li><span class="color-box" style="background: #e2e8f0;"></span> Living Room</li>
-                    <li><span class="color-box" style="background: #bfdbfe;"></span> Bedroom</li>
-                    <li><span class="color-box" style="background: #fef08a;"></span> Kitchen</li>
-                    <li><span class="color-box" style="background: #bbf7d0;"></span> Bathroom</li>
-                    <li><span class="color-box" style="background: #fbcfe8;"></span> Circulation</li>
-                </ul>
+            <div class="cad-card">
+                <div class="cad-card-header">
+                    <h3>Room Schedule</h3>
+                    <span class="badge badge-accent" id="badgeRoomCount">5 Rooms</span>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--color-border); text-align: left; color: var(--color-text-muted);">
+                                <th style="padding: 4px 2px;">Room</th>
+                                <th style="padding: 4px 2px;">Dims</th>
+                                <th style="padding: 4px 2px; text-align: right;">Area</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomScheduleBody">
+                            <!-- Populated dynamically by FloorPlan -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            
-            <div class="stats-card">
-                <h3>Statistics</h3>
-                <p>Total Area: <span id="statArea">0</span> sq.ft</p>
-                <p>Rooms: <span id="statRooms">0</span></p>
-                <p>Doors: <span id="statDoors">0</span></p>
-                <p>Windows: <span id="statWindows">0</span></p>
+
+            <div class="cad-card">
+                <div class="cad-card-header">
+                    <h3>Color Code Legend</h3>
+                </div>
+                <ul class="legend-list">
+                    <li>
+                        <div class="legend-item-info">
+                            <span class="color-box" style="background: #1e3a5f;"></span>
+                            <span>Living & Foyer</span>
+                        </div>
+                        <span class="legend-dim">Public</span>
+                    </li>
+                    <li>
+                        <div class="legend-item-info">
+                            <span class="color-box" style="background: #0d9488;"></span>
+                            <span>Master Bedroom</span>
+                        </div>
+                        <span class="legend-dim">Private</span>
+                    </li>
+                    <li>
+                        <div class="legend-item-info">
+                            <span class="color-box" style="background: #0284c7;"></span>
+                            <span>Guest / Kid Bed</span>
+                        </div>
+                        <span class="legend-dim">Private</span>
+                    </li>
+                    <li>
+                        <div class="legend-item-info">
+                            <span class="color-box" style="background: #d97706;"></span>
+                            <span>Kitchen & Dining</span>
+                        </div>
+                        <span class="legend-dim">Service</span>
+                    </li>
+                    <li>
+                        <div class="legend-item-info">
+                            <span class="color-box" style="background: #64748b;"></span>
+                            <span>Bath & Utilities</span>
+                        </div>
+                        <span class="legend-dim">Wet Zone</span>
+                    </li>
+                </ul>
             </div>
         </aside>
 
+        <!-- Center: CAD Canvas Viewport -->
         <main class="canvas-container">
-            <canvas id="floorPlanCanvas" width="800" height="600"></canvas>
+            <div class="canvas-viewport">
+                <!-- Floating Toolbar -->
+                <div class="canvas-toolbar">
+                    <button class="cad-tool-btn" id="btnRegenerate" title="Generate Alternative Layout Pattern">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                        <span>Alternative Layout</span>
+                    </button>
+                    <button class="cad-tool-btn" id="btnToggleDims" title="Toggle Dimension Lines">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg>
+                        <span>Dimensions</span>
+                    </button>
+                </div>
+
+                <!-- HTML5 Canvas -->
+                <canvas id="floorPlanCanvas" width="800" height="560"></canvas>
+            </div>
             
+            <!-- Bottom Status Strip -->
             <div class="info-bar">
-                <span>Rooms: <b id="barRoomCount">0</b></span> |
-                <span>Total Area: <b id="barTotalArea">0 sq.ft</b></span> |
-                <span class="compliance-note">Vastu Compliant: <b id="barCompliance">Yes</b></span>
+                <div>
+                    <span>Carpet Area: <b id="barCarpetArea">1,400 sq ft</b></span>
+                    <span style="margin: 0 8px; color: rgba(255,255,255,0.2);">|</span>
+                    <span>Built-up Footprint: <b id="barBuiltupArea">1,600 sq ft</b></span>
+                    <span style="margin: 0 8px; color: rgba(255,255,255,0.2);">|</span>
+                    <span>Efficiency: <b id="barEfficiency">87.5%</b></span>
+                </div>
+                <div class="compliance-badge" id="barCompliance">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <span>Vastu Shastra & NBC Compliant</span>
+                </div>
             </div>
         </main>
 
+        <!-- Right: Technical Specs & Workflow Actions -->
         <aside class="sidebar-right">
-            <div class="controls-card">
-                <h3>Actions</h3>
-                <button id="btnGenerateNew" class="btn btn-outline btn-block mb-3">Generate New Plan</button>
-                <a href="{{ url_for('builder') }}" class="btn btn-primary btn-block mb-3">Edit in 3D</a>
-                <button id="btnDownload" class="btn btn-secondary btn-block">Download PNG</button>
+            <!-- Floor Switcher -->
+            <div class="cad-card">
+                <div class="cad-card-header">
+                    <h3>Active Floor</h3>
+                </div>
+                <div class="segmented-control" style="width: 100%;">
+                    <button type="button" class="segmented-option active" id="btnFloor0" onclick="FloorPlanStudio.switchFloor(0)">Ground Floor</button>
+                    <button type="button" class="segmented-option" id="btnFloor1" onclick="FloorPlanStudio.switchFloor(1)">First Floor</button>
+                </div>
+            </div>
+
+            <!-- Architectural Specs -->
+            <div class="cad-card">
+                <div class="cad-card-header">
+                    <h3>Technical Data</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-mini-box">
+                        <span class="stat-mini-label">Total Rooms</span>
+                        <div class="stat-mini-val" id="statRooms">5</div>
+                    </div>
+                    <div class="stat-mini-box">
+                        <span class="stat-mini-label">Doors / Openings</span>
+                        <div class="stat-mini-val" id="statDoors">6</div>
+                    </div>
+                    <div class="stat-mini-box">
+                        <span class="stat-mini-label">Windows (Vent.)</span>
+                        <div class="stat-mini-val" id="statWindows">7</div>
+                    </div>
+                    <div class="stat-mini-box">
+                        <span class="stat-mini-label">Outer Walls</span>
+                        <div class="stat-mini-val">9" AAC Block</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Workflow Links -->
+            <div class="cad-card">
+                <div class="cad-card-header">
+                    <h3>Project Next Steps</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                    <a href="{{ url_for('builder') }}" class="btn btn-primary btn-block" style="font-size: var(--text-xs); padding: 8px 12px;">
+                        <span>Open 3D Elevation Studio</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                    <a href="{{ url_for('cost') }}" class="btn btn-outline btn-block" style="font-size: var(--text-xs); padding: 8px 12px;">
+                        <span>Review Cost BOQ & Budget</span>
+                    </a>
+                    <a href="{{ url_for('risk') }}" class="btn btn-outline btn-block" style="font-size: var(--text-xs); padding: 8px 12px;">
+                        <span>IS 1893 Hazard Audit</span>
+                    </a>
+                </div>
             </div>
         </aside>
     </div>

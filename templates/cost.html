@@ -1,104 +1,169 @@
 {% extends 'base.html' %}
 
-{% block title %}Cost Estimation{% endblock %}
+{% block title %}Construction Cost Intelligence & BOQ — HamaraGhar{% endblock %}
 
 {% block content %}
 <div class="cost-page">
-    <header class="page-header text-center">
-        <h1>Construction Cost Estimate</h1>
+    <!-- Header -->
+    <header class="cost-header">
+        <div>
+            <h1>Construction Cost Intelligence & BOQ</h1>
+            <p>CPWD-benchmarked bill of quantities, material tier simulations, and budget variance tracking.</p>
+        </div>
+        
+        <div class="cost-top-actions">
+            <button class="btn btn-outline" onclick="window.print()" title="Print BOQ Schedule">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                <span>Export BOQ</span>
+            </button>
+            <a href="{{ url_for('risk') }}" class="btn btn-primary">
+                <span>Location Risk Audit →</span>
+            </a>
+        </div>
     </header>
 
-    <div class="disclaimer-box warning mb-4">
-        <p><strong>Disclaimer:</strong> This is a planning estimate only. Actual costs may vary based on location, material quality, labor rates, and market fluctuations. Please consult a professional contractor for a finalized quote.</p>
+    <!-- Engineering Disclaimer Alert -->
+    <div class="disclaimer-box warning mb-6">
+        <p><strong>CPWD Reference Benchmark:</strong> Estimates utilize 2024–2026 Central Public Works Department (CPWD) schedule of rates for Tier-1 & Tier-2 Indian urban areas. Final quotations depend on structural engineer soil tests and regional contractor negotiations.</p>
     </div>
 
+    <!-- 3-Tier Forecast Strip -->
+    <div class="cost-tiers-strip">
+        <div class="cost-tier-card">
+            <span class="cost-tier-badge">Conservative / Economy</span>
+            <div class="cost-tier-val" id="costRangeLow">₹ 36.5 L</div>
+            <div class="cost-tier-rate" id="rateRangeLow">~₹1,450 / sq ft</div>
+            <p class="cost-tier-desc">Standard red brick, vitrified flooring, flush doors, and basic sanitary ware.</p>
+        </div>
+
+        <div class="cost-tier-card featured">
+            <span class="cost-tier-badge">CPWD Standard Baseline</span>
+            <div class="cost-tier-val" id="costRangeExpected" style="color: var(--color-accent);">₹ 44.2 L</div>
+            <div class="cost-tier-rate" id="rateRangeExpected">~₹1,850 / sq ft</div>
+            <p class="cost-tier-desc">Fe550 TMT rebar, AAC blocks, glazed tiles, UPVC windows & concealed MEP.</p>
+        </div>
+
+        <div class="cost-tier-card">
+            <span class="cost-tier-badge">Premium Architectural</span>
+            <div class="cost-tier-val" id="costRangeHigh">₹ 58.8 L</div>
+            <div class="cost-tier-rate" id="rateRangeHigh">~₹2,650 / sq ft</div>
+            <p class="cost-tier-desc">Italian marble flooring, teak woodwork, false ceilings & smart home automation.</p>
+        </div>
+    </div>
+
+    <!-- Main Workspace Layout -->
     <div class="cost-layout">
-        <!-- Left Side: Configuration Summary -->
-        <aside class="config-summary">
-            <div class="card">
-                <h3>Project Configuration</h3>
-                <ul class="config-list mt-3">
-                    <li><strong>Built-up Area:</strong> <span id="confArea">--</span> sq.ft</li>
-                    <li><strong>Floors:</strong> <span id="confFloors">--</span></li>
-                    <li><strong>Rooms:</strong> <span id="confRooms">--</span></li>
-                    <li><strong>Wall Material:</strong> <span id="confWallMat">--</span></li>
-                    <li><strong>Floor Material:</strong> <span id="confFloorMat">--</span></li>
-                    <li><strong>Roof Type:</strong> <span id="confRoofType">--</span></li>
+        <!-- Left: Configuration & Variance Controls -->
+        <aside class="cost-sidebar">
+            <div class="cost-card">
+                <div class="cost-card-header">
+                    <h3>Simulation Tier</h3>
+                </div>
+
+                <!-- Quality Switcher Pills -->
+                <div class="quality-pills">
+                    <div class="quality-pill-btn" onclick="CostStudio.setTier('basic')">
+                        <span class="quality-pill-name">Basic</span>
+                        <span class="quality-pill-rate">₹1,200/sqft</span>
+                    </div>
+                    <div class="quality-pill-btn active" onclick="CostStudio.setTier('standard')">
+                        <span class="quality-pill-name">Standard</span>
+                        <span class="quality-pill-rate">₹1,800/sqft</span>
+                    </div>
+                    <div class="quality-pill-btn" onclick="CostStudio.setTier('premium')">
+                        <span class="quality-pill-name">Premium</span>
+                        <span class="quality-pill-rate">₹2,800/sqft</span>
+                    </div>
+                    <div class="quality-pill-btn" onclick="CostStudio.setTier('luxury')">
+                        <span class="quality-pill-name">Luxury</span>
+                        <span class="quality-pill-rate">₹4,500/sqft</span>
+                    </div>
+                </div>
+
+                <div class="cost-card-header" style="margin-top: var(--space-4);">
+                    <h3>Project Parameters</h3>
+                </div>
+                <ul class="config-list">
+                    <li><span>Built-up Area:</span> <strong id="confArea">2,400 sq ft</strong></li>
+                    <li><span>Floor Levels:</span> <strong id="confFloors">G+1 (2 Floors)</strong></li>
+                    <li><span>Rooms Planned:</span> <strong id="confRooms">6 Rooms</strong></li>
+                    <li><span>Wall Type:</span> <strong id="confWallMat">Fired Brick</strong></li>
+                    <li><span>Floor Finish:</span> <strong id="confFloorMat">Vitrified Tile</strong></li>
+                    <li><span>Roof Profile:</span> <strong id="confRoofType">Flat RCC</strong></li>
                 </ul>
-                
-                <div class="mt-4">
-                    <a href="{{ url_for('builder') }}" class="btn btn-outline btn-block">Adjust Configuration</a>
+
+                <!-- Target Budget Comparison -->
+                <div class="budget-gauge-box">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 600;">
+                        <span>Target Budget</span>
+                        <span id="lblBudget">₹ 50,00,000</span>
+                    </div>
+                    
+                    <div class="budget-gauge-track">
+                        <div class="budget-gauge-fill" id="budgetProgress" style="width: 85%; background: var(--color-success);"></div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted);">
+                        <span>Calculated: <b id="lblEstimate">₹ 44,20,000</b></span>
+                        <span id="budgetStatusMsg" style="font-weight: 700; color: var(--color-success);">Within Target</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: var(--space-5);">
+                    <a href="{{ url_for('builder') }}" class="btn btn-outline btn-block" style="font-size: var(--text-xs); padding: 8px 12px;">
+                        <span>Adjust in 3D Elevation Studio</span>
+                    </a>
                 </div>
             </div>
         </aside>
 
-        <!-- Right Side: Cost Breakdown -->
-        <main class="cost-breakdown">
-            <div class="card">
-                <h3>Detailed Estimate</h3>
+        <!-- Right: Itemized BOQ Table -->
+        <main class="cost-main">
+            <div class="cost-card">
+                <div class="cost-card-header">
+                    <h3>Itemized Bill of Quantities (BOQ)</h3>
+                    <span class="badge badge-accent" id="boqItemCount">8 Work Categories</span>
+                </div>
                 
-                <div class="cost-table-container mt-3">
-                    <table class="cost-table">
+                <div class="cost-table-container">
+                    <table class="boq-table">
                         <thead>
                             <tr>
-                                <th>Category</th>
-                                <th class="text-right">Estimated Amount (₹)</th>
+                                <th style="width: 35%;">Category & Scope</th>
+                                <th style="width: 35%;">Engineering Baseline</th>
+                                <th style="width: 30%; text-align: right;">Estimated Amount (₹)</th>
                             </tr>
                         </thead>
                         <tbody id="costBreakdownBody">
-                            <tr>
-                                <td>Foundation & Civil Work</td>
-                                <td class="text-right" id="costCivil">--</td>
-                            </tr>
-                            <tr>
-                                <td>Doors & Windows</td>
-                                <td class="text-right" id="costDoors">--</td>
-                            </tr>
-                            <tr>
-                                <td>Electrical & Plumbing</td>
-                                <td class="text-right" id="costMep">--</td>
-                            </tr>
-                            <tr>
-                                <td>Flooring & Painting</td>
-                                <td class="text-right" id="costFinishes">--</td>
-                            </tr>
-                            <tr>
-                                <td>Interior & Woodwork</td>
-                                <td class="text-right" id="costInterior">--</td>
-                            </tr>
-                            <tr>
-                                <td>Labor Charges</td>
-                                <td class="text-right" id="costLabor">--</td>
-                            </tr>
-                            <tr>
-                                <td>Contingency (5%)</td>
-                                <td class="text-right" id="costContingency">--</td>
-                            </tr>
+                            <!-- Populated dynamically via JS -->
                         </tbody>
                         <tfoot>
-                            <tr class="total-row">
-                                <td>Total Estimated Cost</td>
-                                <td class="text-right"><strong class="highlight-total" id="costTotal">--</strong></td>
+                            <tr class="boq-subtotal-row">
+                                <td colspan="2">Work Subtotal (Civil + MEP + Finishes)</td>
+                                <td style="text-align: right;" id="costSubtotal">₹ 0</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">Price Escalation & Contingency Buffer (8%)</td>
+                                <td style="text-align: right;" id="costContingency">₹ 0</td>
+                            </tr>
+                            <tr class="boq-total-row">
+                                <td colspan="2">Total Estimated Investment</td>
+                                <td style="text-align: right;" id="costTotal">₹ 0</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
 
-                <div class="budget-comparison mt-4">
-                    <h4>Budget vs Estimate</h4>
-                    <div class="progress-bar-container mt-2">
-                        <div class="progress-bar" id="budgetProgress"></div>
-                    </div>
-                    <div class="budget-labels mt-2">
-                        <span>Estimate: <b id="lblEstimate">--</b></span>
-                        <span>Budget: <b id="lblBudget">--</b></span>
-                    </div>
-                    <p class="budget-status mt-2" id="budgetStatusMsg"></p>
-                </div>
-
-                <div class="cost-actions mt-4">
-                    <button class="btn btn-primary" id="btnSaveProject">Save Project</button>
-                    <a href="{{ url_for('risk') }}" class="btn btn-success">Proceed to Risk Analysis</a>
+                <div class="cost-actions mt-6" style="display: flex; justify-content: space-between; align-items: center; padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+                    <button class="btn btn-outline" id="btnSaveProject">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        <span>Save Estimate to Project</span>
+                    </button>
+                    
+                    <a href="{{ url_for('risk') }}" class="btn btn-primary">
+                        <span>Continue to Hazard Risk Audit</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
                 </div>
             </div>
         </main>

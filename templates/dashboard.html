@@ -1,53 +1,130 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Workspace Dashboard — HamaraGhar{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
-    <header class="dashboard-header">
-        <h1>Welcome back, {{ current_user.name }}!</h1>
-    </header>
-    
-    <section class="stats-row">
-        <div class="stat-card">
-            <h3>Total Projects</h3>
-            <p class="stat-value" id="statTotalProjects">0</p>
+    <!-- Topbar Header -->
+    <div class="dashboard-topbar">
+        <div class="dashboard-heading">
+            <h1>Welcome back, {{ current_user.name }}</h1>
+            <p>Manage your residential house plans, 2D blueprints, 3D models, and construction cost forecasts.</p>
         </div>
-        <div class="stat-card">
-            <h3>Total Rooms Planned</h3>
-            <p class="stat-value" id="statTotalRooms">0</p>
+        <div class="dashboard-topbar-actions">
+            <a href="{{ url_for('requirements') }}" class="btn btn-primary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>New House Project</span>
+            </a>
         </div>
-        <div class="stat-card">
-            <h3>Budget Range</h3>
-            <p class="stat-value" id="statBudgetRange">₹0 - ₹0</p>
-        </div>
-    </section>
+    </div>
 
+    <!-- Resume Recent Project Banner (Dynamic via JS) -->
+    <div id="resumeHeroContainer"></div>
+    
+    <!-- Workspace Metric Cards -->
+    <div class="dashboard-metrics">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Active Projects</span>
+                <div class="stat-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+            </div>
+            <div class="stat-value" id="statTotalProjects">0</div>
+            <span class="stat-desc">Residential plans in workspace</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Total Planned Area</span>
+                <div class="stat-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                        <line x1="9" y1="21" x2="9" y2="9"></line>
+                    </svg>
+                </div>
+            </div>
+            <div class="stat-value" id="statTotalArea">0 sq ft</div>
+            <span class="stat-desc">Combined built-up footprint</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Combined Est. Cost</span>
+                <div class="stat-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="stat-value" id="statTotalBudget">₹0</div>
+            <span class="stat-desc">CPWD-benchmarked estimates</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Engineering Standard</span>
+                <div class="stat-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+            </div>
+            <div class="stat-value" style="font-size: var(--text-xl); color: var(--color-success);">IS 1893:2016</div>
+            <span class="stat-desc">Seismic & NDMA compliant</span>
+        </div>
+    </div>
+
+    <!-- Projects Section -->
     <section class="projects-section">
-        <div class="section-header">
-            <h2>My Projects</h2>
-            <a href="{{ url_for('requirements') }}" class="btn btn-primary">+ New Project</a>
+        <div class="projects-section-header">
+            <div class="projects-section-title">
+                <h2>House Projects</h2>
+            </div>
+            
+            <div class="projects-toolbar">
+                <div class="search-wrapper">
+                    <svg class="search-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="projectSearch" placeholder="Search by name, BHK, city...">
+                </div>
+                
+                <select id="projectSort" class="select-filter">
+                    <option value="newest">Recently Modified</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="name_asc">Name (A-Z)</option>
+                </select>
+            </div>
         </div>
         
-        <!-- Hook for JS to load projects -->
+        <!-- Project Cards Grid -->
         <div id="projectGrid" class="project-grid">
-            <div class="empty-state">
-                <p>No projects yet. Start designing your dream home!</p>
-            </div>
-            <!-- Example of what a project card will look like (populated by JS):
-            <article class="project-card">
-                <h3>My Villa</h3>
-                <p>Plot: 40x50 ft | 3 BHK</p>
-                <p>Estimated Cost: ₹45,00,000</p>
-                <p>Style: Modern</p>
-                <p class="date">Updated: 2023-10-15</p>
-                <div class="card-actions">
-                    <button class="btn btn-outline">Open</button>
-                    <button class="btn btn-ghost">Edit</button>
-                    <button class="btn btn-ghost text-danger">Delete</button>
+            <div class="empty-state-workspace">
+                <div class="empty-state-icon-box">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
                 </div>
-            </article>
-            -->
+                <h3 class="empty-state-title">No house projects yet</h3>
+                <p class="empty-state-desc">Define your plot dimensions, room requirements, and architectural preferences to generate your custom 2D CAD blueprint and 3D model.</p>
+                <a href="{{ url_for('requirements') }}" class="btn btn-primary btn-lg">
+                    <span>Start First Project</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+            </div>
         </div>
     </section>
 </div>
