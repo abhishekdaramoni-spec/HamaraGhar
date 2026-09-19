@@ -6,7 +6,7 @@ import os
 import json
 from functools import wraps
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, session, redirect, url_for, render_template, flash
+from flask import Flask, request, jsonify, session, redirect, url_for, render_template, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -304,6 +304,13 @@ def api_risk(city):
 @app.route('/api/data/layouts', methods=['GET'])
 def api_layouts():
     return jsonify(read_json_data('house_layouts.json'))
+
+@app.route('/static/<path:filename>')
+def serve_static_assets(filename):
+    public_dir = os.path.join(app.root_path, 'public', 'static')
+    if os.path.exists(os.path.join(public_dir, filename)):
+        return send_from_directory(public_dir, filename)
+    return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
 if __name__ == '__main__':
     debug = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')

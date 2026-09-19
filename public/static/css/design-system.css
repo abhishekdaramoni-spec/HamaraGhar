@@ -1,0 +1,229 @@
+/* =========================================================================
+   HamaraGhar — Architectural Design System & Design Tokens
+   Precision, Material Authenticity, Warm Architectural Neutrals
+   ========================================================================= */
+
+:root {
+  /* Brand Core Identity */
+  --color-primary: #0f172a;          /* Deep Slate / Near-Black */
+  --color-primary-light: #1e293b;    /* Charcoal Surface */
+  --color-primary-dark: #020617;     /* True Dark Foundation */
+  --color-accent: #c2410c;           /* Terracotta / Architectural Clay */
+  --color-accent-hover: #9a3412;     /* Deep Terracotta */
+  --color-accent-subtle: #ffedd5;    /* Warm Terracotta Wash */
+  --color-accent-glow: rgba(194, 65, 12, 0.16);
+
+  /* Architectural Blueprint & Tech Accents */
+  --color-blueprint: #0284c7;        /* Technical Blueprint Blue */
+  --color-blueprint-subtle: #e0f2fe; /* Blueprint Light Wash */
+  --color-white: #ffffff;
+
+  /* Warm Architectural Neutrals & Surfaces */
+  --color-surface-bg: #F7F7F4;       /* Warm Architectural Off-White Canvas */
+  --color-surface-card: #ffffff;     /* Pure Crisp White Card */
+  --color-surface-elevated: #ffffff; /* Elevated Modals & Flyouts */
+  --color-surface-subtle: #f5f5f4;   /* Warm Stone 100 */
+  --color-surface-muted: #e7e5e4;    /* Warm Stone 200 */
+  
+  --color-border: #e7e5e4;           /* Warm Stone Gray Border */
+  --color-border-subtle: #f0eeee;    /* Subtle Hairline Border */
+  --color-border-hover: #d6d3d1;     /* Border Active / Hover */
+  --color-border-strong: #a8a29e;    /* High Contrast Border */
+
+  /* Text & Content Hierarchy */
+  --color-text-primary: #0f172a;     /* Deep Charcoal 900 */
+  --color-text-secondary: #475569;   /* Architectural Slate 600 */
+  --color-text-muted: #94a3b8;       /* Technical Subtext 400 */
+  --color-text-inverse: #ffffff;     /* Light Text on Dark Surfaces */
+
+  /* Semantic State Colors */
+  --color-success: #15803d;          /* Architectural Olive / Forest Green */
+  --color-success-bg: #f0fdf4;       /* Green Wash */
+  --color-warning: #b45309;          /* Warm Amber */
+  --color-warning-bg: #fffbeb;       /* Amber Wash */
+  --color-danger: #b91c1c;           /* Brick Red */
+  --color-danger-bg: #fef2f2;        /* Red Wash */
+  --color-info: #0369a1;             /* Informational Sky */
+  --color-info-bg: #f0f9ff;          /* Sky Wash */
+
+  /* Risk Rating Level Tokens */
+  --color-risk-low: #15803d;
+  --color-risk-medium: #b45309;
+  --color-risk-high: #b91c1c;
+  --color-risk-unknown: #64748b;
+
+  /* Typography Stacks */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'DM Sans', var(--font-primary);
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  /* Typography Scales */
+  --text-2xs: 0.6875rem; /* 11px */
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+  --text-5xl: 3rem;       /* 48px */
+  --text-6xl: 3.75rem;    /* 60px */
+
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* Spacing Grid (4px Baseline) */
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Precision Border Radii */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Architectural Lighting & Elevation Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  --shadow-inner: inset 0 2px 4px 0 rgba(15, 23, 42, 0.04);
+
+  /* Performance-tuned Easing */
+  --transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout Standards */
+  --nav-height: 64px;
+  --sidebar-width: 280px;
+  --panel-width: 310px;
+  --max-width: 1360px;
+}
+
+/* Base Styles & Universal Resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Accessibility: Focus visible outline */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Common Structural Utilities */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.text-xs { font-size: var(--text-xs); }
+.text-sm { font-size: var(--text-sm); }
+.text-base { font-size: var(--text-base); }
+.text-lg { font-size: var(--text-lg); }
+.text-xl { font-size: var(--text-xl); }
+.text-2xl { font-size: var(--text-2xl); }
+.text-3xl { font-size: var(--text-3xl); }
+.text-4xl { font-size: var(--text-4xl); }
+
+.font-medium { font-weight: var(--font-medium); }
+.font-semibold { font-weight: var(--font-semibold); }
+.font-bold { font-weight: var(--font-bold); }
+
+.text-muted { color: var(--color-text-muted); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-primary { color: var(--color-primary); }
+.text-accent { color: var(--color-accent); }
+.text-success { color: var(--color-success); }
+.text-danger { color: var(--color-danger); }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.font-mono { font-family: var(--font-mono); }
+.font-display { font-family: var(--font-display); }
+
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.mt-8 { margin-top: var(--space-8); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+.mb-8 { margin-bottom: var(--space-8); }
+.my-4 { margin-top: var(--space-4); margin-bottom: var(--space-4); }
+.p-4 { padding: var(--space-4); }
+.p-6 { padding: var(--space-6); }
+
+/* Accessibility: High contrast keyboard focus indicators */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Accessibility: Respect user reduced-motion OS preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
