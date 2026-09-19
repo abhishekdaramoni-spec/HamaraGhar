@@ -239,6 +239,34 @@ const CostStudio = {
         if (contEl) contEl.textContent = `₹ ${contingency.toLocaleString('en-IN')}`;
         if (totEl) totEl.textContent = `₹ ${grandTotal.toLocaleString('en-IN')}`;
 
+        // Top Hero Amount & Donut Center
+        const cehMainTotal = document.getElementById('cehMainTotal');
+        const donutTotalVal = document.getElementById('donutTotalVal');
+        if (cehMainTotal) cehMainTotal.textContent = this.formatINR(grandTotal);
+        if (donutTotalVal) donutTotalVal.textContent = this.formatINR(grandTotal);
+
+        // Group into Civil, Materials, Finishing, Electrical, Plumbing
+        let civilAmt = 0, matAmt = 0, finishAmt = 0, elecAmt = 0, plumbAmt = 0;
+        items.forEach(it => {
+            if (it.category === 'Substructure' || it.category === 'Superstructure') civilAmt += it.amount;
+            else if (it.category === 'Masonry' || it.category === 'Roofing') matAmt += it.amount;
+            else if (it.category === 'Flooring' || it.category === 'Finishes' || it.category === 'Landscape') finishAmt += it.amount;
+            else if (it.category === 'Electrical') elecAmt += it.amount;
+            else if (it.category === 'Plumbing') plumbAmt += it.amount;
+        });
+
+        const bCiv = document.getElementById('barValCivil');
+        const bMat = document.getElementById('barValMaterials');
+        const bFin = document.getElementById('barValFinishing');
+        const bEle = document.getElementById('barValElectrical');
+        const bPlu = document.getElementById('barValPlumbing');
+
+        if (bCiv) bCiv.textContent = `${this.formatINR(civilAmt)} (${Math.round(civilAmt * 100 / subtotal)}%)`;
+        if (bMat) bMat.textContent = `${this.formatINR(matAmt)} (${Math.round(matAmt * 100 / subtotal)}%)`;
+        if (bFin) bFin.textContent = `${this.formatINR(finishAmt)} (${Math.round(finishAmt * 100 / subtotal)}%)`;
+        if (bEle) bEle.textContent = `${this.formatINR(elecAmt)} (${Math.round(elecAmt * 100 / subtotal)}%)`;
+        if (bPlu) bPlu.textContent = `${this.formatINR(plumbAmt)} (${Math.round(plumbAmt * 100 / subtotal)}%)`;
+
         // Render Target Budget Comparison
         this.renderBudgetComparison(grandTotal);
     },

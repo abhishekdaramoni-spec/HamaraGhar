@@ -1,10 +1,19 @@
-// HamaraGhar — Location Hazard Intelligence & IS 1893 Audit Controller
+// HamaraGhar — Location Hazard Intelligence Controller
 const RiskStudio = {
-    currentCity: 'Bengaluru',
-    currentState: 'Karnataka',
+    currentCity: 'Ahmedabad',
+    currentState: 'Gujarat',
+
+    cityPositions: {
+        'Ahmedabad': { x: 130, y: 230, coords: '23.0225° N, 72.5714° E' },
+        'Mumbai': { x: 140, y: 290, coords: '19.0760° N, 72.8777° E' },
+        'Bengaluru': { x: 210, y: 410, coords: '12.9716° N, 77.5946° E' },
+        'Delhi': { x: 210, y: 140, coords: '28.6139° N, 77.2090° E' },
+        'Chennai': { x: 260, y: 410, coords: '13.0827° N, 80.2707° E' },
+        'Hyderabad': { x: 230, y: 320, coords: '17.3850° N, 78.4867° E' },
+        'Kolkata': { x: 370, y: 230, coords: '22.5726° N, 88.3639° E' }
+    },
 
     async init() {
-        // Load city from saved project configuration if present
         let saved = null;
         if (window.Utils && typeof window.Utils.loadLocal === 'function') {
             saved = window.Utils.loadLocal('house_data') || window.Utils.loadLocal('smartbuild_config');
@@ -45,11 +54,18 @@ const RiskStudio = {
     selectCity(cityName) {
         const input = document.getElementById('cityInput');
         if (input) input.value = cityName;
+
+        const chips = document.querySelectorAll('.preset-chip');
+        chips.forEach(c => {
+            if (c.textContent.trim().toLowerCase() === cityName.toLowerCase()) c.classList.add('active');
+            else c.classList.remove('active');
+        });
+
         this.analyzeLocation(cityName);
     },
 
     async analyzeLocation(city) {
-        city = (city || 'Bengaluru').trim();
+        city = (city || 'Ahmedabad').trim();
         if (!city) return;
 
         const btn = document.getElementById('btnAnalyze');
@@ -68,7 +84,7 @@ const RiskStudio = {
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = `<span>Analyze City</span>`;
+                btn.innerHTML = `<span>Analyze</span>`;
             }
         }
     },
@@ -76,78 +92,56 @@ const RiskStudio = {
     renderData(data) {
         const titleEl = document.getElementById('displayLocationName');
         const scoreEl = document.getElementById('resilienceScoreVal');
-        const zoneBadge = document.getElementById('badgeSeismicZone');
+        const displayCoords = document.getElementById('displayCoords');
 
         if (titleEl) {
             titleEl.textContent = `${data.city}, ${data.state || 'India'}`;
         }
         if (scoreEl) {
-            scoreEl.textContent = data.resilience_score || 85;
-            scoreEl.style.color = data.resilience_score >= 80 ? '#22c55e' : (data.resilience_score >= 65 ? '#eab308' : '#ef4444');
-        }
-        if (zoneBadge) {
-            zoneBadge.textContent = `Seismic Zone ${data.seismic_zone} (${data.seismic_risk})`;
-            zoneBadge.className = `badge ${this.getBadgeClass(data.seismic_risk)}`;
+            scoreEl.textContent = data.resilience_score || 84;
+            scoreEl.style.color = data.resilience_score >= 80 ? 'var(--color-success)' : (data.resilience_score >= 65 ? 'var(--color-warning)' : 'var(--color-danger)');
         }
 
-        // 1. Seismic
-        this.updateCard('Seismic', `Zone ${data.seismic_zone} (${data.seismic_risk})`, this.getBadgeClass(data.seismic_risk), 
-            `Structural seismic hazard evaluated at IS 1893:2016 Zone ${data.seismic_zone}. Requires structural ductile detailing according to Peak Ground Acceleration standards.`,
-            `Recommendation: Employ continuous RCC ring beams and 135° seismic hooks on column stirrups.`);
+        // Update Map Pin
+        const pos = this.cityPositions[data.city] || { x: 210, y: 260, coords: '20.5937° N, 78.9629° E' };
+        const pinGroup = document.getElementById('mapPinGroup');
+        const pinText = document.getElementById('mapPinText');
+        if (pinGroup) pinGroup.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
+        if (pinText) pinText.textContent = data.city;
+        if (displayCoords) displayCoords.textContent = pos.coords;
 
-        // 2. Flood
-        this.updateCard('Flood', data.flood, this.getBadgeClass(data.flood),
-            `Urban flooding and surface waterlogging risk evaluated as ${data.flood}. Low-lying road corridors susceptible to stormwater accumulation.`,
-            `Recommendation: Elevate finished ground floor plinth by min. 600mm above municipal road level.`);
+        // Update Hazard Overview Items
+        this.updateItem('Seismic', `Zone ${data.seismic_zone} &bull; ${data.seismic_risk}`,
+            `Structural seismic hazard evaluated at IS 1893:2016 Zone ${data.seismic_zone}. Ductile detailing of column-beam joints required.`,
+            this.getBadgeClass(data.seismic_risk));
 
-        // 3. Rainfall
-        this.updateCard('Rainfall', `${data.rainfall} Precipitation`, this.getBadgeClass(data.rainfall),
-            `Seasonal monsoon volume classified as ${data.rainfall}. Requires multi-tier terrace waterproofing and gradient roof drainage.`,
-            `Recommendation: Dual-coat elastomeric waterproofing with 1:100 slope to rainwater downspouts.`);
+        this.updateItem('Flood', data.flood,
+            `Inundation vulnerability classified as ${data.flood}. Finished plinth height +450mm above municipal road level recommended.`,
+            this.getBadgeClass(data.flood));
 
-        // 4. Heat
-        this.updateCard('Heat', `${data.heat} Thermal Load`, this.getBadgeClass(data.heat),
-            `Summer temperature profile and peak solar insolation index classified as ${data.heat}.`,
-            `Recommendation: Incorporate 600mm window chajjas and high-reflectance (SRI > 78) roof tiles.`);
+        this.updateItem('Cyclone', data.cyclone,
+            `Wind & cyclone exposure classified as ${data.cyclone}. Basic design wind speed 39 m/s (IS 875 Part 3). Solid parapet coping advised.`,
+            this.getBadgeClass(data.cyclone));
 
-        // 5. Wind
-        this.updateCard('Wind', `${data.wind} Gust Velocity`, this.getBadgeClass(data.wind),
-            `IS 875 Part 3 basic wind speed index classified as ${data.wind} across residential structures.`,
-            `Recommendation: Solid RCC parapet coping at 1.05m height and mechanical roof truss anchors.`);
-
-        // 6. Cyclone
-        this.updateCard('Cyclone', `${data.cyclone} Coastal Hazard`, this.getBadgeClass(data.cyclone),
-            `Coastal storm surge and marine saline corrosion vulnerability classified as ${data.cyclone}.`,
-            `Recommendation: ${data.cyclone === 'High' ? 'Use epoxy-coated rebar and heavy-duty storm-resistant shutters.' : 'Standard galvanized hardware and mild steel structural framing.'}`);
-
-        // Recommendations List
-        const listEl = document.getElementById('recommendationList');
-        if (listEl && Array.isArray(data.recommendations)) {
-            listEl.innerHTML = data.recommendations.map(r => `
-                <li>
-                    <span class="rec-bullet">✓</span>
-                    <div>${this.escapeHtml(r)}</div>
-                </li>
-            `).join('');
-        }
+        this.updateItem('Heat', data.heat,
+            `Summer thermal load classified as ${data.heat}. AAC blocks and high-reflectance roof coating (SRI > 78) recommended.`,
+            this.getBadgeClass(data.heat));
     },
 
-    updateCard(prefix, badgeText, badgeClass, descText, recText) {
+    updateItem(prefix, badgeHtml, descText, badgeClass) {
         const badge = document.getElementById('badge' + prefix);
         const desc = document.getElementById('desc' + prefix);
-        const rec = document.getElementById('rec' + prefix);
 
         if (badge) {
-            badge.textContent = badgeText;
+            badge.innerHTML = badgeHtml;
             badge.className = `badge ${badgeClass}`;
         }
         if (desc) desc.textContent = descText;
-        if (rec) rec.textContent = recText;
     },
 
     getBadgeClass(level) {
         const l = (level || '').toLowerCase();
-        if (l.includes('low') || l.includes('basic') || l.includes('inland')) return 'badge-success';
+        if (l.includes('low') || l.includes('basic')) return 'badge-success';
         if (l.includes('medium') || l.includes('moderate')) return 'badge-warning';
         return 'badge-danger';
     },

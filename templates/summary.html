@@ -1,121 +1,723 @@
 {% extends 'base.html' %}
 
-{% block title %}Executive Architectural Plan Summary — HamaraGhar{% endblock %}
+{% block title %}Project Hub & Executive Dossier — HamaraGhar{% endblock %}
 
 {% block content %}
 <div class="summary-page">
-    <header class="summary-header text-center mb-6">
-        <div style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: var(--space-2);">
-            <span class="badge badge-accent">Architectural Executive Summary</span>
+    <!-- Top Workspace Header -->
+    <header class="project-hub-header mb-6">
+        <div class="hub-header-top">
+            <div class="hub-breadcrumb">
+                <a href="{{ url_for('dashboard') }}" class="hub-bc-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span>Projects</span>
+                </a>
+                <span class="hub-bc-sep">/</span>
+                <span class="hub-bc-curr" id="hubBreadcrumbName">Greenwood Villa</span>
+                <span class="badge badge-accent ml-2">Designing</span>
+                <span class="badge badge-subtle ml-1" id="hubVersionTag">v4.2 Current</span>
+            </div>
+            <div class="hub-header-actions">
+                <a href="{{ url_for('builder') }}" class="btn btn-outline btn-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    <span>Open in 3D Studio</span>
+                </a>
+                <button class="btn btn-outline btn-sm" id="btnPrint" onclick="window.print()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    <span>Export Dossier (PDF)</span>
+                </button>
+                <button class="btn btn-primary btn-sm" id="btnFinalSave">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <span>Save Snapshot</span>
+                </button>
+            </div>
         </div>
-        <h1 id="sumProjectName" style="font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 800; color: var(--color-text);">Greenwood Villa</h1>
-        <p class="text-muted" style="font-size: var(--text-sm);"><span id="sumStyle">Contemporary</span> Architecture &bull; Location: <strong id="sumLocation">Bengaluru, Karnataka</strong> &bull; Generated <span id="sumDate">Today</span></p>
+
+        <div class="hub-header-meta">
+            <div>
+                <h1 id="sumProjectName" class="hub-title">Greenwood Villa</h1>
+                <p class="hub-subtitle">
+                    <span id="sumStyle">Contemporary</span> Architecture &bull; 
+                    Location: <strong id="sumLocation">Ahmedabad, Gujarat</strong> &bull; 
+                    Plot: <span id="sumPlotDim">40 ft &times; 30 ft</span> &bull; 
+                    Built-up: <span id="sumHeaderArea">1,850 sq.ft</span> &bull; 
+                    Updated <span id="sumDate">Today, 14:32</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="hub-tabs" id="hubTabs">
+            <button class="hub-tab active" data-tab="overview">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Executive Overview</span>
+            </button>
+            <button class="hub-tab" data-tab="floorplan">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                <span>Floor Plan (2D)</span>
+            </button>
+            <button class="hub-tab" data-tab="model3d">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                <span>3D Isometric</span>
+            </button>
+            <button class="hub-tab" data-tab="cost">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <span>Cost BOQ</span>
+            </button>
+            <button class="hub-tab" data-tab="risk">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>Risk & Structural</span>
+            </button>
+            <button class="hub-tab" data-tab="versions">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                <span>Version History (4)</span>
+            </button>
+        </nav>
     </header>
 
-    <!-- Scorecards Strip -->
-    <div class="summary-top mb-8">
-        <div class="mini-3d-preview" style="background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); border: 1px solid var(--color-border); border-radius: var(--radius-2xl);">
-            <div class="animated-house-wrapper">
-                <div class="house-3d">
-                    <div class="face front"></div>
-                    <div class="face back"></div>
-                    <div class="face left"></div>
-                    <div class="face right"></div>
-                    <div class="face top"></div>
-                    <div class="face bottom"></div>
-                    <div class="roof left"></div>
-                    <div class="roof right"></div>
+    <!-- Tab Panels Container -->
+    <div class="hub-tab-content">
+        <!-- ==================== TAB 1: OVERVIEW ==================== -->
+        <section class="hub-pane active" id="pane-overview">
+            <div class="summary-top mb-8">
+                <!-- Large Visual 3D Viewport with Floating Contextual Cards -->
+                <div class="hub-visual-viewport">
+                    <div class="hub-stage">
+                        <div class="stage-ground"></div>
+                        <div class="house-isometric-hub">
+                            <!-- Ground Floor Volume -->
+                            <div class="vol-ground">
+                                <div class="face-f"></div>
+                                <div class="face-r"></div>
+                                <div class="face-t"></div>
+                                <div class="hub-door"></div>
+                                <div class="hub-win w1"></div>
+                                <div class="hub-win w2"></div>
+                            </div>
+                            <!-- Cantilevered First Floor Volume -->
+                            <div class="vol-first">
+                                <div class="face-f"></div>
+                                <div class="face-r"></div>
+                                <div class="face-t"></div>
+                                <div class="hub-balcony"></div>
+                                <div class="hub-win w3"></div>
+                                <div class="hub-terrace-accent"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Contextual Cards -->
+                    <div class="fc-badge fc-top-left">
+                        <span class="fc-dot"></span>
+                        <span>ARCHITECTURAL SCHEMATIC &bull; G+1</span>
+                    </div>
+
+                    <div class="fc-card fc-top-right">
+                        <div class="fc-label">ESTIMATED INVESTMENT</div>
+                        <div class="fc-value" id="fcCost">₹38,40,000</div>
+                        <div class="fc-sub" id="fcCostRate">₹2,075 / sq.ft &bull; CPWD Index</div>
+                    </div>
+
+                    <div class="fc-card fc-bottom-left">
+                        <div class="fc-label">BUILT-UP AREA</div>
+                        <div class="fc-value" id="fcArea">1,850 sq.ft</div>
+                        <div class="fc-sub" id="fcPlotSub">Plot: 1,200 sq.ft &bull; 2 Floors</div>
+                    </div>
+
+                    <div class="fc-card fc-bottom-right">
+                        <div class="fc-label">STRUCTURAL COMPLIANCE</div>
+                        <div class="fc-status-row">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            <span class="fc-stat-ok">IS 1893 Zone III</span>
+                        </div>
+                        <div class="fc-sub">NBC 2016 Part 6 Verified</div>
+                    </div>
+                </div>
+
+                <!-- Executive Scorecard Matrix -->
+                <div class="analysis-scores grid-2x2">
+                    <div class="score-card">
+                        <div class="score-header">
+                            <h4>Spatial Efficiency</h4>
+                            <span class="score-badge">Optimized</span>
+                        </div>
+                        <div class="score-value" id="scoreSpace" style="color: var(--color-accent);">8.8 / 10</div>
+                        <div class="score-meta">
+                            <span class="sm-bar" style="width: 88%; background: var(--color-accent);"></span>
+                        </div>
+                        <span class="sm-text">87.5% Carpet-to-builtup ratio</span>
+                    </div>
+
+                    <div class="score-card">
+                        <div class="score-header">
+                            <h4>Budget Envelope</h4>
+                            <span class="score-badge">CPWD DSR</span>
+                        </div>
+                        <div class="score-value" id="scoreBudget" style="color: #16a34a;">9.2 / 10</div>
+                        <div class="score-meta">
+                            <span class="sm-bar" style="width: 92%; background: #16a34a;"></span>
+                        </div>
+                        <span class="sm-text">Within target cost threshold</span>
+                    </div>
+
+                    <div class="score-card">
+                        <div class="score-header">
+                            <h4>NBC & Vastu Audit</h4>
+                            <span class="score-badge">Validated</span>
+                        </div>
+                        <div class="score-value" id="scoreDesign" style="color: #0284c7;">9.5 / 10</div>
+                        <div class="score-meta">
+                            <span class="sm-bar" style="width: 95%; background: #0284c7;"></span>
+                        </div>
+                        <span class="sm-text">Master SW & Kitchen SE oriented</span>
+                    </div>
+
+                    <div class="score-card">
+                        <div class="score-header">
+                            <h4>Climate & Seismic</h4>
+                            <span class="score-badge">IS 1893</span>
+                        </div>
+                        <div class="score-value" id="scoreClimate" style="color: #ea580c;">8.8 / 10</div>
+                        <div class="score-meta">
+                            <span class="sm-bar" style="width: 88%; background: #ea580c;"></span>
+                        </div>
+                        <span class="sm-text">Zone III ductile frame design</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="analysis-scores grid-2x2">
-            <div class="score-card">
-                <h4>Spatial Efficiency</h4>
-                <div class="score-value" id="scoreSpace" style="color: var(--color-accent);">8.8 / 10</div>
-                <span style="font-size: 10px; color: var(--color-text-muted);">87.5% Carpet-to-builtup ratio</span>
+
+            <!-- Specifications & Materials Blueprint -->
+            <div class="summary-details grid-2col mb-6">
+                <div class="card hub-detail-card">
+                    <div class="card-head-row">
+                        <div class="chr-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                            <h3>Architectural & Spatial Configuration</h3>
+                        </div>
+                        <span class="chr-tag">Schedule A</span>
+                    </div>
+                    <ul class="hub-spec-list">
+                        <li>
+                            <span class="hsl-key">Typology</span>
+                            <span class="hsl-val" id="specTypology">G+1 Contemporary Villa</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Room Configuration</span>
+                            <span class="hsl-val" id="specRooms">3 BHK + Family Lounge + Study</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Plot Footprint</span>
+                            <span class="hsl-val" id="specPlot">40' &times; 30' (1,200 sq.ft)</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Ground Floor Built-up</span>
+                            <span class="hsl-val" id="specGroundArea">1,150 sq.ft</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">First Floor Built-up</span>
+                            <span class="hsl-val" id="specFirstArea">700 sq.ft</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Floor-to-Ceiling Height</span>
+                            <span class="hsl-val">3,150 mm (10' 4") Clear Height</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card hub-detail-card">
+                    <div class="card-head-row">
+                        <div class="chr-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            <h3>Structural & Material Specifications</h3>
+                        </div>
+                        <span class="chr-tag">IS / NBC 2016</span>
+                    </div>
+                    <ul class="hub-spec-list">
+                        <li>
+                            <span class="hsl-key">Foundation Type</span>
+                            <span class="hsl-val">RCC Isolated Column Footings (M25)</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Structural Steel</span>
+                            <span class="hsl-val">Fe500D High-Ductility TMT Rebars</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Masonry Walls</span>
+                            <span class="hsl-val">200mm Autoclaved Aerated Concrete (AAC)</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Roofing System</span>
+                            <span class="hsl-val">150mm Cast-in-Situ RCC Monolithic Slab</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Fenestrations</span>
+                            <span class="hsl-val">uPVC Multi-chamber Double Glazed</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Finishes</span>
+                            <span class="hsl-val">1200&times;600 Vitrified Tiles &amp; Acrylic Paint</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="score-card">
-                <h4>Budget Suitability</h4>
-                <div class="score-value" id="scoreBudget" style="color: #22c55e;">9.2 / 10</div>
-                <span style="font-size: 10px; color: var(--color-text-muted);">Within CPWD target envelope</span>
+
+            <!-- Execution Directives Checklist -->
+            <div class="card hub-detail-card mb-6">
+                <div class="card-head-row">
+                    <div class="chr-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                        <h3>Pre-Construction Engineering Directives</h3>
+                    </div>
+                    <span class="badge badge-accent">3 Action Items</span>
+                </div>
+                <div class="hub-directives-grid">
+                    <div class="dir-item">
+                        <div class="dir-num">01</div>
+                        <div class="dir-content">
+                            <h4>Geotechnical Soil Borings</h4>
+                            <p>Commission 2 borehole soil tests to minimum 3.0m depth to establish safe bearing capacity (SBC &ge; 180 kN/m&sup2;) prior to footing excavation.</p>
+                            <div class="dir-status">Status: Pending Field Survey</div>
+                        </div>
+                    </div>
+                    <div class="dir-item">
+                        <div class="dir-num">02</div>
+                        <div class="dir-content">
+                            <h4>Municipal Sanction Drawings</h4>
+                            <p>Generate AutoCAD 2D submission blueprint conforming to local municipal zoning bylaws (FAR 1.5, Setbacks: Front 3.0m, Sides 1.5m).</p>
+                            <div class="dir-status">Status: Ready for Dossier Export</div>
+                        </div>
+                    </div>
+                    <div class="dir-item">
+                        <div class="dir-num">03</div>
+                        <div class="dir-content">
+                            <h4>Contractor Bill of Quantities (BOQ)</h4>
+                            <p>Issue the CPWD itemized measurement schedule as the mandatory tender document for item-rate contractor bidding.</p>
+                            <div class="dir-status">Status: Computed from CPWD DSR</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="score-card">
-                <h4>NBC & Vastu Audit</h4>
-                <div class="score-value" id="scoreDesign" style="color: #0284c7;">9.5 / 10</div>
-                <span style="font-size: 10px; color: var(--color-text-muted);">Optimal SW Master & SE Kitchen</span>
+        </section>
+
+        <!-- ==================== TAB 2: FLOOR PLAN (2D) ==================== -->
+        <section class="hub-pane" id="pane-floorplan">
+            <div class="card hub-detail-card mb-6">
+                <div class="card-head-row">
+                    <div>
+                        <h3>Architectural Floor Plan Blueprint</h3>
+                        <p class="text-muted" style="font-size: 12px; margin-top: 2px;">Vector layout with dimensional grids and functional room zoning.</p>
+                    </div>
+                    <div class="hub-fp-controls">
+                        <button class="btn btn-sm btn-primary active fp-floor-btn" data-floor="ground">Ground Floor (1,150 sq.ft)</button>
+                        <button class="btn btn-sm btn-outline fp-floor-btn" data-floor="first">First Floor (700 sq.ft)</button>
+                    </div>
+                </div>
+
+                <div class="hub-blueprint-container" id="hubBlueprintArea">
+                    <!-- SVG Floor Plan Blueprint -->
+                    <svg viewBox="0 0 800 500" class="hub-blueprint-svg">
+                        <defs>
+                            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(15, 23, 42, 0.05)" stroke-width="1"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="#FFFFFF"/>
+                        <rect width="100%" height="100%" fill="url(#grid)"/>
+                        
+                        <!-- Outer Boundary Wall -->
+                        <rect x="80" y="40" width="640" height="420" fill="#fafafa" stroke="#0f172a" stroke-width="4" rx="2"/>
+                        
+                        <!-- Living Room (South East) -->
+                        <g id="fp-room-living">
+                            <rect x="90" y="50" width="310" height="230" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+                            <text x="245" y="150" text-anchor="middle" font-weight="700" font-size="14" fill="#0f172a">Living Hall</text>
+                            <text x="245" y="170" text-anchor="middle" font-size="11" fill="#64748b">16' 0" &times; 14' 6"</text>
+                            <text x="245" y="190" text-anchor="middle" font-size="10" fill="#ea580c" font-weight="600">232 sq.ft</text>
+                        </g>
+
+                        <!-- Dining & Kitchen (North East - Agni) -->
+                        <g id="fp-room-kitchen">
+                            <rect x="410" y="50" width="300" height="150" fill="#fffbeb" stroke="#334155" stroke-width="2"/>
+                            <text x="560" y="115" text-anchor="middle" font-weight="700" font-size="13" fill="#0f172a">Kitchen &amp; Dining</text>
+                            <text x="560" y="135" text-anchor="middle" font-size="11" fill="#64748b">15' 0" &times; 10' 0"</text>
+                            <text x="560" y="155" text-anchor="middle" font-size="10" fill="#d97706" font-weight="600">Vastu SE Compliant</text>
+                        </g>
+
+                        <!-- Master Bedroom (South West - Nairutya) -->
+                        <g id="fp-room-master">
+                            <rect x="90" y="290" width="310" height="160" fill="#f1f5f9" stroke="#334155" stroke-width="2"/>
+                            <text x="245" y="360" text-anchor="middle" font-weight="700" font-size="13" fill="#0f172a">Master Bedroom</text>
+                            <text x="245" y="380" text-anchor="middle" font-size="11" fill="#64748b">15' 6" &times; 12' 0"</text>
+                            <text x="245" y="400" text-anchor="middle" font-size="10" fill="#2563eb" font-weight="600">Ensuite Bath (7' &times; 5')</text>
+                        </g>
+
+                        <!-- Guest Bedroom / Study -->
+                        <g id="fp-room-guest">
+                            <rect x="410" y="210" width="180" height="240" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+                            <text x="500" y="320" text-anchor="middle" font-weight="700" font-size="12" fill="#0f172a">Guest Suite</text>
+                            <text x="500" y="340" text-anchor="middle" font-size="11" fill="#64748b">11' 0" &times; 12' 0"</text>
+                        </g>
+
+                        <!-- Common Bath & Staircase Core -->
+                        <g id="fp-room-core">
+                            <rect x="600" y="210" width="110" height="240" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+                            <text x="655" y="310" text-anchor="middle" font-weight="700" font-size="11" fill="#0f172a">Stairs Core</text>
+                            <text x="655" y="330" text-anchor="middle" font-size="10" fill="#64748b">To Floor 1</text>
+                        </g>
+
+                        <!-- Entrance Portal -->
+                        <path d="M 210 40 L 270 40" stroke="#c2410c" stroke-width="6" stroke-linecap="round"/>
+                        <text x="240" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#c2410c">MAIN ENTRY (NORTH-EAST)</text>
+
+                        <!-- Vastu Compass Marker -->
+                        <g transform="translate(730, 80)">
+                            <circle cx="0" cy="0" r="24" fill="#FFFFFF" stroke="#0f172a" stroke-width="1.5"/>
+                            <line x1="0" y1="20" x2="0" y2="-20" stroke="#ea580c" stroke-width="2"/>
+                            <polyline points="-4,-14 0,-22 4,-14" fill="#ea580c"/>
+                            <text x="0" y="-25" text-anchor="middle" font-size="9" font-weight="800" fill="#ea580c">N</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="hub-fp-footer mt-4">
+                    <div class="fp-legend">
+                        <span class="legend-item"><span class="legend-dot" style="background: #334155;"></span> External RCC Load Bearing Walls (200mm)</span>
+                        <span class="legend-item"><span class="legend-dot" style="background: #94a3b8;"></span> Internal Partition Walls (100mm)</span>
+                        <span class="legend-item"><span class="legend-dot" style="background: #c2410c;"></span> Main Entrance Portal</span>
+                        <span class="legend-item"><span class="legend-dot" style="background: #d97706;"></span> Vastu Agni Zone</span>
+                    </div>
+                    <a href="{{ url_for('floor_plan') }}" class="btn btn-outline btn-sm">Edit in 2D Floor Planner &rarr;</a>
+                </div>
             </div>
-            <div class="score-card">
-                <h4>Climate & Seismic</h4>
-                <div class="score-value" id="scoreClimate" style="color: #eab308;">8.8 / 10</div>
-                <span style="font-size: 10px; color: var(--color-text-muted);">IS 1893 Zone II compliant</span>
+        </section>
+
+        <!-- ==================== TAB 3: 3D MODEL ==================== -->
+        <section class="hub-pane" id="pane-model3d">
+            <div class="card hub-detail-card mb-6">
+                <div class="card-head-row">
+                    <div>
+                        <h3>Interactive 3D Architectural Model</h3>
+                        <p class="text-muted" style="font-size: 12px; margin-top: 2px;">Massing, cantilevered balconies, and solar orientation.</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('builder') }}" class="btn btn-primary btn-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                            <span>Open in Fullscreen Studio</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="hub-3d-interactive-view">
+                    <div class="h3d-viewport" id="h3dViewport">
+                        <div class="h3d-cube-stage">
+                            <div class="h3d-ground-plane"></div>
+                            <div class="h3d-building">
+                                <div class="h3d-cube-wall f-front"></div>
+                                <div class="h3d-cube-wall f-back"></div>
+                                <div class="h3d-cube-wall f-left"></div>
+                                <div class="h3d-cube-wall f-right"></div>
+                                <div class="h3d-cube-wall f-top"></div>
+                                <div class="h3d-cantilever-upper">
+                                    <div class="cu-front"></div>
+                                    <div class="cu-side"></div>
+                                    <div class="cu-top"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h3d-controls-overlay">
+                        <span class="badge badge-subtle">Isometric Projection</span>
+                        <div class="h3d-hint">Click and drag in Studio to rotate &bull; Rendered via CSS3D Hardware Pipeline</div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <!-- ==================== TAB 4: COST BOQ ==================== -->
+        <section class="hub-pane" id="pane-cost">
+            <div class="summary-details grid-2col mb-6">
+                <div class="card hub-detail-card">
+                    <div class="card-head-row">
+                        <h3>Investment Envelope Forecast</h3>
+                        <span class="badge badge-accent">CPWD DSR 2024–2026</span>
+                    </div>
+                    <div class="hub-cost-triad mt-4 mb-4">
+                        <div class="cost-tier">
+                            <div class="ct-label">LOW (ECONOMY)</div>
+                            <div class="ct-val" id="ctLow">₹32,64,000</div>
+                            <div class="ct-rate">₹1,764 / sq.ft</div>
+                        </div>
+                        <div class="cost-tier active-tier">
+                            <div class="ct-label">EXPECTED (STANDARD)</div>
+                            <div class="ct-val" id="ctExpected">₹38,40,000</div>
+                            <div class="ct-rate">₹2,075 / sq.ft</div>
+                        </div>
+                        <div class="cost-tier">
+                            <div class="ct-label">HIGH (PREMIUM)</div>
+                            <div class="ct-val" id="ctHigh">₹47,20,000</div>
+                            <div class="ct-rate">₹2,551 / sq.ft</div>
+                        </div>
+                    </div>
+                    <ul class="hub-spec-list">
+                        <li><span>Civil Structure (52%):</span> <strong id="costCivil">₹ 19,96,800</strong></li>
+                        <li><span>Finishing & Millwork (18%):</span> <strong id="costFinish">₹ 6,91,200</strong></li>
+                        <li><span>Electrical & Mechanical (10%):</span> <strong id="costElec">₹ 3,84,000</strong></li>
+                        <li><span>Plumbing & Sanitation (10%):</span> <strong id="costPlumb">₹ 3,84,000</strong></li>
+                        <li><span>Contingency & Permits (10%):</span> <strong id="costContin">₹ 3,84,000</strong></li>
+                    </ul>
+                    <div class="mt-4">
+                        <a href="{{ url_for('cost') }}" class="btn btn-outline btn-sm w-full">Open Full Cost Intelligence &rarr;</a>
+                    </div>
+                </div>
+
+                <div class="card hub-detail-card">
+                    <div class="card-head-row">
+                        <h3>Material Schedule & Rates</h3>
+                        <span class="chr-tag">IS Rate Benchmarks</span>
+                    </div>
+                    <table class="hub-mini-table">
+                        <thead>
+                            <tr>
+                                <th>Item Description</th>
+                                <th>Unit</th>
+                                <th>CPWD Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>RCC M25 Structural Concrete</td>
+                                <td>cu.m</td>
+                                <td>₹ 6,450</td>
+                            </tr>
+                            <tr>
+                                <td>Fe500D TMT Reinforcement Steel</td>
+                                <td>kg</td>
+                                <td>₹ 68</td>
+                            </tr>
+                            <tr>
+                                <td>200mm AAC Block Masonry</td>
+                                <td>sq.m</td>
+                                <td>₹ 1,120</td>
+                            </tr>
+                            <tr>
+                                <td>Vitrified Flooring 1200&times;600mm</td>
+                                <td>sq.ft</td>
+                                <td>₹ 85</td>
+                            </tr>
+                            <tr>
+                                <td>uPVC 3-Track Windows</td>
+                                <td>sq.ft</td>
+                                <td>₹ 480</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 5: RISK AUDIT ==================== -->
+        <section class="hub-pane" id="pane-risk">
+            <div class="summary-details grid-2col mb-6">
+                <div class="card hub-detail-card">
+                    <div class="card-head-row">
+                        <h3>Hazard Vulnerability Profile</h3>
+                        <span class="badge badge-accent">NDMA / BMTPC Matrix</span>
+                    </div>
+                    <ul class="hub-spec-list mt-4">
+                        <li>
+                            <span class="hsl-key">Location Analyzed</span>
+                            <span class="hsl-val" id="riskCity">Ahmedabad, Gujarat</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Seismic Hazard Zone</span>
+                            <span class="hsl-val" id="riskSeismic"><span class="badge badge-subtle">Zone III (Moderate)</span></span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Flood Vulnerability</span>
+                            <span class="hsl-val" id="riskFlood"><span class="badge badge-subtle">Low (1.2m Plinth Advised)</span></span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Peak Wind Velocity</span>
+                            <span class="hsl-val" id="riskWind">47 m/s (Cyclonic Buffer)</span>
+                        </li>
+                        <li>
+                            <span class="hsl-key">Soil Bearing Capacity</span>
+                            <span class="hsl-val">180 kN/m&sup2; (Medium Dense Sand)</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4">
+                        <a href="{{ url_for('risk') }}" class="btn btn-outline btn-sm w-full">Open Spatial Risk Intelligence &rarr;</a>
+                    </div>
+                </div>
+
+                <div class="card hub-detail-card">
+                    <div class="card-head-row">
+                        <h3>Structural Mitigation Measures</h3>
+                        <span class="chr-tag">Mandatory Directives</span>
+                    </div>
+                    <div class="hub-directives-grid" style="grid-template-columns: 1fr;">
+                        <div class="dir-item">
+                            <div class="dir-num">01</div>
+                            <div class="dir-content">
+                                <h4>Ductile Detailing (IS 13920)</h4>
+                                <p>Provide 135-degree seismic hooks and 100mm c/c tie spacing in column-beam plastic hinge zones.</p>
+                            </div>
+                        </div>
+                        <div class="dir-item">
+                            <div class="dir-num">02</div>
+                            <div class="dir-content">
+                                <h4>Plinth Inundation Threshold</h4>
+                                <p>Set finished floor level (FFL) at minimum +750mm above street crown to mitigate monsoon storm flooding.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 6: VERSION TIMELINE ==================== -->
+        <section class="hub-pane" id="pane-versions">
+            <div class="card hub-detail-card mb-6">
+                <div class="card-head-row">
+                    <div>
+                        <h3>Project Version History &amp; Checkpoints</h3>
+                        <p class="text-muted" style="font-size: 12px; margin-top: 2px;">Immutable design snapshots, structural audits, and revision rollback.</p>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="btnCreateVersion">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Create Checkpoint</span>
+                    </button>
+                </div>
+
+                <div class="hub-version-timeline mt-6">
+                    <!-- Version 4 (Current) -->
+                    <div class="v-timeline-item current">
+                        <div class="v-tl-marker">
+                            <div class="v-tl-circle active"></div>
+                            <div class="v-tl-line"></div>
+                        </div>
+                        <div class="v-tl-body">
+                            <div class="v-tl-header">
+                                <div class="v-tl-title">
+                                    <strong>Version 4.2</strong>
+                                    <span class="badge badge-accent">Current Active</span>
+                                    <span class="badge badge-subtle">IS 1893 Validated</span>
+                                </div>
+                                <span class="v-tl-time">Today, 14:32</span>
+                            </div>
+                            <p class="v-tl-desc">Added cantilevered balcony on first floor, incorporated uPVC double-glazed window schedule, and refreshed CPWD DSR 2024–2026 material cost indices.</p>
+                            <div class="v-tl-meta">
+                                <span>Author: Abhishek D.</span> &bull; 
+                                <span>Built-up: 1,850 sq.ft</span> &bull; 
+                                <span>Budget: ₹38.40 Lakh</span>
+                            </div>
+                            <div class="v-tl-actions">
+                                <button class="btn btn-sm btn-subtle" onclick="alert('Viewing Version 4.2 differences: +1 Cantilever Terrace, +2 uPVC Glazing')">View Diff</button>
+                                <button class="btn btn-sm btn-outline" onclick="alert('Branch created: Greenwood Villa (v4.2-branch)')">Branch Version</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Version 3 -->
+                    <div class="v-timeline-item">
+                        <div class="v-tl-marker">
+                            <div class="v-tl-circle"></div>
+                            <div class="v-tl-line"></div>
+                        </div>
+                        <div class="v-tl-body">
+                            <div class="v-tl-header">
+                                <div class="v-tl-title">
+                                    <strong>Version 3.0</strong>
+                                    <span class="badge badge-subtle">Structural Checkpoint</span>
+                                </div>
+                                <span class="v-tl-time">Yesterday, 18:45</span>
+                            </div>
+                            <p class="v-tl-desc">Civil structural re-alignment: shifted shear column positions to accommodate 24' clear-span open living room. Recalculated dead and live loads per IS 875 Part 2.</p>
+                            <div class="v-tl-meta">
+                                <span>Author: Abhishek D.</span> &bull; 
+                                <span>Built-up: 1,820 sq.ft</span> &bull; 
+                                <span>Budget: ₹37.90 Lakh</span>
+                            </div>
+                            <div class="v-tl-actions">
+                                <button class="btn btn-sm btn-subtle" onclick="alert('Previewing Version 3.0')">Preview</button>
+                                <button class="btn btn-sm btn-subtle" onclick="alert('Comparing v3.0 with v4.2 Current')">Compare</button>
+                                <button class="btn btn-sm btn-outline" onclick="alert('Reverted workspace to Version 3.0 checkpoint')">Restore v3.0</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Version 2 -->
+                    <div class="v-timeline-item">
+                        <div class="v-tl-marker">
+                            <div class="v-tl-circle"></div>
+                            <div class="v-tl-line"></div>
+                        </div>
+                        <div class="v-tl-body">
+                            <div class="v-tl-header">
+                                <div class="v-tl-title">
+                                    <strong>Version 2.0</strong>
+                                    <span class="badge badge-subtle">Vastu Alignment</span>
+                                </div>
+                                <span class="v-tl-time">3 days ago, 11:15</span>
+                            </div>
+                            <p class="v-tl-desc">Relocated Master Bedroom to Southwest (Nairutya) corner and Kitchen to Southeast (Agni) corner in accordance with Vedic orientation guidelines.</p>
+                            <div class="v-tl-meta">
+                                <span>Author: Abhishek D.</span> &bull; 
+                                <span>Built-up: 1,780 sq.ft</span> &bull; 
+                                <span>Budget: ₹36.80 Lakh</span>
+                            </div>
+                            <div class="v-tl-actions">
+                                <button class="btn btn-sm btn-subtle" onclick="alert('Previewing Version 2.0')">Preview</button>
+                                <button class="btn btn-sm btn-outline" onclick="alert('Reverted workspace to Version 2.0 checkpoint')">Restore v2.0</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Version 1 -->
+                    <div class="v-timeline-item">
+                        <div class="v-tl-marker">
+                            <div class="v-tl-circle"></div>
+                        </div>
+                        <div class="v-tl-body">
+                            <div class="v-tl-header">
+                                <div class="v-tl-title">
+                                    <strong>Version 1.0</strong>
+                                    <span class="badge badge-subtle">Initial Import</span>
+                                </div>
+                                <span class="v-tl-time">5 days ago, 09:30</span>
+                            </div>
+                            <p class="v-tl-desc">Initial project setup from plot dimensions (40 &times; 30 ft) with default G+1 contemporary configuration and baseline zoning.</p>
+                            <div class="v-tl-meta">
+                                <span>Author: System Setup</span> &bull; 
+                                <span>Built-up: 1,600 sq.ft</span> &bull; 
+                                <span>Budget: ₹34.50 Lakh</span>
+                            </div>
+                            <div class="v-tl-actions">
+                                <button class="btn btn-sm btn-subtle" onclick="alert('Previewing Version 1.0 baseline')">Preview</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <!-- Details Grid -->
-    <div class="summary-details grid-2col mb-6">
-        <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
-            <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3); margin-bottom: var(--space-4);">
-                Cost & Investment Forecast
-            </h3>
-            <ul class="simple-list">
-                <li><span>Target Budget:</span> <strong id="sumTargetBudget">₹ 50,00,000</strong></li>
-                <li><span>CPWD Estimated Cost:</span> <strong id="sumCost" style="color: var(--color-accent);">₹ 44,20,000</strong></li>
-                <li><span>Planned Built-up Area:</span> <strong id="sumArea">2,400 sq ft</strong></li>
-                <li><span>Effective Rate / sq ft:</span> <strong id="sumCostPerSqft">₹ 1,842 / sq ft</strong></li>
-            </ul>
-        </div>
-        
-        <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
-            <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3); margin-bottom: var(--space-4);">
-                Structural & Hazard Audit
-            </h3>
-            <ul class="simple-list" id="sumRiskList">
-                <li><span>Seismic Hazard:</span> <strong id="sumSeismic">Zone II (Low Activity)</strong></li>
-                <li><span>Flood Vulnerability:</span> <strong id="sumFlood">Moderate (Elevate Plinth)</strong></li>
-                <li><span>Wind Velocity:</span> <strong id="sumWind">Basic (33 m/s)</strong></li>
-                <li><span>Rainfall Intensity:</span> <strong id="sumRain">950 mm Annual</strong></li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Final Checklist Card -->
-    <div class="card mb-6" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);">
-        <h3 style="font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3); margin-bottom: var(--space-4);">
-            Final Architectural Execution Directives
-        </h3>
-        <ul class="recommendation-list" id="finalRecommendations">
-            <li>
-                <span class="rec-bullet">✓</span>
-                <div><strong>Geotechnical Soil Borings:</strong> Commission 2 borehole soil tests to calculate actual safe bearing capacity (SBC) before footing excavation.</div>
-            </li>
-            <li>
-                <span class="rec-bullet">✓</span>
-                <div><strong>Municipal Sanction Drawings:</strong> Submit 2D blueprint drawings to the local urban development authority for building plan permit.</div>
-            </li>
-            <li>
-                <span class="rec-bullet">✓</span>
-                <div><strong>Contractor Bill of Quantities (BOQ):</strong> Issue the itemized CPWD rate schedule as the baseline tender document for contractor bids.</div>
-            </li>
-        </ul>
-    </div>
-
+    <!-- Statutory Engineering Notice -->
     <div class="disclaimer-box warning mb-6">
-        <p><strong>Statutory Notice:</strong> These scores, calculations, and recommendations represent automated educational planning assessments. Always engage certified architects, chartered structural engineers, and local municipal authorities before initiating physical excavation or construction.</p>
+        <p><strong>Statutory Engineering Notice:</strong> Architectural estimates, dimensional layouts, and hazard ratings generated by HamaraGhar are based on CPWD DSR 2024–2026, IS 1893:2016, and NBC 2016 planning algorithms. Final construction requires municipal sanction drawings stamped by a licensed architect and chartered structural engineer.</p>
     </div>
 
-    <!-- Action Toolbar -->
-    <div class="summary-actions text-center" style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
-        <button class="btn btn-primary btn-lg" id="btnFinalSave">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-            <span>Save Complete Plan</span>
-        </button>
-        <button class="btn btn-outline btn-lg" id="btnPrint" onclick="window.print()">
+    <!-- Action Toolbar Footer -->
+    <div class="summary-actions text-center" style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap; padding-top: var(--space-4);">
+        <a href="{{ url_for('builder') }}" class="btn btn-primary btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            <span>Launch 3D Studio</span>
+        </a>
+        <button class="btn btn-outline btn-lg" onclick="window.print()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-            <span>Export Executive Dossier</span>
+            <span>Print Executive Dossier</span>
         </button>
-        <a href="{{ url_for('requirements') }}" class="btn btn-ghost btn-lg">Start Another House Plan</a>
+        <a href="{{ url_for('requirements') }}" class="btn btn-ghost btn-lg">Plan New Project</a>
     </div>
 </div>
 {% endblock %}

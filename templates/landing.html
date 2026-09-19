@@ -9,13 +9,13 @@
         <div class="hero-content">
             <div class="hero-eyebrow">
                 <span class="hero-pill">ARCHITECTURAL PLANNING PLATFORM</span>
-                <span class="hero-eyebrow-text">2D Blueprinting &bull; 3D Elevation &bull; Costing</span>
+                <span class="hero-eyebrow-text">2D Blueprinting &bull; 3D Elevation &bull; CPWD Costing</span>
             </div>
             
-            <h1 class="hero-title">DESIGN YOUR HOME BEFORE YOU BUILD IT.</h1>
-            <p class="hero-subtitle">Plan your home in 2D. Explore it in 3D. Understand what it will cost.</p>
+            <h1 class="hero-title">DESIGN YOUR HOME<br>BEFORE YOU BUILD IT.</h1>
+            <p class="hero-subtitle">Plan your home in 2D. Visualize it in 3D. Understand your construction cost before breaking ground.</p>
             <p class="hero-desc">
-                An integrated platform for residential planning in India. Draft compliant floor layouts, visualize massing and materials in real-time 3D, and generate itemized CPWD-benchmarked cost breakdowns before breaking ground.
+                An integrated platform for residential planning in India. Draft compliant floor layouts, visualize massing and materials in real-time 3D, and generate itemized CPWD-benchmarked cost breakdowns before construction begins.
             </p>
             
             <div class="hero-ctas">
@@ -24,7 +24,7 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </a>
                 <a href="{{ url_for('builder') }}" class="btn btn-outline btn-large">
-                    <span>Explore 3D Studio</span>
+                    <span>Explore Platform</span>
                 </a>
             </div>
 
@@ -58,41 +58,41 @@
                     <div class="cad-status-tag">3D ACTIVE</div>
                 </div>
 
-                <div class="cad-viewport">
-                    <div class="cad-grid-lines"></div>
-                    <div class="animated-house-wrapper">
-                        <div class="house-3d">
-                            <div class="face front"></div>
-                            <div class="face back"></div>
-                            <div class="face left"></div>
-                            <div class="face right"></div>
-                            <div class="face top"></div>
-                            <div class="face bottom"></div>
-                            <div class="roof left"></div>
-                            <div class="roof right"></div>
-                        </div>
+                <div class="cad-viewport" id="heroScene" style="cursor: grab; height: 380px;">
+                    <div class="hero-floating-card top-left">
+                        <span class="hfc-label">ELEVATION</span>
+                        <span class="hfc-value">Modernist Villa</span>
                     </div>
-
-                    <div class="cad-dimension-badge top-right">
-                        <span>Plot: 1,500 sq.ft</span>
+                    <div class="hero-floating-card top-right">
+                        <span class="hfc-label">ESTIMATED COST</span>
+                        <span class="hfc-value text-accent">₹38,40,000</span>
                     </div>
-                    <div class="cad-dimension-badge bottom-left">
-                        <span>Ground + 1 Floor</span>
+                    <div class="hero-floating-card bottom-left">
+                        <span class="hfc-label">BUILT-UP AREA</span>
+                        <span class="hfc-value">1,850 sq.ft &bull; 2 Floors</span>
+                    </div>
+                    <div class="hero-floating-card bottom-right">
+                        <span class="hfc-label">SEISMIC CHECK</span>
+                        <span class="hfc-value">IS 1893 Zone III</span>
                     </div>
                 </div>
 
                 <div class="cad-footer-bar">
                     <div class="cad-spec">
                         <span class="spec-lbl">Built-Up Area</span>
-                        <span class="spec-val">2,100 sq.ft</span>
+                        <span class="spec-val">1,850 sq.ft</span>
                     </div>
                     <div class="cad-spec">
                         <span class="spec-lbl">Configuration</span>
-                        <span class="spec-val">3 BHK + Study</span>
+                        <span class="spec-val">3 BHK &bull; G+1</span>
                     </div>
                     <div class="cad-spec">
                         <span class="spec-lbl">Est. Construction</span>
-                        <span class="spec-val text-accent">₹46,20,000</span>
+                        <span class="spec-val text-accent">₹38,40,000</span>
+                    </div>
+                    <div class="cad-spec">
+                        <span class="spec-lbl">Interaction</span>
+                        <span class="spec-val text-muted">Click & Drag Orbit</span>
                     </div>
                 </div>
             </div>
@@ -251,7 +251,7 @@
                             </div>
                         </div>
                         <div class="mockup-recommendation-box mt-3">
-                            <span class="rec-icon">✓</span>
+                            <span class="rec-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
                             <span>Optimal for a family of 4–6 with front setback & stilt parking space.</span>
                         </div>
                     </div>
@@ -506,5 +506,9 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/builder/hero-scene.js') }}"></script>
 {% endblock %}
 

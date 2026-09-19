@@ -1,213 +1,240 @@
 {% extends 'base.html' %}
 
-{% block title %}3D House Elevation Studio — HamaraGhar{% endblock %}
+{% block title %}Architectural 3D Studio — HamaraGhar{% endblock %}
 
 {% block content %}
-<div class="builder-layout">
-    <!-- Left CAD Tool Panel -->
-    <aside class="tool-panel">
-        <div class="panel-section" style="padding-bottom: var(--space-3);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
-                <h3>Studio Controls</h3>
-                <span class="badge badge-accent">CAD 3D</span>
+<div class="studio-workspace">
+    <!-- Studio Top Bar -->
+    <header class="studio-topbar">
+        <div class="st-left">
+            <span class="st-brand-mark">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+            </span>
+            <div class="st-project-info">
+                <span class="st-label">Project</span>
+                <span class="st-project-name" id="builderProjectName">Modern Residence</span>
             </div>
-            
-            <div class="segmented-control" style="width: 100%;">
-                <label style="flex: 1; text-align: center;">
-                    <input type="radio" name="viewMode" id="viewModeFull" value="full" checked style="display: none;">
-                    <span class="segmented-option active" id="segModeFull" style="display: block; cursor: pointer;">Rendered 3D</span>
-                </label>
-                <label style="flex: 1; text-align: center;">
-                    <input type="radio" name="viewMode" id="viewModeSketch" value="sketch" style="display: none;">
-                    <span class="segmented-option" id="segModeSketch" style="display: block; cursor: pointer;">Wireframe</span>
-                </label>
+            <div class="st-actions-history">
+                <button type="button" class="st-btn-icon" id="btnUndo" title="Undo (Ctrl+Z)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+                </button>
+                <button type="button" class="st-btn-icon" id="btnRedo" title="Redo (Ctrl+Y)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
+                </button>
             </div>
+            <span class="st-save-status" id="saveStatusIndicator">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Saved</span>
+            </span>
         </div>
 
-        <form id="builderForm">
-            <!-- Structural Parameters -->
-            <div class="panel-section">
-                <h3>Building Structure</h3>
-                <div class="form-group-inline">
-                    <label for="floors">Floor Levels</label>
-                    <input type="number" id="floors" name="floors" min="1" max="4" value="2">
-                </div>
-                <div class="form-group-inline">
-                    <label for="rooms">Rooms per Floor</label>
-                    <input type="number" id="rooms" name="rooms" min="1" max="8" value="3">
-                </div>
-                <div class="form-group-inline">
-                    <label for="land">Land Footprint (sqft)</label>
-                    <input type="number" id="land" name="land" value="2000" step="50">
-                </div>
-                
-                <div class="checkbox-group" style="margin-top: var(--space-3);">
-                    <label>
-                        <input type="checkbox" id="compound" name="compound" checked>
-                        <span>Compound Wall & Boundary</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" id="garden" name="garden" checked>
-                        <span>Landscaped Lawn / Garden</span>
-                    </label>
-                </div>
-            </div>
+        <div class="st-right">
+            <button type="button" class="btn btn-outline btn-sm" id="btnShareStudio">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <span>Share</span>
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnExportStudio">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" id="save-project-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>Save Project</span>
+            </button>
+        </div>
+    </header>
 
-            <!-- Material Finishes -->
-            <div class="panel-section">
-                <h3>Exterior Finishes</h3>
-                <div class="form-group">
-                    <label for="wallMaterial">Wall Construction</label>
-                    <select id="wallMaterial" name="wallMaterial">
-                        <option value="brick">Fired Clay Brick (Standard)</option>
-                        <option value="concrete">Precast Concrete Blocks</option>
-                        <option value="wood">Timber Accent Cladding</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="floorMaterial">Flooring Material</label>
-                    <select id="floorMaterial" name="floorMaterial">
-                        <option value="tile">Glazed Vitrified Tiles</option>
-                        <option value="wood">Engineered Hardwood</option>
-                        <option value="concrete">Polished Concrete</option>
-                    </select>
-                </div>
+    <div class="studio-body">
+        <!-- Left Vertical Floating CAD Toolbar -->
+        <aside class="studio-cad-toolbar" aria-label="CAD Tools">
+            <button type="button" class="cad-tool-btn active" data-tool="select" title="Select Tool (V)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7 18 3-7 7-3L3 3z"></path></svg>
+            </button>
+            <button type="button" class="cad-tool-btn" data-tool="room" title="Add Room (R)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="12" x2="21" y2="12"></line><line x1="12" y1="3" x2="12" y2="21"></line></svg>
+            </button>
+            <button type="button" class="cad-tool-btn" data-tool="wall" title="Wall Tool (W)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="1"></rect><line x1="9" y1="8" x2="9" y2="16"></line><line x1="15" y1="8" x2="15" y2="16"></line></svg>
+            </button>
+            <button type="button" class="cad-tool-btn" data-tool="door" title="Door (D)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
+            </button>
+            <button type="button" class="cad-tool-btn" data-tool="window" title="Window (O)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"></rect><line x1="12" y1="3" x2="12" y2="21"></line><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+            </button>
+            <button type="button" class="cad-tool-btn" data-tool="furniture" title="Interior Furniture (F)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"></path><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path><line x1="6" y1="18" x2="6" y2="21"></line><line x1="18" y1="18" x2="18" y2="21"></line></svg>
+            </button>
+            <button type="button" class="cad-tool-btn" data-tool="material" title="Material Palette (M)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>
+            </button>
+            <button type="button" class="cad-tool-btn" data-tool="measure" title="Measure Distance (T)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.3 15.3l-6.6 6.6c-.4.4-1 .4-1.4 0l-11-11c-.4-.4-.4-1 0-1.4l6.6-6.6c.4-.4 1-.4 1.4 0l11 11c.4.4.4 1 0 1.4z"></path><path d="M14.5 4.5l3 3"></path><path d="M11.5 7.5l2 2"></path><path d="M8.5 10.5l3 3"></path><path d="M5.5 13.5l2 2"></path></svg>
+            </button>
+        </aside>
 
-                <div class="form-group">
-                    <label for="roofType">Roof Elevation Profile</label>
-                    <select id="roofType" name="roofType">
-                        <option value="flat">RCC Flat Terrace with Parapet</option>
-                        <option value="sloped">Vernacular Sloped Tile Roof</option>
-                    </select>
-                </div>
-                
-                <div class="color-palette mt-3">
-                    <label style="font-size: var(--text-2xs); font-weight: var(--font-bold); text-transform: uppercase; color: var(--color-text-muted);">Exterior Wall Tone</label>
-                    <div class="swatches" id="wallColors" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px;">
-                        <div class="swatch active" style="background: #ffffff; border: 1px solid #cbd5e1; height: 26px; border-radius: 4px; cursor: pointer;" data-color="#ffffff" title="Pure Architectural White"></div>
-                        <div class="swatch" style="background: #f1f5f9; border: 1px solid #cbd5e1; height: 26px; border-radius: 4px; cursor: pointer;" data-color="#f1f5f9" title="Off-White"></div>
-                        <div class="swatch" style="background: #e2e8f0; border: 1px solid #cbd5e1; height: 26px; border-radius: 4px; cursor: pointer;" data-color="#e2e8f0" title="Concrete Mist"></div>
-                        <div class="swatch" style="background: #fef08a; border: 1px solid #cbd5e1; height: 26px; border-radius: 4px; cursor: pointer;" data-color="#fef08a" title="Warm Sandstone"></div>
-                        <div class="swatch" style="background: #fed7aa; border: 1px solid #cbd5e1; height: 26px; border-radius: 4px; cursor: pointer;" data-color="#fed7aa" title="Terracotta Hue"></div>
-                        <div class="swatch" style="background: #fca5a5; border: 1px solid #cbd5e1; height: 26px; border-radius: 4px; cursor: pointer;" data-color="#fca5a5" title="Clay Brick Tint"></div>
-                        <div class="swatch" style="background: #93c5fd; border: 1px solid #cbd5e1; height: 26px; border-radius: 4px; cursor: pointer;" data-color="#93c5fd" title="Coastal Slate"></div>
-                        <div class="swatch" style="background: #86efac; border: 1px solid #cbd5e1; height: 26px; border-radius: 4px; cursor: pointer;" data-color="#86efac" title="Sage Olive"></div>
+        <!-- Center Viewport (Primary Visual Focal Point - 85%+ screen) -->
+        <main class="studio-viewport-container">
+            <div class="scene-container" id="studioSceneContainer">
+                <div id="scene">
+                    <div id="house">
+                        <!-- 3D Architectural house rendered here -->
                     </div>
                 </div>
+
+                <!-- Floating Context Cards Over Workspace -->
+                <div class="studio-floating-card top-left" id="floatingSelectedRoom" style="display: none;">
+                    <div class="sfc-header">
+                        <span class="sfc-type">SELECTED ROOM</span>
+                        <button type="button" class="sfc-close" id="closeFloatingRoom">&times;</button>
+                    </div>
+                    <div class="sfc-title" id="flRoomName">BEDROOM</div>
+                    <div class="sfc-specs">
+                        <span id="flRoomDim">14' × 13'</span> &bull; <span id="flRoomFloor">Floor 1</span>
+                    </div>
+                    <div class="sfc-actions">
+                        <button type="button" class="btn btn-outline btn-xs" id="btnEditRoom">Edit Space</button>
+                    </div>
+                </div>
+
+                <div class="studio-floating-card top-right">
+                    <div class="sfc-type">PROJECT SPECIFICATION</div>
+                    <div class="sfc-title" id="flProjectName">Modern Residence</div>
+                    <div class="sfc-specs">
+                        <span id="flFloors">2 Floors</span> &bull; <span id="flRooms">6 Rooms</span> &bull; <span id="flArea">1,850 sq.ft</span>
+                    </div>
+                </div>
+
+                <div class="studio-floating-card bottom-left">
+                    <div class="sfc-type">ESTIMATED COST</div>
+                    <div class="sfc-cost" id="flCost">₹38,40,000</div>
+                    <a href="{{ url_for('cost') }}" class="sfc-link">View Full BOQ &rarr;</a>
+                </div>
+
+                <!-- Hidden Form for Param Controls -->
+                <form id="builderForm" style="display: none;">
+                    <input type="number" id="floors" name="floors" value="2">
+                    <input type="number" id="rooms" name="rooms" value="3">
+                    <input type="number" id="land" name="land" value="2000">
+                    <input type="checkbox" id="compound" name="compound" checked>
+                    <input type="checkbox" id="garden" name="garden" checked>
+                    <select id="wallMaterial" name="wallMaterial"><option value="brick" selected>Brick</option></select>
+                    <select id="floorMaterial" name="floorMaterial"><option value="tile" selected>Tile</option></select>
+                    <select id="roofType" name="roofType"><option value="flat" selected>Flat</option></select>
+                    <input type="radio" name="viewMode" id="viewModeFull" value="full" checked>
+                    <input type="radio" name="viewMode" id="viewModeSketch" value="sketch">
+                </form>
             </div>
 
-            <div style="padding: var(--space-4);">
-                <button type="button" id="btnRebuild" class="btn btn-primary btn-block">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                    <span>Rebuild 3D Model</span>
-                </button>
-            </div>
-        </form>
-    </aside>
+            <!-- Bottom Floating Studio Control Strip -->
+            <footer class="studio-bottom-strip">
+                <div class="sbs-left">
+                    <div class="sbs-segmented-view">
+                        <a href="{{ url_for('floor_plan') }}" class="sbs-view-btn" id="sbsView2D">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="12" x2="21" y2="12"></line><line x1="12" y1="3" x2="12" y2="21"></line></svg>
+                            <span>2D PLAN</span>
+                        </a>
+                        <button type="button" class="sbs-view-btn active" id="sbsView3D">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                            <span>3D VIEW</span>
+                        </button>
+                    </div>
+                </div>
 
-    <!-- Center 3D Elevation Studio -->
-    <main class="builder-center">
-        <!-- Studio Top Bar -->
-        <div class="top-bar">
-            <div style="display: flex; align-items: center; gap: var(--space-3);">
-                <h2 id="builderProjectName" style="font-size: var(--text-base); font-weight: 700;">Greenwood Villa</h2>
-                <a href="{{ url_for('floor_plan') }}" class="btn btn-outline btn-sm" title="View 2D CAD Blueprint">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-                    <span>Switch to 2D Plan</span>
-                </a>
-            </div>
-            
-            <div class="top-actions">
-                <button type="button" class="btn btn-outline btn-sm" id="save-project-btn">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                    <span>Save Project</span>
-                </button>
-                <a href="{{ url_for('cost') }}" class="btn btn-primary btn-sm">
-                    <span>Cost BOQ →</span>
-                </a>
-            </div>
-        </div>
+                <div class="sbs-center">
+                    <div class="floor-selector-strip">
+                        <button type="button" class="sbs-floor-pill active" data-floor="1">Floor 1</button>
+                        <button type="button" class="sbs-floor-pill" data-floor="2">Floor 2</button>
+                        <button type="button" class="sbs-floor-add" id="btnAddFloor" title="Add Floor Level">+ Add Floor</button>
+                    </div>
+                </div>
 
-        <!-- 3D Scene Viewport -->
-        <div class="scene-container" style="background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);">
-            <div id="scene">
-                <div id="house">
-                    <!-- Dynamic 3D elements injected here via JS -->
+                <div class="sbs-right">
+                    <div class="camera-controls-strip">
+                        <button type="button" class="cam-btn" id="btnCamIso" title="Isometric Angle">Isometric</button>
+                        <button type="button" class="cam-btn" id="btnCamFront" title="Front Elevation">Elevation</button>
+                        <button type="button" class="cam-btn" id="btnCamTop" title="Top Plan View">Top</button>
+                        <button type="button" class="cam-btn" id="btnResetView" title="Reset Orbit">Orbit</button>
+                        <button type="button" class="cam-btn-icon" id="btnZoomIn" title="Zoom In">+</button>
+                        <button type="button" class="cam-btn-icon" id="btnZoomOut" title="Zoom Out">-</button>
+                    </div>
+                </div>
+            </footer>
+        </main>
+
+        <!-- Right Context-Aware Properties Panel -->
+        <aside class="studio-properties-panel" id="studioPropertiesPanel">
+            <div class="prop-header">
+                <h3 id="propPanelTitle">PROJECT</h3>
+                <span class="badge badge-accent">INSPECTOR</span>
+            </div>
+
+            <div class="prop-body" id="propertiesContent">
+                <!-- Injected dynamically based on selection state -->
+                <div class="prop-section">
+                    <div class="prop-row">
+                        <span class="prop-label">Project Name</span>
+                        <span class="prop-val font-semibold" id="propProjectName">Modern Residence</span>
+                    </div>
+                    <div class="prop-row">
+                        <span class="prop-label">Plot Footprint</span>
+                        <span class="prop-val font-mono" id="propPlot">30' × 50' ft</span>
+                    </div>
+                    <div class="prop-row">
+                        <span class="prop-label">Total Built-up</span>
+                        <span class="prop-val font-mono" id="propArea">1,850 sq.ft</span>
+                    </div>
+                    <div class="prop-row">
+                        <span class="prop-label">Floor Levels</span>
+                        <span class="prop-val font-mono" id="propFloors">2 (Ground + 1)</span>
+                    </div>
+                    <div class="prop-row">
+                        <span class="prop-label">Planned Rooms</span>
+                        <span class="prop-val font-mono" id="propRooms">6 Rooms</span>
+                    </div>
+                </div>
+
+                <div class="prop-section">
+                    <h4>Architectural Finishes</h4>
+                    <div class="prop-swatches mt-2">
+                        <span class="prop-label mb-1">Exterior Wall Tone</span>
+                        <div class="swatches" id="wallColors" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+                            <div class="swatch active" style="background: #ffffff; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#ffffff" title="Pure White"></div>
+                            <div class="swatch" style="background: #f1f5f9; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#f1f5f9" title="Off-White"></div>
+                            <div class="swatch" style="background: #e2e8f0; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#e2e8f0" title="Concrete Mist"></div>
+                            <div class="swatch" style="background: #fed7aa; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#fed7aa" title="Terracotta Hue"></div>
+                            <div class="swatch" style="background: #fef08a; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#fef08a" title="Sandstone"></div>
+                            <div class="swatch" style="background: #fca5a5; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#fca5a5" title="Clay Brick"></div>
+                            <div class="swatch" style="background: #93c5fd; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#93c5fd" title="Coastal Slate"></div>
+                            <div class="swatch" style="background: #86efac; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#86efac" title="Sage Olive"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prop-section">
+                    <h4>IS 1893:2016 Structural Audit</h4>
+                    <ul class="prop-checklist">
+                        <li>
+                            <span class="chk-label">Seismic Detailing</span>
+                            <span class="chk-status pass">Compliant</span>
+                        </li>
+                        <li>
+                            <span class="chk-label">Plinth Clearance</span>
+                            <span class="chk-val">600 mm</span>
+                        </li>
+                        <li>
+                            <span class="chk-label">Ceiling Clear Ht</span>
+                            <span class="chk-val">10'0" (3.05m)</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            
-            <!-- Camera Presets Toolbar -->
-            <div class="overlay-controls" style="left: var(--space-4); right: auto; top: var(--space-4); bottom: auto; flex-direction: row;">
-                <button type="button" class="cad-tool-btn" id="btnCamIso" title="Isometric 3D View">Isometric</button>
-                <button type="button" class="cad-tool-btn" id="btnCamFront" title="Front Elevation View">Front</button>
-                <button type="button" class="cad-tool-btn" id="btnCamTop" title="Top Down Plan View">Top Plan</button>
-            </div>
-
-            <!-- Orbit / Zoom Controls -->
-            <div class="overlay-controls">
-                <button id="btnResetView" class="btn btn-icon" title="Reset Camera Orbit">⟲ Reset</button>
-                <button id="btnZoomIn" class="btn btn-icon" title="Zoom In">+</button>
-                <button id="btnZoomOut" class="btn btn-icon" title="Zoom Out">-</button>
-            </div>
-            
-            <div class="view-label" style="background: rgba(15, 23, 42, 0.85); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1);">
-                Mode: <span id="currentViewLabel" style="color: var(--color-accent); font-weight: 600;">Full 3D Elevation</span>
-            </div>
-        </div>
-
-        <!-- Real-Time Cost & Builtup Strip -->
-        <div class="cost-bar" style="background: #090d16; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-            <div class="cost-stat">Built-up Area: <span id="barArea">--</span> sq ft</div>
-            <div class="cost-stat">Estimated Cost: <span id="barCost" style="color: var(--color-accent-light);">₹ --</span></div>
-            <div class="cost-stat">Budget: <span id="barBudget">₹ --</span></div>
-            <div class="cost-stat">Variance: <span id="barStatus" class="badge">--</span></div>
-        </div>
-    </main>
-
-    <!-- Right Properties & Engineering Inspector -->
-    <aside class="properties-panel">
-        <div class="panel-section">
-            <h3>Object Inspector</h3>
-            <div id="propertiesContent">
-                <div style="background: var(--color-bg); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
-                    <div style="font-size: var(--text-xs); font-weight: 600; color: var(--color-text); margin-bottom: 4px;">Main Structure</div>
-                    <p style="font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">Click any wall, room cuboid, or roof element in the 3D scene to inspect individual structural parameters.</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="panel-section">
-            <h3>Engineering Checklist</h3>
-            <ul class="summary-list">
-                <li>
-                    <span>IS 1893:2016</span>
-                    <span style="color: var(--color-success); font-weight: 600;">Compliant</span>
-                </li>
-                <li>
-                    <span>NBC Fire Buffer</span>
-                    <span style="color: var(--color-success); font-weight: 600;">Passed</span>
-                </li>
-                <li>
-                    <span>Plinth Clearance</span>
-                    <span>600 mm</span>
-                </li>
-                <li>
-                    <span>Ceiling Clear Ht</span>
-                    <span>10'0" (3.05m)</span>
-                </li>
-            </ul>
-        </div>
-
-        <div class="panel-section mt-auto">
-            <h3>Elevation Summary</h3>
-            <ul class="summary-list">
-                <li>Floors: <span id="sumFloors">2</span></li>
-                <li>Total Spaces: <span id="sumRooms">6</span></li>
-                <li>Total Built-up: <span id="sumArea">1,800</span> sq ft</li>
-            </ul>
-        </div>
-    </aside>
+        </aside>
+    </div>
 </div>
 {% endblock %}
 

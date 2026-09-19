@@ -4,63 +4,147 @@
 
 {% block content %}
 <div class="cost-page">
-    <!-- Header -->
-    <header class="cost-header">
-        <div>
-            <h1>Construction Cost Intelligence & BOQ</h1>
-            <p>CPWD-benchmarked bill of quantities, material tier simulations, and budget variance tracking.</p>
+    <!-- Top Construction Estimate Header -->
+    <header class="cost-estimate-hero">
+        <div class="ceh-left">
+            <span class="ceh-label">CONSTRUCTION ESTIMATE</span>
+            <div class="ceh-amount" id="cehMainTotal">₹38,40,000</div>
+            <p class="ceh-sub">Planning estimate based on CPWD Schedule of Rates (DSR 2024–2026)</p>
         </div>
-        
-        <div class="cost-top-actions">
-            <button class="btn btn-outline" onclick="window.print()" title="Print BOQ Schedule">
+        <div class="ceh-right">
+            <button type="button" class="btn btn-outline" onclick="window.print()" title="Print BOQ Schedule">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                 <span>Export BOQ</span>
             </button>
             <a href="{{ url_for('risk') }}" class="btn btn-primary">
-                <span>Location Risk Audit →</span>
+                <span>Location Risk Audit &rarr;</span>
             </a>
         </div>
     </header>
 
-    <!-- Engineering Disclaimer Alert -->
-    <div class="disclaimer-box warning mb-6">
-        <p><strong>CPWD Reference Benchmark:</strong> Estimates utilize 2024–2026 Central Public Works Department (CPWD) schedule of rates for Tier-1 & Tier-2 Indian urban areas. Final quotations depend on structural engineer soil tests and regional contractor negotiations.</p>
-    </div>
-
-    <!-- 3-Tier Forecast Strip -->
+    <!-- 3-Tier Forecast Cards: Low / Expected / High -->
     <div class="cost-tiers-strip">
         <div class="cost-tier-card">
-            <span class="cost-tier-badge">Conservative / Economy</span>
-            <div class="cost-tier-val" id="costRangeLow">₹ 36.5 L</div>
-            <div class="cost-tier-rate" id="rateRangeLow">~₹1,450 / sq ft</div>
-            <p class="cost-tier-desc">Standard red brick, vitrified flooring, flush doors, and basic sanitary ware.</p>
+            <span class="cost-tier-badge">LOW</span>
+            <div class="cost-tier-val" id="costRangeLow">₹32.6 L</div>
+            <div class="cost-tier-rate" id="rateRangeLow">~₹1,650 / sq.ft</div>
+            <p class="cost-tier-desc">Basic red brick, vitrified tile flooring, flush doors, and essential sanitary ware.</p>
         </div>
 
         <div class="cost-tier-card featured">
-            <span class="cost-tier-badge">CPWD Standard Baseline</span>
-            <div class="cost-tier-val" id="costRangeExpected" style="color: var(--color-accent);">₹ 44.2 L</div>
-            <div class="cost-tier-rate" id="rateRangeExpected">~₹1,850 / sq ft</div>
-            <p class="cost-tier-desc">Fe550 TMT rebar, AAC blocks, glazed tiles, UPVC windows & concealed MEP.</p>
+            <span class="cost-tier-badge">EXPECTED (CPWD STANDARD)</span>
+            <div class="cost-tier-val text-accent" id="costRangeExpected">₹38.4 L</div>
+            <div class="cost-tier-rate" id="rateRangeExpected">~₹1,950 / sq.ft</div>
+            <p class="cost-tier-desc">Fe550 TMT rebar, AAC blocks, glazed tiles, UPVC windows & concealed conduits.</p>
         </div>
 
         <div class="cost-tier-card">
-            <span class="cost-tier-badge">Premium Architectural</span>
-            <div class="cost-tier-val" id="costRangeHigh">₹ 58.8 L</div>
-            <div class="cost-tier-rate" id="rateRangeHigh">~₹2,650 / sq ft</div>
-            <p class="cost-tier-desc">Italian marble flooring, teak woodwork, false ceilings & smart home automation.</p>
+            <span class="cost-tier-badge">HIGH</span>
+            <div class="cost-tier-val" id="costRangeHigh">₹47.2 L</div>
+            <div class="cost-tier-rate" id="rateRangeHigh">~₹2,400 / sq.ft</div>
+            <p class="cost-tier-desc">Italian marble flooring, teak woodwork, acoustic glazing & smart home wiring.</p>
         </div>
     </div>
 
+    <!-- Large Visual Cost Breakdown Section -->
+    <section class="cost-distribution-card">
+        <div class="cdc-header">
+            <h3>COST DISTRIBUTION</h3>
+            <span class="badge badge-accent">Interactive Allocation</span>
+        </div>
+
+        <div class="cdc-body">
+            <!-- Left: Donut Chart -->
+            <div class="cdc-donut-col">
+                <div class="cdc-donut-wrapper">
+                    <svg viewBox="0 0 120 120" width="160" height="160" class="cdc-donut-svg">
+                        <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" stroke-width="18" />
+                        <!-- Civil (52%) -->
+                        <circle cx="60" cy="60" r="46" fill="none" stroke="#0f172a" stroke-width="18"
+                            stroke-dasharray="289" stroke-dashoffset="0" stroke-linecap="butt" />
+                        <!-- Materials (18%) -->
+                        <circle cx="60" cy="60" r="46" fill="none" stroke="#c2410c" stroke-width="18"
+                            stroke-dasharray="289" stroke-dashoffset="138" stroke-linecap="butt" />
+                        <!-- Finishing (14%) -->
+                        <circle cx="60" cy="60" r="46" fill="none" stroke="#0284c7" stroke-width="18"
+                            stroke-dasharray="289" stroke-dashoffset="190" stroke-linecap="butt" />
+                        <!-- Electrical (8%) -->
+                        <circle cx="60" cy="60" r="46" fill="none" stroke="#d97706" stroke-width="18"
+                            stroke-dasharray="289" stroke-dashoffset="230" stroke-linecap="butt" />
+                        <!-- Plumbing (8%) -->
+                        <circle cx="60" cy="60" r="46" fill="none" stroke="#15803d" stroke-width="18"
+                            stroke-dasharray="289" stroke-dashoffset="253" stroke-linecap="butt" />
+                    </svg>
+                    <div class="cdc-donut-center">
+                        <span class="cdc-dc-lbl">TOTAL</span>
+                        <span class="cdc-dc-val" id="donutTotalVal">₹38.4L</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Horizontal Progress Bars -->
+            <div class="cdc-bars-col">
+                <div class="bar-group">
+                    <div class="bar-header">
+                        <span>Civil Structure (Foundation & RCC)</span>
+                        <span class="bar-val" id="barValCivil">₹19,96,800 (52%)</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 52%; background: #0f172a;"></div>
+                    </div>
+                </div>
+
+                <div class="bar-group">
+                    <div class="bar-header">
+                        <span>Materials & Brickwork</span>
+                        <span class="bar-val" id="barValMaterials">₹6,91,200 (18%)</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 18%; background: #c2410c;"></div>
+                    </div>
+                </div>
+
+                <div class="bar-group">
+                    <div class="bar-header">
+                        <span>Finishing & Flooring</span>
+                        <span class="bar-val" id="barValFinishing">₹5,37,600 (14%)</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 14%; background: #0284c7;"></div>
+                    </div>
+                </div>
+
+                <div class="bar-group">
+                    <div class="bar-header">
+                        <span>Electrical & Lighting</span>
+                        <span class="bar-val" id="barValElectrical">₹3,07,200 (8%)</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 8%; background: #d97706;"></div>
+                    </div>
+                </div>
+
+                <div class="bar-group">
+                    <div class="bar-header">
+                        <span>Plumbing & Sanitation</span>
+                        <span class="bar-val" id="barValPlumbing">₹3,07,200 (8%)</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 8%; background: #15803d;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Main Workspace Layout -->
     <div class="cost-layout">
-        <!-- Left: Configuration & Variance Controls -->
         <aside class="cost-sidebar">
             <div class="cost-card">
                 <div class="cost-card-header">
                     <h3>Simulation Tier</h3>
                 </div>
 
-                <!-- Quality Switcher Pills -->
                 <div class="quality-pills">
                     <div class="quality-pill-btn" onclick="CostStudio.setTier('basic')">
                         <span class="quality-pill-name">Basic</span>
@@ -84,7 +168,7 @@
                     <h3>Project Parameters</h3>
                 </div>
                 <ul class="config-list">
-                    <li><span>Built-up Area:</span> <strong id="confArea">2,400 sq ft</strong></li>
+                    <li><span>Built-up Area:</span> <strong id="confArea">1,850 sq ft</strong></li>
                     <li><span>Floor Levels:</span> <strong id="confFloors">G+1 (2 Floors)</strong></li>
                     <li><span>Rooms Planned:</span> <strong id="confRooms">6 Rooms</strong></li>
                     <li><span>Wall Type:</span> <strong id="confWallMat">Fired Brick</strong></li>
@@ -92,19 +176,16 @@
                     <li><span>Roof Profile:</span> <strong id="confRoofType">Flat RCC</strong></li>
                 </ul>
 
-                <!-- Target Budget Comparison -->
                 <div class="budget-gauge-box">
                     <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 600;">
                         <span>Target Budget</span>
                         <span id="lblBudget">₹ 50,00,000</span>
                     </div>
-                    
                     <div class="budget-gauge-track">
-                        <div class="budget-gauge-fill" id="budgetProgress" style="width: 85%; background: var(--color-success);"></div>
+                        <div class="budget-gauge-fill" id="budgetProgress" style="width: 76%; background: var(--color-success);"></div>
                     </div>
-
                     <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted);">
-                        <span>Calculated: <b id="lblEstimate">₹ 44,20,000</b></span>
+                        <span>Calculated: <b id="lblEstimate">₹ 38,40,000</b></span>
                         <span id="budgetStatusMsg" style="font-weight: 700; color: var(--color-success);">Within Target</span>
                     </div>
                 </div>

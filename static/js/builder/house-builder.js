@@ -1,31 +1,30 @@
 // =========================================================================
-// HouseBuilder - 3D CSS Cuboid House Engine
-// PRESERVES & ENHANCES YOUR ORIGINAL 3D HOUSE BUILDER IMPLEMENTATION
-// Features: Multi-floor, multiple rooms per floor, balconies, compound wall,
-//           garden, sketch & full 3D modes, roof, doors & windows, color presets,
-//           dimension labels, interactive orbit drag & scroll zoom.
+// HouseBuilder — Architectural 3D House Studio Engine
+// Modern Architectural Visualization: Realistic Proportions, Cantilevers,
+// Glazed Fenestrations, Contextual Inspections, and Zero Debug Clutter.
 // =========================================================================
 
 const HouseBuilder = {
-  // State
   config: {
-    land: 500,
+    land: 2000,
     floors: 2,
     rooms: 3,
-    compound: false,
-    garden: false,
+    compound: true,
+    garden: true,
     viewMode: 'full',
-    wallColor: '#90caf9',
-    roofColor: '#546e7a',
-    roofType: 'flat'
+    wallColor: '#ffffff',
+    roofColor: '#0f172a',
+    roofType: 'flat',
+    activeTool: 'select'
   },
 
-  rotX: -20,
-  rotY: 0,
-  zoom: 1500,
+  rotX: -22,
+  rotY: 35,
+  zoom: 1350,
   isDragging: false,
   lastX: 0,
   lastY: 0,
+  selectedElement: null,
 
   sceneEl: null,
   houseEl: null,
@@ -42,7 +41,7 @@ const HouseBuilder = {
   setupControls() {
     if (!this.sceneEl) return;
 
-    // Mouse drag to rotate (PRESERVED from original implementation)
+    // Mouse Drag Rotation
     this.sceneEl.addEventListener('mousedown', (e) => {
       this.isDragging = true;
       this.lastX = e.clientX;
@@ -62,14 +61,13 @@ const HouseBuilder = {
       this.lastX = e.clientX;
       this.lastY = e.clientY;
 
-      this.rotY += dx * 0.5;
-      this.rotX += dy * 0.5;
-      this.rotX = Math.min(80, Math.max(-80, this.rotX));
-
+      this.rotY += dx * 0.45;
+      this.rotX += dy * 0.45;
+      this.rotX = Math.min(85, Math.max(-85, this.rotX));
       this.updateTransform();
     });
 
-    // Touch support for mobile devices
+    // Mobile Touch Orbit
     this.sceneEl.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
         this.isDragging = true;
@@ -85,10 +83,9 @@ const HouseBuilder = {
       this.lastX = e.touches[0].clientX;
       this.lastY = e.touches[0].clientY;
 
-      this.rotY += dx * 0.6;
-      this.rotX += dy * 0.6;
-      this.rotX = Math.min(80, Math.max(-80, this.rotX));
-
+      this.rotY += dx * 0.55;
+      this.rotX += dy * 0.55;
+      this.rotX = Math.min(85, Math.max(-85, this.rotX));
       this.updateTransform();
     }, { passive: true });
 
@@ -96,26 +93,33 @@ const HouseBuilder = {
       this.isDragging = false;
     });
 
-    // Scroll wheel to zoom (changes 3D perspective distance)
+    // Zoom via Wheel
     this.sceneEl.addEventListener('wheel', (e) => {
       e.preventDefault();
-      this.zoom += e.deltaY * 1.5;
-      this.zoom = Math.max(500, Math.min(3000, this.zoom));
+      this.zoom += e.deltaY * 1.2;
+      this.zoom = Math.max(600, Math.min(2600, this.zoom));
       this.sceneEl.style.perspective = `${this.zoom}px`;
     }, { passive: false });
+
+    // Deselect on click on background
+    this.sceneEl.addEventListener('click', (e) => {
+      if (e.target === this.sceneEl || e.target === this.houseEl) {
+        this.deselect();
+      }
+    });
   },
 
   updateTransform() {
     if (this.houseEl) {
-      this.houseEl.style.transform = `translate(-50%, -50%) rotateX(${this.rotX}deg) rotateY(${this.rotY}deg)`;
+      this.houseEl.style.transform = `translate(-50%, -46%) rotateX(${this.rotX}deg) rotateY(${this.rotY}deg)`;
     }
   },
 
   resetCamera() {
-    this.rotX = -20;
-    this.rotY = 0;
-    this.zoom = 1500;
-    if (this.sceneEl) this.sceneEl.style.perspective = '1500px';
+    this.rotX = -22;
+    this.rotY = 35;
+    this.zoom = 1350;
+    if (this.sceneEl) this.sceneEl.style.perspective = '1350px';
     this.updateTransform();
   },
 
@@ -126,12 +130,12 @@ const HouseBuilder = {
   },
 
   zoomIn() {
-    this.zoom = Math.max(500, this.zoom - 200);
+    this.zoom = Math.max(600, this.zoom - 150);
     if (this.sceneEl) this.sceneEl.style.perspective = `${this.zoom}px`;
   },
 
   zoomOut() {
-    this.zoom = Math.min(3000, this.zoom + 200);
+    this.zoom = Math.min(2600, this.zoom + 150);
     if (this.sceneEl) this.sceneEl.style.perspective = `${this.zoom}px`;
   },
 
@@ -153,15 +157,11 @@ const HouseBuilder = {
     return { ...this.config };
   },
 
-  // =========================================================================
-  // Color Utility Helpers (PRESERVED EXACTLY FROM YOUR ORIGINAL CODE)
-  // =========================================================================
+  // Color Utility Helpers
   hexToRgb(hex) {
-    if (!hex) return { r: 144, g: 202, b: 249 };
+    if (!hex) return { r: 255, g: 255, b: 255 };
     hex = hex.replace('#', '');
-    if (hex.length === 3) {
-      hex = hex.split('').map(h => h + h).join('');
-    }
+    if (hex.length === 3) hex = hex.split('').map(h => h + h).join('');
     const bigint = parseInt(hex, 16);
     return {
       r: (bigint >> 16) & 255,
@@ -177,148 +177,124 @@ const HouseBuilder = {
     }).join('');
   },
 
-  lighten(hex, factor) {
-    const c = this.hexToRgb(hex);
-    const r = Math.min(255, c.r + 255 * factor);
-    const g = Math.min(255, c.g + 255 * factor);
-    const b = Math.min(255, c.b + 255 * factor);
-    return this.rgbToHex(r, g, b);
-  },
-
   darken(hex, factor) {
-    const c = this.hexToRgb(hex);
-    const r = Math.max(0, c.r - 255 * factor);
-    const g = Math.max(0, c.g - 255 * factor);
-    const b = Math.max(0, c.b - 255 * factor);
-    return this.rgbToHex(r, g, b);
+    const { r, g, b } = this.hexToRgb(hex);
+    return this.rgbToHex(r * (1 - factor), g * (1 - factor), b * (1 - factor));
   },
 
-  // =========================================================================
-  // Face & Cuboid Generation (PRESERVED EXACTLY FROM YOUR ORIGINAL CODE)
-  // =========================================================================
-  createFace(w, h, bg, border) {
-    const f = document.createElement('div');
-    f.className = 'face';
-    f.style.width = w + 'px';
-    f.style.height = h + 'px';
-    f.style.background = bg;
-    f.style.border = '1px solid ' + border;
-    return f;
+  lighten(hex, factor) {
+    const { r, g, b } = this.hexToRgb(hex);
+    return this.rgbToHex(r + (255 - r) * factor, g + (255 - g) * factor, b + (255 - b) * factor);
   },
 
-  createFaceSketch(w, h, borderColor) {
-    const f = document.createElement('div');
-    f.className = 'face';
-    f.style.width = w + 'px';
-    f.style.height = h + 'px';
-    f.style.background = 'transparent';
-    f.style.border = `1.5px dashed ${borderColor}`;
-    return f;
+  createFace(w, h, color, className = '') {
+    const face = document.createElement('div');
+    face.className = `face ${className}`;
+    face.style.width = `${w}px`;
+    face.style.height = `${h}px`;
+    face.style.backgroundColor = color;
+    face.style.boxSizing = 'border-box';
+    face.style.position = 'absolute';
+    face.style.backfaceVisibility = 'visible';
+    return face;
   },
 
-  createCuboid(x, y, z, w, h, d, baseColor, viewMode) {
+  createCuboid(x, y, z, w, h, d, color, viewMode) {
     const cuboid = document.createElement('div');
     cuboid.className = 'cuboid';
-    cuboid.style.width = w + 'px';
-    cuboid.style.height = h + 'px';
-    cuboid.style.transform = `translate3d(${x}px, ${-y - h/2}px, ${z}px)`;
+    cuboid.style.width = `${w}px`;
+    cuboid.style.height = `${h}px`;
+    cuboid.style.position = 'absolute';
     cuboid.style.transformStyle = 'preserve-3d';
+    cuboid.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
 
     if (viewMode === 'full') {
-      const front = this.createFace(w, h, baseColor, this.darken(baseColor, 0.3));
+      const frontColor  = color;
+      const backColor   = this.darken(color, 0.15);
+      const rightColor  = this.darken(color, 0.22);
+      const leftColor   = this.darken(color, 0.10);
+      const topColor    = this.lighten(color, 0.12);
+      const bottomColor = this.darken(color, 0.35);
+
+      const front = this.createFace(w, h, frontColor, 'face-front');
       front.style.transform = `translateZ(${d/2}px)`;
       cuboid.appendChild(front);
 
-      const back = this.createFace(w, h, this.darken(baseColor, 0.8), this.darken(baseColor, 0.9));
+      const back = this.createFace(w, h, backColor, 'face-back');
       back.style.transform = `rotateY(180deg) translateZ(${d/2}px)`;
       cuboid.appendChild(back);
 
-      const right = this.createFace(d, h, this.darken(baseColor, 0.5), this.darken(baseColor, 0.7));
+      const right = this.createFace(d, h, rightColor, 'face-right');
       right.style.transform = `rotateY(90deg) translateZ(${w/2}px)`;
       cuboid.appendChild(right);
 
-      const left = this.createFace(d, h, this.darken(baseColor, 0.5), this.darken(baseColor, 0.7));
+      const left = this.createFace(d, h, leftColor, 'face-left');
       left.style.transform = `rotateY(-90deg) translateZ(${w/2}px)`;
       cuboid.appendChild(left);
 
-      const top = this.createFace(w, d, this.lighten(baseColor, 0.3), this.darken(baseColor, 0.6));
+      const top = this.createFace(w, d, topColor, 'face-top');
       top.style.transform = `rotateX(90deg) translateZ(${h/2}px)`;
       cuboid.appendChild(top);
 
-      const bottom = this.createFace(w, d, this.darken(baseColor, 0.6), this.darken(baseColor, 0.8));
+      const bottom = this.createFace(w, d, bottomColor, 'face-bottom');
       bottom.style.transform = `rotateX(-90deg) translateZ(${h/2}px)`;
       cuboid.appendChild(bottom);
-    } else if (viewMode === 'sketch') {
-      const edgeColor = '#333333';
-
-      const front = this.createFaceSketch(w, h, edgeColor);
-      front.style.transform = `translateZ(${d/2}px)`;
-      cuboid.appendChild(front);
-
-      const back = this.createFaceSketch(w, h, edgeColor);
-      back.style.transform = `rotateY(180deg) translateZ(${d/2}px)`;
-      cuboid.appendChild(back);
-
-      const right = this.createFaceSketch(d, h, edgeColor);
-      right.style.transform = `rotateY(90deg) translateZ(${w/2}px)`;
-      cuboid.appendChild(right);
-
-      const left = this.createFaceSketch(d, h, edgeColor);
-      left.style.transform = `rotateY(-90deg) translateZ(${w/2}px)`;
-      cuboid.appendChild(left);
-
-      const top = this.createFaceSketch(w, d, edgeColor);
-      top.style.transform = `rotateX(90deg) translateZ(${h/2}px)`;
-      cuboid.appendChild(top);
-
-      const bottom = this.createFaceSketch(w, d, edgeColor);
-      bottom.style.transform = `rotateX(-90deg) translateZ(${h/2}px)`;
-      cuboid.appendChild(bottom);
+    } else {
+      // Wireframe Sketch Mode
+      const edge = '1px solid #0284c7';
+      const faces = [
+        { w, h, t: `translateZ(${d/2}px)` },
+        { w, h, t: `rotateY(180deg) translateZ(${d/2}px)` },
+        { w: d, h, t: `rotateY(90deg) translateZ(${w/2}px)` },
+        { w: d, h, t: `rotateY(-90deg) translateZ(${w/2}px)` },
+        { w, h: d, t: `rotateX(90deg) translateZ(${h/2}px)` },
+        { w, h: d, t: `rotateX(-90deg) translateZ(${h/2}px)` }
+      ];
+      faces.forEach(f => {
+        const fc = document.createElement('div');
+        fc.className = 'face sketch-face';
+        fc.style.width = `${f.w}px`;
+        fc.style.height = `${f.h}px`;
+        fc.style.position = 'absolute';
+        fc.style.border = edge;
+        fc.style.background = 'rgba(2, 132, 199, 0.04)';
+        fc.style.transform = f.t;
+        cuboid.appendChild(fc);
+      });
     }
 
     return cuboid;
   },
 
-  createLabel(text) {
-    const label = document.createElement('div');
-    label.className = 'label';
-    label.textContent = text;
-    return label;
-  },
-
-  // =========================================================================
-  // buildHouse() — PRESERVES ORIGINAL ARCHITECTURE WITH PRODUCTION ENHANCEMENTS
-  // =========================================================================
+  // Architectural Assembly
   buildHouse(customConfig) {
     if (customConfig) {
       this.config = { ...this.config, ...customConfig };
     }
     if (!this.houseEl) return;
-
     this.clearHouse();
 
-    const floors = parseInt(this.config.floors) || 2;
-    const rooms = parseInt(this.config.rooms) || 3;
+    const floors = Math.max(1, parseInt(this.config.floors) || 2);
+    const rooms = Math.max(1, parseInt(this.config.rooms) || 3);
     const compound = Boolean(this.config.compound);
     const garden = Boolean(this.config.garden);
     const viewMode = this.config.viewMode || 'full';
-    const wallColor = this.config.wallColor || '#90caf9';
-    const roofColor = this.config.roofColor || '#546e7a';
+    const wallColor = this.config.wallColor || '#ffffff';
+    const roofColor = this.config.roofColor || '#0f172a';
 
-    // Dimensions in px (PRESERVED from original geometry)
-    const roomW = 80;
-    const roomD = 80;
-    const floorH = 50;
+    // Substantial Architectural Proportions
+    const roomW = 130;
+    const roomD = 120;
+    const floorH = 80;
     const gap = 12;
 
     const houseW = rooms * (roomW + gap) - gap;
     const houseD = roomD;
 
-    // Ground base (land)
-    const groundW = houseW + 200;
-    const groundD = houseD + 200;
-    const groundH = 10;
-    const groundColor = (viewMode === 'full') ? '#7c7c7c' : 'transparent';
+    // 1. Site Ground Platform
+    const groundW = houseW + 240;
+    const groundD = houseD + 220;
+    const groundH = 8;
     const groundCuboid = this.createCuboid(
       houseW / 2 - groundW / 2,
       -groundH / 2,
@@ -326,266 +302,260 @@ const HouseBuilder = {
       groundW,
       groundH,
       groundD,
-      groundColor,
+      '#f1f5f9',
       viewMode
     );
     this.houseEl.appendChild(groundCuboid);
 
-    const landLabel = this.createLabel(`Land / Ground\n(${groundW}×${groundH}×${groundD}px)`);
-    landLabel.style.whiteSpace = 'pre';
-    landLabel.style.transform = `translate3d(${houseW / 2 - groundW / 2 - 50}px, ${-groundH - 20}px, ${houseD / 2 - groundD / 2 + 10}px)`;
-    this.houseEl.appendChild(landLabel);
+    // 2. Landscaped Garden Turf
+    if (garden && viewMode === 'full') {
+      const lawnW = groundW - 60;
+      const lawnD = 70;
+      const lawnCuboid = this.createCuboid(
+        houseW / 2 - lawnW / 2,
+        groundH / 2,
+        houseD + 20,
+        lawnW,
+        4,
+        lawnD,
+        '#86efac',
+        viewMode
+      );
+      this.houseEl.appendChild(lawnCuboid);
+    }
 
-    // Build Floors and Rooms
+    // 3. Build Floors & Rooms
+    const roomNames = ['Living Room', 'Dining & Kitchen', 'Master Suite', 'Bedroom 2', 'Family Lounge', 'Study / Workspace'];
+    
     for (let f = 0; f < floors; f++) {
       for (let r = 0; r < rooms; r++) {
         const x = r * (roomW + gap);
         const y = f * (floorH + gap) + groundH;
         const z = 0;
-        const roomColor = wallColor;
-        const roomCuboid = this.createCuboid(x, y, z, roomW, floorH, roomD, roomColor, viewMode);
+        const roomName = roomNames[(f * rooms + r) % roomNames.length];
+        const roomCuboid = this.createCuboid(x, y, z, roomW, floorH, roomD, wallColor, viewMode);
 
-        // Click interaction: Show object properties in properties panel
+        // Click interaction: select room & update inspector
         roomCuboid.style.cursor = 'pointer';
         roomCuboid.addEventListener('click', (e) => {
           e.stopPropagation();
-          this.showProperties(`Floor ${f + 1} - Room ${r + 1}`, {
-            width: `${roomW} px (approx ${(roomW/8).toFixed(1)} ft)`,
-            length: `${roomD} px (approx ${(roomD/8).toFixed(1)} ft)`,
-            height: `${floorH} px (approx ${(floorH/5).toFixed(1)} ft)`,
-            color: roomColor,
-            floor: f + 1,
-            roomNumber: r + 1,
-            material: this.config.wallMaterial || 'Brick / Block'
-          });
+          this.selectRoom(roomName, f + 1, r + 1, roomW, roomD, floorH, wallColor);
         });
 
-        // Architectural details: Front Door on ground floor room 1
-        if (viewMode === 'full' && f === 0 && r === 0) {
-          const door = document.createElement('div');
-          door.style.position = 'absolute';
-          door.style.width = '24px';
-          door.style.height = '38px';
-          door.style.background = '#4e342e';
-          door.style.border = '2px solid #271406';
-          door.style.borderRadius = '3px 3px 0 0';
-          door.style.left = `${(roomW - 24) / 2}px`;
-          door.style.bottom = '0px';
-          door.style.transform = `translateZ(${roomD / 2 + 1}px)`;
-          door.title = 'Main Entrance Door';
-          roomCuboid.appendChild(door);
-        }
-
-        // Architectural details: Windows on front faces
+        // Architectural Details: Front Glazing / Window
         if (viewMode === 'full') {
           const win = document.createElement('div');
+          win.className = 'arch-window';
           win.style.position = 'absolute';
-          win.style.width = '20px';
-          win.style.height = '18px';
-          win.style.background = '#e1f5fe';
-          win.style.border = '2px solid #0288d1';
+          win.style.width = `${roomW * 0.55}px`;
+          win.style.height = `${floorH * 0.55}px`;
+          win.style.background = 'linear-gradient(135deg, rgba(2, 132, 199, 0.35) 0%, rgba(224, 242, 254, 0.7) 100%)';
+          win.style.border = '2px solid #0284c7';
           win.style.borderRadius = '2px';
-          win.style.left = (f === 0 && r === 0) ? '6px' : `${(roomW - 20) / 2}px`;
-          win.style.top = '10px';
+          win.style.left = `${(roomW - (roomW * 0.55)) / 2}px`;
+          win.style.top = `${floorH * 0.2}px`;
           win.style.transform = `translateZ(${roomD / 2 + 1}px)`;
-          win.title = 'Window';
+          win.title = `${roomName} Panoramic Window`;
           roomCuboid.appendChild(win);
+
+          // Front Entrance Door on Ground Floor room 1
+          if (f === 0 && r === 0) {
+            const door = document.createElement('div');
+            door.style.position = 'absolute';
+            door.style.width = '32px';
+            door.style.height = `${floorH * 0.75}px`;
+            door.style.background = '#451a03';
+            door.style.border = '2px solid #1c0a00';
+            door.style.left = '16px';
+            door.style.bottom = '0px';
+            door.style.transform = `translateZ(${roomD / 2 + 2}px)`;
+            door.title = 'Main Teak Entrance Door';
+            roomCuboid.appendChild(door);
+          }
         }
 
         this.houseEl.appendChild(roomCuboid);
+      }
 
-        // Floor label once per floor near first room
-        if (r === 0) {
-          const floorLabel = this.createLabel(`Floor ${f + 1}`);
-          floorLabel.style.transform = `translate3d(${x + 10}px, ${-y - floorH - 15}px, ${z + 10}px)`;
-          this.houseEl.appendChild(floorLabel);
-        }
-
-        // Room label with dimensions
-        const roomLabel = this.createLabel(`Room\n(${roomW}×${floorH}×${roomD}px)`);
-        roomLabel.style.whiteSpace = 'pre';
-        roomLabel.style.transform = `translate3d(${x + 10}px, ${-y - floorH / 2}px, ${z + roomD / 2 + 20}px)`;
-        this.houseEl.appendChild(roomLabel);
-
-        // Balcony for every room (front center) (PRESERVED from original code)
-        const balW = roomW * 0.9;
-        const balH = floorH * 0.6;
-        const balD = roomD * 0.3;
-        const balX = x + (roomW - balW) / 2;
-        const balY = y + floorH * 0.4;
-        const balZ = z + roomD / 2 + balD / 2;
-        const balColor = (viewMode === 'full') ? '#fdd835' : '#333333';
-        const balconyCuboid = this.createCuboid(balX, balY, balZ, balW, balH, balD, balColor, viewMode);
-
-        balconyCuboid.style.cursor = 'pointer';
-        balconyCuboid.addEventListener('click', (e) => {
+      // First Floor Cantilevered Balcony
+      if (f === 1 && viewMode === 'full') {
+        const balW = 90;
+        const balH = 26;
+        const balD = 36;
+        const balCuboid = this.createCuboid(
+          houseW - balW - 10,
+          f * (floorH + gap) + groundH,
+          roomD / 2 + balD / 2,
+          balW,
+          balH,
+          balD,
+          'rgba(2, 132, 199, 0.25)',
+          viewMode
+        );
+        balCuboid.style.cursor = 'pointer';
+        balCuboid.addEventListener('click', (e) => {
           e.stopPropagation();
-          this.showProperties(`Floor ${f + 1} - Balcony`, {
-            width: `${Math.round(balW)} px`,
-            length: `${Math.round(balD)} px`,
-            height: `${Math.round(balH)} px`,
-            feature: 'Cantilever Balcony Railing'
-          });
+          this.selectRoom('Cantilever Balcony', f + 1, 0, balW, balD, balH, 'Glass & Steel');
         });
-
-        this.houseEl.appendChild(balconyCuboid);
-
-        const balLabel = this.createLabel(`Balcony\n(${Math.round(balW)}×${Math.round(balH)}×${Math.round(balD)}px)`);
-        balLabel.style.whiteSpace = 'pre';
-        balLabel.style.transform = `translate3d(${balX}px, ${-balY}px, ${balZ + balD / 2 + 10}px)`;
-        this.houseEl.appendChild(balLabel);
+        this.houseEl.appendChild(balCuboid);
       }
     }
 
-    // ROOF (Top Level Cover Enhancement)
-    const roofY = floors * (floorH + gap) + groundH;
-    const roofW = houseW + 20;
-    const roofD = houseD + 20;
+    // 4. Extended Modern RCC Roof Slab with Parapet
+    const roofW = houseW + 28;
+    const roofD = houseD + 28;
     const roofH = 10;
+    const roofY = floors * (floorH + gap) + groundH;
     const roofCuboid = this.createCuboid(
       houseW / 2 - roofW / 2,
-      roofY + roofH / 2,
+      roofY,
       houseD / 2 - roofD / 2,
       roofW,
       roofH,
       roofD,
-      (viewMode === 'full') ? roofColor : '#333333',
+      roofColor,
       viewMode
     );
-    roofCuboid.style.cursor = 'pointer';
-    roofCuboid.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.showProperties('Roof Structure', {
-        type: this.config.roofType || 'Flat RCC Terrace',
-        width: `${roofW} px`,
-        length: `${roofD} px`,
-        features: 'Waterproofing membrane & parapet edge'
-      });
-    });
     this.houseEl.appendChild(roofCuboid);
 
-    const roofLabel = this.createLabel(`Roof Slab\n(${roofW}×${roofH}×${roofD}px)`);
-    roofLabel.style.whiteSpace = 'pre';
-    roofLabel.style.transform = `translate3d(${houseW / 2 - roofW / 2}px, ${-roofY - roofH - 18}px, ${houseD / 2}px)`;
-    this.houseEl.appendChild(roofLabel);
-
-    // COMPOUND WALL (PRESERVED from original code)
-    if (compound) {
-      const wallThick = 15;
-      const wallH = floorH * 0.6;
-      const wallColorCompound = '#5d4037';
-
-      const wallW = groundW + wallThick * 2;
-      const wallD = groundD + wallThick * 2;
-
-      // Front wall
+    // 5. Perimeter Boundary Compound Wall
+    if (compound && viewMode === 'full') {
+      const wallThick = 6;
+      const wallH = 24;
+      // Front Wall
       const frontWall = this.createCuboid(
-        houseW / 2 - wallW / 2,
-        wallH / 2,
-        houseD / 2 - wallD / 2 - wallThick / 2,
-        wallW,
+        houseW / 2 - groundW / 2,
+        groundH,
+        houseD / 2 + groundD / 2 - wallThick,
+        groundW,
         wallH,
         wallThick,
-        wallColorCompound,
+        '#cbd5e1',
         viewMode
       );
       this.houseEl.appendChild(frontWall);
 
-      // Back wall
-      const backWall = this.createCuboid(
-        houseW / 2 - wallW / 2,
-        wallH / 2,
-        houseD / 2 + wallD / 2 - wallThick / 2,
-        wallW,
-        wallH,
-        wallThick,
-        wallColorCompound,
-        viewMode
-      );
-      this.houseEl.appendChild(backWall);
-
-      // Left wall
+      // Left Wall
       const leftWall = this.createCuboid(
-        houseW / 2 - wallW / 2 - wallThick / 2,
-        wallH / 2,
-        houseD / 2 - wallD / 2,
+        houseW / 2 - groundW / 2,
+        groundH,
+        houseD / 2 - groundD / 2,
         wallThick,
         wallH,
-        wallD,
-        wallColorCompound,
+        groundD,
+        '#cbd5e1',
         viewMode
       );
       this.houseEl.appendChild(leftWall);
-
-      // Right wall
-      const rightWall = this.createCuboid(
-        houseW / 2 + wallW / 2 - wallThick / 2,
-        wallH / 2,
-        houseD / 2 - wallD / 2,
-        wallThick,
-        wallH,
-        wallD,
-        wallColorCompound,
-        viewMode
-      );
-      this.houseEl.appendChild(rightWall);
-
-      const wallLabel = this.createLabel(`Compound Wall\n(${wallW}×${wallH}×${wallD}px)`);
-      wallLabel.style.whiteSpace = 'pre';
-      wallLabel.style.transform = `translate3d(${houseW / 2 - wallW / 2}px, ${-wallH - 20}px, ${houseD / 2 - wallD / 2}px)`;
-      this.houseEl.appendChild(wallLabel);
-    }
-
-    // GARDENING AREA (PRESERVED from original code)
-    if (garden) {
-      const gardenW = houseW * 0.8;
-      const gardenD = 80;
-      const gardenH = 20;
-      const gardenColor = '#388e3c';
-
-      const gardenX = houseW / 2 - gardenW / 2;
-      const gardenY = gardenH / 2;
-      const gardenZ = houseD / 2 + gardenD / 2 + 20;
-      const gardenCuboid = this.createCuboid(
-        gardenX,
-        gardenY,
-        gardenZ,
-        gardenW,
-        gardenH,
-        gardenD,
-        gardenColor,
-        viewMode
-      );
-      this.houseEl.appendChild(gardenCuboid);
-
-      const gardenLabel = this.createLabel(`Gardening Area\n(${Math.round(gardenW)}×${gardenH}×${gardenD}px)`);
-      gardenLabel.style.whiteSpace = 'pre';
-      gardenLabel.style.transform = `translate3d(${gardenX}px, ${-gardenY - 20}px, ${gardenZ + gardenD / 2 + 10}px)`;
-      this.houseEl.appendChild(gardenLabel);
     }
 
     this.updateTransform();
   },
 
-  escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = String(str);
-    return div.innerHTML;
+  selectRoom(name, floor, roomNum, w, d, h, material) {
+    const flCard = document.getElementById('floatingSelectedRoom');
+    const flName = document.getElementById('flRoomName');
+    const flDim = document.getElementById('flRoomDim');
+    const flFloor = document.getElementById('flRoomFloor');
+
+    const approxW = (w / 9).toFixed(1);
+    const approxD = (d / 9).toFixed(1);
+
+    if (flCard && flName && flDim && flFloor) {
+      flCard.style.display = 'block';
+      flName.textContent = name.toUpperCase();
+      flDim.textContent = `${approxW}' × ${approxD}' ft`;
+      flFloor.textContent = `Floor ${floor}`;
+    }
+
+    // Update Right Inspector
+    const propTitle = document.getElementById('propPanelTitle');
+    const propContent = document.getElementById('propertiesContent');
+    if (propTitle) propTitle.textContent = 'ROOM';
+    if (propContent) {
+      propContent.innerHTML = `
+        <div class="prop-section">
+          <div class="prop-row">
+            <span class="prop-label">Space Name</span>
+            <span class="prop-val font-semibold">${name}</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">Width</span>
+            <span class="prop-val font-mono">${approxW} ft (${(approxW * 0.3048).toFixed(2)}m)</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">Length</span>
+            <span class="prop-val font-mono">${approxD} ft (${(approxD * 0.3048).toFixed(2)}m)</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">Clear Height</span>
+            <span class="prop-val font-mono">10'0" (3.05m)</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">Floor Assignment</span>
+            <span class="prop-val font-mono">Level ${floor}</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">Material Finish</span>
+            <span class="prop-val font-mono">${material}</span>
+          </div>
+        </div>
+        <div class="prop-section mt-3">
+          <button type="button" class="btn btn-outline btn-block btn-sm" onclick="HouseBuilder.deselect()">
+            &larr; Back to Project View
+          </button>
+        </div>
+      `;
+    }
   },
 
-  showProperties(title, details) {
-    const container = document.getElementById('propertiesContent');
-    if (!container) return;
+  deselect() {
+    const flCard = document.getElementById('floatingSelectedRoom');
+    if (flCard) flCard.style.display = 'none';
 
-    let html = `<h4 style="margin: 0 0 10px 0; color: var(--color-primary);">${this.escapeHtml(title)}</h4><ul style="list-style: none; padding: 0; margin: 0; font-size: 13px;">`;
-    for (const [key, value] of Object.entries(details)) {
-      html += `<li style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--color-gray-200);">
-        <strong style="text-transform: capitalize; color: var(--color-gray-600);">${this.escapeHtml(key)}:</strong>
-        <span>${this.escapeHtml(value)}</span>
-      </li>`;
+    const propTitle = document.getElementById('propPanelTitle');
+    const propContent = document.getElementById('propertiesContent');
+    if (propTitle) propTitle.textContent = 'PROJECT';
+
+    const floors = this.config.floors || 2;
+    const rooms = this.config.rooms || 3;
+    const totalRooms = floors * rooms;
+    const totalArea = totalRooms * 280 + 350;
+
+    if (propContent) {
+      propContent.innerHTML = `
+        <div class="prop-section">
+          <div class="prop-row">
+            <span class="prop-label">Project Name</span>
+            <span class="prop-val font-semibold">Modern Residence</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">Plot Footprint</span>
+            <span class="prop-val font-mono">30' × 50' ft</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">Total Built-up</span>
+            <span class="prop-val font-mono">${totalArea.toLocaleString()} sq.ft</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">Floor Levels</span>
+            <span class="prop-val font-mono">${floors} (G + ${floors - 1})</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">Planned Spaces</span>
+            <span class="prop-val font-mono">${totalRooms} Rooms</span>
+          </div>
+        </div>
+        <div class="prop-section mt-3">
+          <h4>IS 1893:2016 Structural Audit</h4>
+          <ul class="prop-checklist">
+            <li><span class="chk-label">Seismic Detailing</span><span class="chk-status pass">Compliant</span></li>
+            <li><span class="chk-label">Plinth Clearance</span><span class="chk-val">600 mm</span></li>
+            <li><span class="chk-label">Ceiling Clear Ht</span><span class="chk-val">10'0" (3.05m)</span></li>
+          </ul>
+        </div>
+      `;
     }
-    html += '</ul>';
-    container.innerHTML = html;
   }
 };
 

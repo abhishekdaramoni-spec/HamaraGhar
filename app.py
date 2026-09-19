@@ -286,9 +286,18 @@ def api_cost_rates():
 def api_risk(city):
     risk_data = read_json_data('location_risk.json')
     cities = risk_data.get('cities', {})
+    city_aliases = {
+        'bangalore': 'Bengaluru',
+        'bombay': 'Mumbai',
+        'madras': 'Chennai',
+        'calcutta': 'Kolkata',
+        'gurgaon': 'Faridabad',
+        'noida': 'Ghaziabad'
+    }
+    lookup_city = city_aliases.get(city.lower(), city)
     # Case-insensitive lookup
     for key, value in cities.items():
-        if key.lower() == city.lower():
+        if key.lower() == lookup_city.lower():
             return jsonify(value)
     return jsonify({'error': 'City not found'}), 404
 

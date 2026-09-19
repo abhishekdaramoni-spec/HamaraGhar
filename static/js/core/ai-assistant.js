@@ -68,7 +68,7 @@ const HamaraAI = {
                     </svg>
                     <h3>Hamara AI Copilot</h3>
                 </div>
-                <button type="button" class="ai-drawer-close" id="aiDrawerClose" title="Close Copilot">✕</button>
+                <button type="button" class="ai-drawer-close" id="aiDrawerClose" title="Close Copilot">&times;</button>
             </div>
 
             <div class="ai-context-strip">

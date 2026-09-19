@@ -7,16 +7,23 @@
     <!-- Topbar Header -->
     <div class="dashboard-topbar">
         <div class="dashboard-heading">
-            <h1>Welcome back, {{ current_user.name }}</h1>
-            <p>Manage your residential house plans, 2D blueprints, 3D models, and construction cost forecasts.</p>
+            <h1 id="dashboardGreeting">Good morning, {{ current_user.name }}.</h1>
+            <p class="dashboard-sub">Plan and manage your home projects.</p>
         </div>
         <div class="dashboard-topbar-actions">
+            <div class="project-selector-wrapper" id="projectSelectorWrapper" style="display: none;">
+                <label for="activeProjectSelect" class="selector-label">Project</label>
+                <div class="selector-dropdown-box">
+                    <select id="activeProjectSelect" class="active-project-select"></select>
+                    <span class="status-pill designing">Designing</span>
+                </div>
+            </div>
             <a href="{{ url_for('requirements') }}" class="btn btn-primary">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                <span>New House Project</span>
+                <span>New Project</span>
             </a>
         </div>
     </div>
