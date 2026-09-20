@@ -177,16 +177,19 @@
                 </ul>
 
                 <div class="budget-gauge-box">
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 600;">
-                        <span>Target Budget</span>
-                        <span id="lblBudget">₹ 50,00,000</span>
+                    <div class="budget-gauge-row">
+                        <span class="budget-gauge-lbl">Target Budget</span>
+                        <span class="budget-gauge-val" id="lblBudget">₹ 50,00,000</span>
                     </div>
                     <div class="budget-gauge-track">
                         <div class="budget-gauge-fill" id="budgetProgress" style="width: 76%; background: var(--color-success);"></div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted);">
-                        <span>Calculated: <b id="lblEstimate">₹ 38,40,000</b></span>
-                        <span id="budgetStatusMsg" style="font-weight: 700; color: var(--color-success);">Within Target</span>
+                    <div class="budget-gauge-row">
+                        <span class="budget-calc-lbl">Calculated: <b id="lblEstimate">₹ 38,40,000</b></span>
+                        <span class="budget-variance-badge success" id="budgetVarianceBadge">Within Target</span>
+                    </div>
+                    <div class="budget-status-row success" id="budgetStatusMsg">
+                        Within Target Budget
                     </div>
                 </div>
 

@@ -19,6 +19,7 @@
   --color-white: #ffffff;
 
   /* Warm Architectural Neutrals & Surfaces */
+  --color-surface: #ffffff;          /* Default Opaque Surface Card */
   --color-surface-bg: #F7F7F4;       /* Warm Architectural Off-White Canvas */
   --color-surface-card: #ffffff;     /* Pure Crisp White Card */
   --color-surface-elevated: #ffffff; /* Elevated Modals & Flyouts */

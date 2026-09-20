@@ -277,11 +277,12 @@ const CostStudio = {
         const lblEstimate = document.getElementById('lblEstimate');
         const progressFill = document.getElementById('budgetProgress');
         const statusMsg = document.getElementById('budgetStatusMsg');
+        const varianceBadge = document.getElementById('budgetVarianceBadge');
 
         if (lblBudget) lblBudget.textContent = this.formatINR(userBudget);
         if (lblEstimate) lblEstimate.textContent = this.formatINR(grandTotal);
 
-        const ratio = grandTotal / userBudget;
+        const ratio = userBudget > 0 ? (grandTotal / userBudget) : 1;
         const pct = Math.min(100, Math.max(10, Math.round(ratio * 100)));
 
         if (progressFill) {
@@ -295,18 +296,36 @@ const CostStudio = {
             }
         }
 
-        if (statusMsg) {
-            const diff = Math.abs(userBudget - grandTotal);
-            const diffStr = this.formatINR(diff);
-            if (ratio <= 1.0) {
-                statusMsg.textContent = `${diffStr} under target`;
-                statusMsg.style.color = 'var(--color-success)';
-            } else if (ratio <= 1.15) {
-                statusMsg.textContent = `${diffStr} minor variance (+${Math.round((ratio - 1) * 100)}%)`;
-                statusMsg.style.color = 'var(--color-warning)';
-            } else {
-                statusMsg.textContent = `${diffStr} exceeds target (+${Math.round((ratio - 1) * 100)}%)`;
-                statusMsg.style.color = 'var(--color-danger)';
+        const diff = Math.abs(userBudget - grandTotal);
+        const diffStr = this.formatINR(diff);
+        const varPct = Math.round(Math.abs(ratio - 1) * 100);
+
+        if (ratio <= 1.0) {
+            if (varianceBadge) {
+                varianceBadge.textContent = ratio === 1 ? 'On Target' : `-${varPct}%`;
+                varianceBadge.className = 'budget-variance-badge success';
+            }
+            if (statusMsg) {
+                statusMsg.textContent = `${diffStr} under target budget`;
+                statusMsg.className = 'budget-status-row success';
+            }
+        } else if (ratio <= 1.15) {
+            if (varianceBadge) {
+                varianceBadge.textContent = `+${varPct}%`;
+                varianceBadge.className = 'budget-variance-badge warning';
+            }
+            if (statusMsg) {
+                statusMsg.textContent = `${diffStr} minor variance (+${varPct}%)`;
+                statusMsg.className = 'budget-status-row warning';
+            }
+        } else {
+            if (varianceBadge) {
+                varianceBadge.textContent = `+${varPct}%`;
+                varianceBadge.className = 'budget-variance-badge danger';
+            }
+            if (statusMsg) {
+                statusMsg.textContent = `${diffStr} exceeds target budget (+${varPct}%)`;
+                statusMsg.className = 'budget-status-row danger';
             }
         }
     },
@@ -358,14 +377,14 @@ const CostStudio = {
     },
 
     formatINR(num) {
-        if (!num || isNaN(num)) return '₹ 0';
+        if (!num || isNaN(num)) return '₹\u00A00';
         num = Math.round(num);
         if (num >= 10000000) {
-            return `₹ ${(num / 10000000).toFixed(2)} Cr`;
+            return `₹\u00A0${(num / 10000000).toFixed(2)}\u00A0Cr`;
         } else if (num >= 100000) {
-            return `₹ ${(num / 100000).toFixed(2)} L`;
+            return `₹\u00A0${(num / 100000).toFixed(2)}\u00A0L`;
         } else {
-            return `₹ ${num.toLocaleString('en-IN')}`;
+            return `₹\u00A0${num.toLocaleString('en-IN')}`;
         }
     },
 

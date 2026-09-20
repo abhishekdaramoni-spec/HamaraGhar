@@ -1326,50 +1326,7 @@
   background-color: rgba(233, 69, 96, 0.05);
 }
 
-/* Floor Plan Page */
-.floor-plan-layout {
-  height: calc(100vh - var(--nav-height));
-  margin-top: var(--nav-height);
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-6);
-}
-
-.canvas-area {
-  flex: 1;
-  position: relative;
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-gray-200);
-}
-
-.plan-legend {
-  display: flex;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-}
-
-.plan-info-bar {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--space-4);
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-radius: var(--radius-lg);
-  margin-top: var(--space-4);
-}
+/* Legacy floor-plan-layout removed to prevent height overflow */
 
 /* Builder Page */
 .builder-layout {
@@ -2723,9 +2680,12 @@
 /* Floor Plan CAD Studio Layout */
 .floor-plan-layout { 
   display: grid; 
-  grid-template-columns: 260px 1fr 280px; 
+  grid-template-columns: 280px 1fr 280px; 
   gap: var(--space-5); 
   align-items: start;
+  height: auto;
+  min-height: auto;
+  margin-bottom: var(--space-12);
 }
 @media (max-width: 1180px) {
   .floor-plan-layout { grid-template-columns: 1fr; }
@@ -2738,11 +2698,13 @@
 }
 
 .cad-card { 
-  background: var(--color-surface); 
+  background: var(--color-surface-card, #ffffff); 
   border: 1px solid var(--color-border); 
   border-radius: var(--radius-xl); 
   padding: var(--space-5); 
   box-shadow: var(--shadow-xs);
+  position: relative;
+  z-index: 2;
 }
 .cad-card-header {
   display: flex;
@@ -2761,12 +2723,15 @@
 }
 
 .legend-list { 
-  display: flex; 
-  flex-direction: column; 
-  gap: var(--space-2); 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: var(--space-2) var(--space-3); 
   list-style: none; 
   padding: 0; 
   margin: 0;
+}
+@media (max-width: 480px) {
+  .legend-list { grid-template-columns: 1fr; }
 }
 .legend-list li { 
   display: flex; 
@@ -3035,21 +3000,22 @@
 /* Material Tier Selector Pills */
 .quality-pills {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-5);
 }
 .quality-pill-btn {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 8px 10px;
+  padding: 10px 12px;
   text-align: center;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   transition: all var(--transition-fast);
+  box-sizing: border-box;
 }
 .quality-pill-btn:hover {
   border-color: var(--color-border-dark);
@@ -3123,7 +3089,24 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--space-4);
-  margin-top: var(--space-6);
+  margin-top: var(--space-5);
+  box-sizing: border-box;
+}
+.budget-gauge-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+.budget-gauge-lbl {
+  color: var(--color-text-secondary);
+}
+.budget-gauge-val {
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
 }
 .budget-gauge-track {
   height: 10px;
@@ -3136,6 +3119,70 @@
   height: 100%;
   border-radius: var(--radius-full);
   transition: width 0.5s ease, background-color 0.3s ease;
+}
+.budget-calc-lbl {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.budget-calc-lbl b {
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.budget-variance-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.budget-variance-badge.success {
+  background: var(--color-success-bg, #f0fdf4);
+  color: var(--color-success, #15803d);
+}
+.budget-variance-badge.warning {
+  background: var(--color-warning-bg, #fffbeb);
+  color: var(--color-warning, #b45309);
+}
+.budget-variance-badge.danger {
+  background: var(--color-danger-bg, #fef2f2);
+  color: var(--color-danger, #b91c1c);
+}
+.budget-status-row {
+  margin-top: var(--space-2);
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  white-space: normal;
+  word-break: break-word;
+}
+.budget-status-row.success {
+  background: var(--color-success-bg, #f0fdf4);
+  color: var(--color-success, #15803d);
+}
+.budget-status-row.warning {
+  background: var(--color-warning-bg, #fffbeb);
+  color: var(--color-warning, #b45309);
+}
+.budget-status-row.danger {
+  background: var(--color-danger-bg, #fef2f2);
+  color: var(--color-danger, #b91c1c);
+}
+
+@media (max-width: 768px) {
+  .floor-plan-page {
+    padding-bottom: 96px;
+  }
+  .cost-page {
+    padding-bottom: 96px;
+  }
+  .risk-page {
+    padding-bottom: 96px;
+  }
 }
 
 /* --- LOCATION HAZARD & RESILIENCE (template: .risk-page) --- */
