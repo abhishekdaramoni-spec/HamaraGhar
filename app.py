@@ -15,6 +15,27 @@ from datetime import datetime, timezone
 load_dotenv()
 
 app = Flask(__name__)
+class ServerlessDebugMiddleware:
+    """Catches any uncaught exception in serverless environments and displays the Python traceback."""
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        try:
+            return self.wsgi_app(environ, start_response)
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            error_html = f"<!DOCTYPE html><html><body style='background:#0f172a;color:#f8fafc;padding:2rem;font-family:sans-serif;'><h2>Serverless Runtime Exception</h2><pre style='background:#1e293b;padding:1rem;color:#f87171;overflow:auto;'>{tb}</pre></body></html>"
+            response_body = error_html.encode('utf-8')
+            start_response('500 Internal Server Error', [
+                ('Content-Type', 'text/html; charset=utf-8'),
+                ('Content-Length', str(len(response_body)))
+            ])
+            return [response_body]
+
+app.wsgi_app = ServerlessDebugMiddleware(app.wsgi_app)
+
 # Stable secret key fallback for serverless functions (Vercel/Lambda)
 app.secret_key = os.environ.get('SECRET_KEY', 'hamaraghar-session-secret-key-prod-2024')
 
@@ -23,7 +44,8 @@ is_serverless = bool(
     os.environ.get('VERCEL') or
     os.environ.get('VERCEL_ENV') or
     os.environ.get('AWS_LAMBDA_FUNCTION_NAME') or
-    os.environ.get('LAMBDA_TASK_ROOT')
+    os.environ.get('LAMBDA_TASK_ROOT') or
+    (os.path.exists('/tmp') and os.name != 'nt')
 )
 default_db_uri = 'sqlite:////tmp/smartbuild.db' if is_serverless else 'sqlite:///smartbuild.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', default_db_uri)
