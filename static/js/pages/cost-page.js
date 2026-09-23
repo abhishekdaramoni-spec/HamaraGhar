@@ -69,6 +69,7 @@ const CostStudio = {
         this.updateConfigSummary();
         this.calculateAndRenderForecasts();
         this.calculateAndRenderBOQ();
+        this.fetchAndRenderMLValuation();
     },
 
     updateConfigSummary() {
@@ -393,6 +394,79 @@ const CostStudio = {
         const div = document.createElement('div');
         div.textContent = String(str);
         return div.innerHTML;
+    },
+
+    async fetchAndRenderMLValuation() {
+        const pW = Number(this.config.plotWidth || this.config.plot_width) || 40;
+        const pL = Number(this.config.plotLength || this.config.plot_length) || 50;
+        const floors = Math.max(1, Number(this.config.floors) || 1);
+        const builtup = Number(this.config.builtup_area) || Math.round(pW * pL * 0.7 * floors);
+        const bhk = Number(this.config.bedrooms || this.config.bhk || 3);
+        const city = this.config.city || 'Bangalore';
+
+        const payload = {
+            square_ft: builtup,
+            built_up_area_sqft: builtup,
+            bhk: bhk,
+            floors: floors,
+            city: city,
+            finishing_tier: this.currentTier
+        };
+
+        try {
+            const res = await fetch('/api/ml/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const ml = data.property_valuation_ml;
+                const cpwd = data.construction_cost_cpwd;
+
+                const cpwdDisplay = document.getElementById('mlCpwdCostDisplay');
+                const priceDisplay = document.getElementById('mlPriceValuationDisplay');
+                const priceSubtext = document.getElementById('mlPriceSubtext');
+                const equityDisplay = document.getElementById('mlEquityMarginDisplay');
+                const equityRatioText = document.getElementById('mlEquityRatioText');
+
+                let cpwdLakhs = 0;
+                let mlPriceLakhs = 0;
+
+                if (cpwd && cpwd.calculation) {
+                    cpwdLakhs = cpwd.calculation.total_construction_cost_lakhs;
+                    if (cpwdDisplay) {
+                        cpwdDisplay.textContent = `₹ ${cpwdLakhs.toLocaleString('en-IN')} Lakhs`;
+                    }
+                }
+
+                if (ml && ml.prediction) {
+                    mlPriceLakhs = ml.prediction.property_price_lakhs;
+                    if (priceDisplay) {
+                        priceDisplay.textContent = `₹ ${mlPriceLakhs.toLocaleString('en-IN')} Lakhs`;
+                    }
+                    if (priceSubtext) {
+                        const ci = ml.prediction.confidence_interval_90;
+                        const rate = Math.round(ml.prediction.market_price_per_sqft_inr);
+                        priceSubtext.textContent = `Predicted market value (90% CI: ₹${ci.lower_lakhs} - ${ci.upper_lakhs} L). Rate: ₹${rate.toLocaleString('en-IN')}/sqft.`;
+                    }
+                }
+
+                if (cpwdLakhs > 0 && mlPriceLakhs > 0) {
+                    const diff = mlPriceLakhs - cpwdLakhs;
+                    if (equityDisplay) {
+                        equityDisplay.textContent = `₹ ${diff > 0 ? '+' : ''}${diff.toFixed(2)} Lakhs`;
+                        equityDisplay.style.color = diff >= 0 ? '#0d9488' : '#e11d48';
+                    }
+                    if (equityRatioText) {
+                        const pct = ((diff / cpwdLakhs) * 100).toFixed(1);
+                        equityRatioText.innerHTML = `<strong>Equity Margin:</strong> ${diff >= 0 ? '+' : ''}${pct}% projected asset appreciation above construction outlay.`;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('Could not fetch ML valuation:', e);
+        }
     }
 };
 

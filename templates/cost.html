@@ -46,6 +46,54 @@
         </div>
     </div>
 
+    <!-- Real-World Engineering vs ML Nomenclature Banner -->
+    <div class="cost-intelligence-banner" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-5);">
+        <!-- Side A: Deterministic CPWD Construction Cost -->
+        <div class="cost-card" style="border-top: 3px solid #0d9488;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
+                <span style="font-size: var(--text-xs); font-weight: 700; color: #0d9488; letter-spacing: 0.05em;">CIVIL ENGINEERING COST</span>
+                <span class="badge badge-neutral" style="font-size: 10px;">CPWD DSR 2024</span>
+            </div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--color-text); margin-bottom: 2px;" id="mlCpwdCostDisplay">₹ -- Lakhs</div>
+            <div style="font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-3);">
+                Physical material, structural rebar, masonry, and labor cost schedule.
+            </div>
+            <div style="font-size: 11px; padding: 8px; background: var(--color-bg); border-radius: 4px; border: 1px solid var(--color-border);">
+                <strong>Methodology:</strong> Deterministic civil quantity takeoff (Zero synthetic guessing).
+            </div>
+        </div>
+
+        <!-- Side B: Kaggle Real-Estate ML Valuation -->
+        <div class="cost-card" style="border-top: 3px solid var(--color-primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
+                <span style="font-size: var(--text-xs); font-weight: 700; color: var(--color-primary); letter-spacing: 0.05em;">CAPITAL MARKET VALUATION</span>
+                <span class="badge badge-accent" style="font-size: 10px;">Kaggle ML Regressor</span>
+            </div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--color-text); margin-bottom: 2px;" id="mlPriceValuationDisplay">₹ -- Lakhs</div>
+            <div style="font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-3);" id="mlPriceSubtext">
+                Predicted post-completion market valuation for this location and footprint.
+            </div>
+            <div style="font-size: 11px; padding: 8px; background: var(--color-bg); border-radius: 4px; border: 1px solid var(--color-border);">
+                <strong>Model:</strong> HistGradientBoosting ($R^2=0.85$) trained on 29,451 pan-India properties.
+            </div>
+        </div>
+
+        <!-- Side C: Projected Equity Margin -->
+        <div class="cost-card" style="border-top: 3px solid #7c3aed;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
+                <span style="font-size: var(--text-xs); font-weight: 700; color: #7c3aed; letter-spacing: 0.05em;">ESTIMATED ASSET EQUITY</span>
+                <span class="badge badge-accent" style="font-size: 10px; background: rgba(124, 58, 237, 0.15); color: #7c3aed; border-color: rgba(124, 58, 237, 0.3);">Market - Cost</span>
+            </div>
+            <div style="font-size: 24px; font-weight: 700; color: #7c3aed; margin-bottom: 2px;" id="mlEquityMarginDisplay">₹ -- Lakhs</div>
+            <div style="font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-3);">
+                Potential capital appreciation / built equity upon construction completion.
+            </div>
+            <div style="font-size: 11px; padding: 8px; background: var(--color-bg); border-radius: 4px; border: 1px solid var(--color-border);" id="mlEquityRatioText">
+                <strong>Equity Ratio:</strong> Calculated live against regional market baseline.
+            </div>
+        </div>
+    </div>
+
     <!-- Large Visual Cost Breakdown Section -->
     <section class="cost-distribution-card">
         <div class="cdc-header">

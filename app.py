@@ -98,18 +98,18 @@ def get_scoped_project(project_id_param=None):
 
 def generate_deterministic_floor_plan(config, floor=0, variant=0):
     config = config or {}
-    plot_width = max(20.0, float(config.get('plotWidth') or config.get('plot_width') or 40.0))
-    plot_length = max(25.0, float(config.get('plotLength') or config.get('plot_length') or 50.0))
-    bhk = max(1, int(config.get('bedrooms') or config.get('bhk') or 3))
+    plot_width = max(18.0, float(config.get('plotWidth') or config.get('plot_width') or 30.0))
+    plot_length = max(22.0, float(config.get('plotLength') or config.get('plot_length') or 40.0))
+    bhk = max(1, int(config.get('bedrooms') or config.get('bhk') or 2))
     bathrooms = max(1, int(config.get('bathrooms') or 2))
     total_floors = max(1, int(config.get('floors') or 1))
     features = config.get('features')
     if not isinstance(features, list):
         features = ['Parking', 'Balcony', 'Pooja Room', 'Utility']
 
-    setback_front = round(max(4.0, min(8.0, plot_length * 0.10)), 1)
-    setback_rear = round(max(3.0, min(6.0, plot_length * 0.08)), 1)
-    setback_side = round(max(2.5, min(5.0, plot_width * 0.08)), 1)
+    setback_front = round(max(3.5, min(8.0, plot_length * 0.10)), 1)
+    setback_rear = round(max(2.5, min(6.0, plot_length * 0.08)), 1)
+    setback_side = round(max(2.0, min(5.0, plot_width * 0.08)), 1)
 
     build_width = round(max(14.0, plot_width - setback_side * 2), 1)
     build_length = round(max(16.0, plot_length - setback_front - setback_rear), 1)
@@ -144,465 +144,278 @@ def generate_deterministic_floor_plan(config, floor=0, variant=0):
 
     if floor == 0:
         has_parking = ('Parking' in features or 'Car Porch' in features) and build_width >= 22.0
+        has_pooja = ('Pooja Room' in features or 'Pooja' in features) and build_width >= 20.0
 
-        if variant == 0:
-            front_len = round(build_length * 0.38, 1)
-            if has_parking:
-                park_w = round(build_width * 0.38, 1)
-                rooms.append({
-                    'id': 'g_park',
-                    'name': 'Car Porch',
-                    'type': 'parking',
-                    'zone': 'service',
-                    'x': start_x,
-                    'y': start_y,
-                    'width': park_w,
-                    'height': front_len,
-                    'color': COLORS['parking'],
-                    'floorName': 'Heavy Duty Pavers'
-                })
-                liv_w = round(build_width - park_w, 1)
-                rooms.append({
-                    'id': 'g_living',
-                    'name': 'Living & Foyer',
-                    'type': 'living',
-                    'zone': 'public',
-                    'x': round(start_x + park_w, 1),
-                    'y': start_y,
-                    'width': liv_w,
-                    'height': front_len,
-                    'color': COLORS['living'],
-                    'floorName': 'Vitrified Tiles'
-                })
-            else:
-                rooms.append({
-                    'id': 'g_living',
-                    'name': 'Living & Entrance Foyer',
-                    'type': 'living',
-                    'zone': 'public',
-                    'x': start_x,
-                    'y': start_y,
-                    'width': build_width,
-                    'height': front_len,
-                    'color': COLORS['living'],
-                    'floorName': 'Italian Marble Tiles'
-                })
-
-            mid_y = round(start_y + front_len, 1)
-            mid_len = round(build_length * 0.34, 1)
-            mid_split = round(build_width * 0.48, 1)
-
-            has_pooja = ('Pooja Room' in features or 'Pooja' in features) and build_width >= 20.0
-            if has_pooja:
-                pooja_w = round(min(6.0, mid_split * 0.35), 1)
-                pooja_l = round(min(6.0, mid_len * 0.40), 1)
-                rooms.append({
-                    'id': 'g_pooja',
-                    'name': 'Pooja Mandir',
-                    'type': 'pooja',
-                    'zone': 'public',
-                    'x': round(start_x + mid_split - pooja_w, 1),
-                    'y': mid_y,
-                    'width': pooja_w,
-                    'height': pooja_l,
-                    'color': COLORS['pooja'],
-                    'floorName': 'White Makrana Marble'
-                })
-                kit_len = round(mid_len - pooja_l, 1)
-                rooms.append({
-                    'id': 'g_kitchen',
-                    'name': 'Modular Kitchen & Dining',
-                    'type': 'kitchen',
-                    'zone': 'service',
-                    'x': start_x,
-                    'y': round(mid_y + pooja_l, 1),
-                    'width': mid_split,
-                    'height': kit_len,
-                    'color': COLORS['kitchen'],
-                    'floorName': 'Anti-Skid Vitrified'
-                })
-            else:
-                rooms.append({
-                    'id': 'g_kitchen',
-                    'name': 'Kitchen & Dining Space',
-                    'type': 'kitchen',
-                    'zone': 'service',
-                    'x': start_x,
-                    'y': mid_y,
-                    'width': mid_split,
-                    'height': mid_len,
-                    'color': COLORS['kitchen'],
-                    'floorName': 'Anti-Skid Vitrified'
-                })
-
-            bed1_w = round(build_width - mid_split, 1)
-            bed1_name = 'Master Bedroom (SW)' if total_floors == 1 else 'Guest / Parents Bedroom'
-            rooms.append({
-                'id': 'g_bed1',
-                'name': bed1_name,
-                'type': 'masterBed' if total_floors == 1 else 'bedroom',
-                'zone': 'private',
-                'x': round(start_x + mid_split, 1),
-                'y': mid_y,
-                'width': bed1_w,
-                'height': mid_len,
-                'color': COLORS['masterBed'] if total_floors == 1 else COLORS['bedroom'],
-                'floorName': 'Wooden Textured Tiles'
-            })
-
-            rear_y = round(mid_y + mid_len, 1)
-            rear_len = round(max(7.0, build_length - (front_len + mid_len)), 1)
-            bath_w = round(min(8.0, max(5.0, build_width * 0.28)), 1)
-
-            rooms.append({
-                'id': 'g_bath',
-                'name': 'Common Bath & Toilet',
-                'type': 'bath',
-                'zone': 'wet',
-                'x': start_x,
-                'y': rear_y,
-                'width': bath_w,
-                'height': rear_len,
-                'color': COLORS['bath'],
-                'floorName': 'Ceramic Matte'
-            })
-
-            rem_w = round(build_width - bath_w, 1)
-            if total_floors == 1 and bhk >= 2:
-                rooms.append({
-                    'id': 'g_bed2',
-                    'name': 'Bedroom 2',
-                    'type': 'bedroom',
-                    'zone': 'private',
-                    'x': round(start_x + bath_w, 1),
-                    'y': rear_y,
-                    'width': rem_w,
-                    'height': rear_len,
-                    'color': COLORS['bedroom'],
-                    'floorName': 'Vitrified Tiles'
-                })
-            else:
-                util_w = round(rem_w * 0.45, 1)
-                sitout_w = round(rem_w - util_w, 1)
-                rooms.append({
-                    'id': 'g_util',
-                    'name': 'Utility & Wash Area',
-                    'type': 'corridor',
-                    'zone': 'service',
-                    'x': round(start_x + bath_w, 1),
-                    'y': rear_y,
-                    'width': util_w,
-                    'height': rear_len,
-                    'color': COLORS['corridor'],
-                    'floorName': 'Granite Slabs'
-                })
-                rooms.append({
-                    'id': 'g_sitout',
-                    'name': 'Rear Courtyard / Sit-Out',
-                    'type': 'balcony',
-                    'zone': 'public',
-                    'x': round(start_x + bath_w + util_w, 1),
-                    'y': rear_y,
-                    'width': sitout_w,
-                    'height': rear_len,
-                    'color': COLORS['balcony'],
-                    'floorName': 'Stone Decking'
-                })
-
-        elif variant == 1:
+        if bhk == 1:
+            # 1 BHK Specialized Architectural Typology
             front_len = round(build_length * 0.42, 1)
-            kit_w = round(build_width * 0.38, 1)
-            liv_w = round(build_width - kit_w, 1)
-
-            rooms.append({
-                'id': 'g_greatroom',
-                'name': 'Grand Living & Lounge',
-                'type': 'living',
-                'zone': 'public',
-                'x': start_x,
-                'y': start_y,
-                'width': liv_w,
-                'height': front_len,
-                'color': COLORS['living'],
-                'floorName': 'Polished Italian Marble'
-            })
-            rooms.append({
-                'id': 'g_island_kitchen',
-                'name': 'Open Island Kitchen & Pantry',
-                'type': 'kitchen',
-                'zone': 'service',
-                'x': round(start_x + liv_w, 1),
-                'y': start_y,
-                'width': kit_w,
-                'height': front_len,
-                'color': COLORS['kitchen'],
-                'floorName': 'Quartz Finish Flooring'
-            })
-
-            rear_y = round(start_y + front_len, 1)
             rear_len = round(build_length - front_len, 1)
-            bed_w = round(build_width * 0.58, 1)
-            bath_w = round(build_width - bed_w, 1)
 
-            rooms.append({
-                'id': 'g_ground_suite',
-                'name': 'Ground Floor Suite',
-                'type': 'masterBed',
-                'zone': 'private',
-                'x': start_x,
-                'y': rear_y,
-                'width': bed_w,
-                'height': rear_len,
-                'color': COLORS['masterBed'],
-                'floorName': 'Engineered Hardwood'
-            })
-            bath_half = round(rear_len * 0.5, 1)
-            rooms.append({
-                'id': 'g_suite_bath',
-                'name': 'Ensuite Bath',
-                'type': 'bath',
-                'zone': 'wet',
-                'x': round(start_x + bed_w, 1),
-                'y': rear_y,
-                'width': bath_w,
-                'height': bath_half,
-                'color': COLORS['bath'],
-                'floorName': 'Porcelain Tile'
-            })
-            rooms.append({
-                'id': 'g_powder_room',
-                'name': 'Powder Room & Laundry',
-                'type': 'corridor',
-                'zone': 'service',
-                'x': round(start_x + bed_w, 1),
-                'y': round(rear_y + bath_half, 1),
-                'width': bath_w,
-                'height': round(rear_len - bath_half, 1),
-                'color': COLORS['corridor'],
-                'floorName': 'Ceramic Tile'
-            })
+            if variant == 0:  # Vastu 1BHK
+                kit_w = round(build_width * 0.42, 1)
+                liv_w = round(build_width - kit_w, 1)
+                rooms.append({'id': 'g_liv', 'name': 'Living & Foyer', 'type': 'living', 'zone': 'public',
+                              'x': start_x, 'y': start_y, 'width': liv_w, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Vitrified Tiles'})
+                rooms.append({'id': 'g_kit', 'name': 'Kitchen (SE)', 'type': 'kitchen', 'zone': 'service',
+                              'x': round(start_x + liv_w, 1), 'y': start_y, 'width': kit_w, 'height': front_len, 'color': COLORS['kitchen'], 'floorName': 'Anti-Skid Vitrified'})
+                bath_w = round(min(7.0, build_width * 0.35), 1)
+                bed_w = round(build_width - bath_w, 1)
+                rooms.append({'id': 'g_bath', 'name': 'Bath & WC', 'type': 'bath', 'zone': 'wet',
+                              'x': start_x, 'y': round(start_y + front_len, 1), 'width': bath_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+                rooms.append({'id': 'g_bed', 'name': 'Master Bedroom (SW)', 'type': 'masterBed', 'zone': 'private',
+                              'x': round(start_x + bath_w, 1), 'y': round(start_y + front_len, 1), 'width': bed_w, 'height': rear_len, 'color': COLORS['masterBed'], 'floorName': 'Laminated Wooden'})
+            elif variant == 1:  # Open Plan 1BHK
+                liv_w = round(build_width * 0.60, 1)
+                kit_w = round(build_width - liv_w, 1)
+                rooms.append({'id': 'g_liv', 'name': 'Open Great Room', 'type': 'living', 'zone': 'public',
+                              'x': start_x, 'y': start_y, 'width': liv_w, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Italian Porcelain'})
+                rooms.append({'id': 'g_kit', 'name': 'Modular Kitchen', 'type': 'kitchen', 'zone': 'service',
+                              'x': round(start_x + liv_w, 1), 'y': start_y, 'width': kit_w, 'height': front_len, 'color': COLORS['kitchen'], 'floorName': 'Quartz Tiles'})
+                bed_w = round(build_width * 0.65, 1)
+                bath_w = round(build_width - bed_w, 1)
+                rooms.append({'id': 'g_bed', 'name': 'Bedroom Suite', 'type': 'masterBed', 'zone': 'private',
+                              'x': start_x, 'y': round(start_y + front_len, 1), 'width': bed_w, 'height': rear_len, 'color': COLORS['masterBed'], 'floorName': 'Engineered Hardwood'})
+                rooms.append({'id': 'g_bath', 'name': 'Ensuite Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': round(start_x + bed_w, 1), 'y': round(start_y + front_len, 1), 'width': bath_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+            else:  # Linear 1BHK
+                col_w = round(build_width / 2.0, 1)
+                rooms.append({'id': 'g_liv', 'name': 'Front Living Room', 'type': 'living', 'zone': 'public',
+                              'x': start_x, 'y': start_y, 'width': build_width, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Vitrified Tiles'})
+                rooms.append({'id': 'g_kit', 'name': 'Kitchen', 'type': 'kitchen', 'zone': 'service',
+                              'x': start_x, 'y': round(start_y + front_len, 1), 'width': col_w, 'height': round(rear_len * 0.6, 1), 'color': COLORS['kitchen'], 'floorName': 'Anti-Skid Vitrified'})
+                rooms.append({'id': 'g_bath', 'name': 'Bathroom', 'type': 'bath', 'zone': 'wet',
+                              'x': start_x, 'y': round(start_y + front_len + rear_len * 0.6, 1), 'width': col_w, 'height': round(rear_len * 0.4, 1), 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+                rooms.append({'id': 'g_bed', 'name': 'Master Bedroom', 'type': 'masterBed', 'zone': 'private',
+                              'x': round(start_x + col_w, 1), 'y': round(start_y + front_len, 1), 'width': round(build_width - col_w, 1), 'height': rear_len, 'color': COLORS['masterBed'], 'floorName': 'Laminated Wooden'})
+
+        elif bhk == 2:
+            # 2 BHK Specialized Architectural Typology across Variants
+            front_len = round(build_length * 0.38, 1)
+            mid_len = round(build_length * 0.34, 1)
+            rear_len = round(build_length - front_len - mid_len, 1)
+
+            if variant == 0:
+                # Variant 0: Vastu-Aligned Classic 2BHK
+                if has_parking:
+                    park_w = round(build_width * 0.38, 1)
+                    liv_w = round(build_width - park_w, 1)
+                    rooms.append({'id': 'g_park', 'name': 'Car Porch', 'type': 'parking', 'zone': 'service',
+                                  'x': start_x, 'y': start_y, 'width': park_w, 'height': front_len, 'color': COLORS['parking'], 'floorName': 'Heavy Duty Pavers'})
+                    rooms.append({'id': 'g_liv', 'name': 'Living & Foyer', 'type': 'living', 'zone': 'public',
+                                  'x': round(start_x + park_w, 1), 'y': start_y, 'width': liv_w, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Vitrified Tiles'})
+                else:
+                    rooms.append({'id': 'g_liv', 'name': 'Living & Entrance Foyer', 'type': 'living', 'zone': 'public',
+                                  'x': start_x, 'y': start_y, 'width': build_width, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Italian Marble Tiles'})
+
+                mid_split = round(build_width * 0.46, 1)
+                rooms.append({'id': 'g_kit', 'name': 'Kitchen & Dining Space', 'type': 'kitchen', 'zone': 'service',
+                              'x': start_x, 'y': round(start_y + front_len, 1), 'width': mid_split, 'height': mid_len, 'color': COLORS['kitchen'], 'floorName': 'Anti-Skid Vitrified'})
+                rooms.append({'id': 'g_mbed', 'name': 'Master Bedroom (SW)', 'type': 'masterBed', 'zone': 'private',
+                              'x': round(start_x + mid_split, 1), 'y': round(start_y + front_len, 1), 'width': round(build_width - mid_split, 1), 'height': mid_len, 'color': COLORS['masterBed'], 'floorName': 'Wooden Textured Tiles'})
+
+                bath_w = round(min(7.0, build_width * 0.25), 1)
+                bed2_w = round(build_width - (bath_w * 2), 1)
+                rooms.append({'id': 'g_bath1', 'name': 'Common Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': start_x, 'y': round(start_y + front_len + mid_len, 1), 'width': bath_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+                rooms.append({'id': 'g_bed2', 'name': 'Bedroom 2', 'type': 'bedroom', 'zone': 'private',
+                              'x': round(start_x + bath_w, 1), 'y': round(start_y + front_len + mid_len, 1), 'width': bed2_w, 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Vitrified Tiles'})
+                rooms.append({'id': 'g_bath2', 'name': 'Attached Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': round(start_x + bath_w + bed2_w, 1), 'y': round(start_y + front_len + mid_len, 1), 'width': bath_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+
+            elif variant == 1:
+                # Variant 1: Modern Open-Plan 2BHK
+                kit_w = round(build_width * 0.40, 1)
+                liv_w = round(build_width - kit_w, 1)
+                rooms.append({'id': 'g_liv', 'name': 'Open Great Room & Lounge', 'type': 'living', 'zone': 'public',
+                              'x': start_x, 'y': start_y, 'width': liv_w, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Polished Marble'})
+                rooms.append({'id': 'g_kit', 'name': 'Open Island Kitchen', 'type': 'kitchen', 'zone': 'service',
+                              'x': round(start_x + liv_w, 1), 'y': start_y, 'width': kit_w, 'height': front_len, 'color': COLORS['kitchen'], 'floorName': 'Quartz Stone'})
+
+                bed_split = round(build_width * 0.58, 1)
+                suite_bath_w = round(build_width - bed_split, 1)
+                rooms.append({'id': 'g_mbed', 'name': 'Master Bedroom Suite', 'type': 'masterBed', 'zone': 'private',
+                              'x': start_x, 'y': round(start_y + front_len, 1), 'width': bed_split, 'height': mid_len, 'color': COLORS['masterBed'], 'floorName': 'Wooden Parquet'})
+                rooms.append({'id': 'g_bath1', 'name': 'Ensuite Master Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': round(start_x + bed_split, 1), 'y': round(start_y + front_len, 1), 'width': suite_bath_w, 'height': mid_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+
+                bed2_w = round(build_width * 0.65, 1)
+                bath2_w = round(build_width - bed2_w, 1)
+                rooms.append({'id': 'g_bed2', 'name': 'Bedroom 2', 'type': 'bedroom', 'zone': 'private',
+                              'x': start_x, 'y': round(start_y + front_len + mid_len, 1), 'width': bed2_w, 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Vitrified Tiles'})
+                rooms.append({'id': 'g_bath2', 'name': 'Powder Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': round(start_x + bed2_w, 1), 'y': round(start_y + front_len + mid_len, 1), 'width': bath2_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+
+            else:
+                # Variant 2: Linear Circulation 2BHK
+                rooms.append({'id': 'g_liv', 'name': 'Formal Living Hall', 'type': 'living', 'zone': 'public',
+                              'x': start_x, 'y': start_y, 'width': build_width, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Italian Tiles'})
+
+                col_w = round(build_width * 0.42, 1)
+                mbed_w = round(build_width - col_w, 1)
+                rooms.append({'id': 'g_kit', 'name': 'Linear Kitchen', 'type': 'kitchen', 'zone': 'service',
+                              'x': start_x, 'y': round(start_y + front_len, 1), 'width': col_w, 'height': mid_len, 'color': COLORS['kitchen'], 'floorName': 'Anti-Skid Vitrified'})
+                rooms.append({'id': 'g_mbed', 'name': 'Master Bedroom Suite', 'type': 'masterBed', 'zone': 'private',
+                              'x': round(start_x + col_w, 1), 'y': round(start_y + front_len, 1), 'width': mbed_w, 'height': mid_len, 'color': COLORS['masterBed'], 'floorName': 'Laminated Wood'})
+
+                b_w = round(min(7.0, build_width * 0.30), 1)
+                b2_w = round(build_width - b_w, 1)
+                rooms.append({'id': 'g_bath', 'name': 'Central Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': start_x, 'y': round(start_y + front_len + mid_len, 1), 'width': b_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+                rooms.append({'id': 'g_bed2', 'name': 'Bedroom 2', 'type': 'bedroom', 'zone': 'private',
+                              'x': round(start_x + b_w, 1), 'y': round(start_y + front_len + mid_len, 1), 'width': b2_w, 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Vitrified Tiles'})
 
         else:
-            front_len = round(build_length * 0.32, 1)
-            rooms.append({
-                'id': 'g_linear_living',
-                'name': 'Formal Living Room',
-                'type': 'living',
-                'zone': 'public',
-                'x': start_x,
-                'y': start_y,
-                'width': build_width,
-                'height': front_len,
-                'color': COLORS['living'],
-                'floorName': 'Vitrified Tiles'
-            })
+            # 3 BHK / 4+ BHK Multi-Space Typology across Variants
+            front_len = round(build_length * 0.36, 1)
+            mid_len = round(build_length * 0.34, 1)
+            rear_len = round(build_length - front_len - mid_len, 1)
 
-            mid_y = round(start_y + front_len, 1)
-            mid_len = round(build_length * 0.38, 1)
-            col_w = round(build_width / 3.0, 1)
+            if variant == 0:
+                # Variant 0: Vastu-Aligned Classic
+                if has_parking:
+                    park_w = round(build_width * 0.38, 1)
+                    liv_w = round(build_width - park_w, 1)
+                    rooms.append({'id': 'g_park', 'name': 'Car Porch', 'type': 'parking', 'zone': 'service',
+                                  'x': start_x, 'y': start_y, 'width': park_w, 'height': front_len, 'color': COLORS['parking'], 'floorName': 'Heavy Duty Pavers'})
+                    rooms.append({'id': 'g_liv', 'name': 'Living & Foyer', 'type': 'living', 'zone': 'public',
+                                  'x': round(start_x + park_w, 1), 'y': start_y, 'width': liv_w, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Vitrified Tiles'})
+                else:
+                    rooms.append({'id': 'g_liv', 'name': 'Grand Living Hall', 'type': 'living', 'zone': 'public',
+                                  'x': start_x, 'y': start_y, 'width': build_width, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Italian Marble Tiles'})
 
-            rooms.append({
-                'id': 'g_dining_hall',
-                'name': 'Dining Hall',
-                'type': 'living',
-                'zone': 'public',
-                'x': start_x,
-                'y': mid_y,
-                'width': col_w,
-                'height': mid_len,
-                'color': COLORS['living'],
-                'floorName': 'Vitrified Tiles'
-            })
-            rooms.append({
-                'id': 'g_compact_kitchen',
-                'name': 'Kitchen',
-                'type': 'kitchen',
-                'zone': 'service',
-                'x': round(start_x + col_w, 1),
-                'y': mid_y,
-                'width': col_w,
-                'height': mid_len,
-                'color': COLORS['kitchen'],
-                'floorName': 'Anti-Skid Tiles'
-            })
-            rooms.append({
-                'id': 'g_guest_bed',
-                'name': 'Bedroom (Guest)',
-                'type': 'bedroom',
-                'zone': 'private',
-                'x': round(start_x + col_w * 2, 1),
-                'y': mid_y,
-                'width': round(build_width - col_w * 2, 1),
-                'height': mid_len,
-                'color': COLORS['bedroom'],
-                'floorName': 'Wooden Flooring'
-            })
+                mid_split = round(build_width * 0.46, 1)
+                if has_pooja:
+                    pooja_w = round(min(5.5, mid_split * 0.35), 1)
+                    rooms.append({'id': 'g_pooja', 'name': 'Pooja Mandir', 'type': 'pooja', 'zone': 'public',
+                                  'x': start_x, 'y': round(start_y + front_len, 1), 'width': pooja_w, 'height': round(mid_len * 0.45, 1), 'color': COLORS['pooja'], 'floorName': 'White Makrana Marble'})
+                    rooms.append({'id': 'g_kit', 'name': 'Modular Kitchen & Dining', 'type': 'kitchen', 'zone': 'service',
+                                  'x': start_x, 'y': round(start_y + front_len + mid_len * 0.45, 1), 'width': mid_split, 'height': round(mid_len * 0.55, 1), 'color': COLORS['kitchen'], 'floorName': 'Anti-Skid Vitrified'})
+                else:
+                    rooms.append({'id': 'g_kit', 'name': 'Modular Kitchen & Dining', 'type': 'kitchen', 'zone': 'service',
+                                  'x': start_x, 'y': round(start_y + front_len, 1), 'width': mid_split, 'height': mid_len, 'color': COLORS['kitchen'], 'floorName': 'Anti-Skid Vitrified'})
 
-            rear_y = round(mid_y + mid_len, 1)
-            rear_len = round(max(6.0, build_length - (front_len + mid_len)), 1)
-            half_w = round(build_width * 0.5, 1)
-            rooms.append({
-                'id': 'g_bath_rear',
-                'name': 'Bath & Washroom',
-                'type': 'bath',
-                'zone': 'wet',
-                'x': start_x,
-                'y': rear_y,
-                'width': half_w,
-                'height': rear_len,
-                'color': COLORS['bath'],
-                'floorName': 'Anti-Skid Tiles'
-            })
-            rooms.append({
-                'id': 'g_rear_veranda',
-                'name': 'Verandah & Storage',
-                'type': 'corridor',
-                'zone': 'service',
-                'x': round(start_x + half_w, 1),
-                'y': rear_y,
-                'width': round(build_width - half_w, 1),
-                'height': rear_len,
-                'color': COLORS['corridor'],
-                'floorName': 'Kota Stone'
-            })
+                bed1_name = 'Master Bedroom (SW)' if total_floors == 1 else 'Parents / Guest Bedroom'
+                rooms.append({'id': 'g_bed1', 'name': bed1_name, 'type': 'masterBed' if total_floors == 1 else 'bedroom', 'zone': 'private',
+                              'x': round(start_x + mid_split, 1), 'y': round(start_y + front_len, 1), 'width': round(build_width - mid_split, 1), 'height': mid_len, 'color': COLORS['masterBed'] if total_floors == 1 else COLORS['bedroom'], 'floorName': 'Wooden Textured Tiles'})
+
+                bath_w = round(min(7.5, build_width * 0.25), 1)
+                bed2_w = round(build_width - bath_w * 2, 1)
+                bed2_name = 'Bedroom 2' if total_floors == 1 else 'Study / Bedroom 2'
+                rooms.append({'id': 'g_bath1', 'name': 'Common Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': start_x, 'y': round(start_y + front_len + mid_len, 1), 'width': bath_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+                rooms.append({'id': 'g_bed2', 'name': bed2_name, 'type': 'bedroom', 'zone': 'private',
+                              'x': round(start_x + bath_w, 1), 'y': round(start_y + front_len + mid_len, 1), 'width': bed2_w, 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Vitrified Tiles'})
+                rooms.append({'id': 'g_bath2', 'name': 'Attached Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': round(start_x + bath_w + bed2_w, 1), 'y': round(start_y + front_len + mid_len, 1), 'width': bath_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+
+            elif variant == 1:
+                # Variant 1: Modern Open-Plan Living
+                kit_w = round(build_width * 0.38, 1)
+                liv_w = round(build_width - kit_w, 1)
+                rooms.append({'id': 'g_liv', 'name': 'Open Great Room & Lounge', 'type': 'living', 'zone': 'public',
+                              'x': start_x, 'y': start_y, 'width': liv_w, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Polished Italian Marble'})
+                rooms.append({'id': 'g_kit', 'name': 'Open Island Kitchen & Dining', 'type': 'kitchen', 'zone': 'service',
+                              'x': round(start_x + liv_w, 1), 'y': start_y, 'width': kit_w, 'height': front_len, 'color': COLORS['kitchen'], 'floorName': 'Quartz Stone'})
+
+                bed_w = round(build_width * 0.58, 1)
+                suite_bath_w = round(build_width - bed_w, 1)
+                bed1_name = 'Master Bedroom Suite' if total_floors == 1 else 'Ground Guest Suite'
+                rooms.append({'id': 'g_bed1', 'name': bed1_name, 'type': 'masterBed' if total_floors == 1 else 'bedroom', 'zone': 'private',
+                              'x': start_x, 'y': round(start_y + front_len, 1), 'width': bed_w, 'height': mid_len, 'color': COLORS['masterBed'], 'floorName': 'Solid Hardwood'})
+                rooms.append({'id': 'g_bath1', 'name': 'Ensuite Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': round(start_x + bed_w, 1), 'y': round(start_y + front_len, 1), 'width': suite_bath_w, 'height': mid_len, 'color': COLORS['bath'], 'floorName': 'Porcelain Tiles'})
+
+                bath_w = round(min(7.0, build_width * 0.25), 1)
+                bed2_w = round(build_width - bath_w, 1)
+                rooms.append({'id': 'g_bath2', 'name': 'Powder / Common Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': start_x, 'y': round(start_y + front_len + mid_len, 1), 'width': bath_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Ceramic Matte'})
+                rooms.append({'id': 'g_bed2', 'name': 'Bedroom 2', 'type': 'bedroom', 'zone': 'private',
+                              'x': round(start_x + bath_w, 1), 'y': round(start_y + front_len + mid_len, 1), 'width': bed2_w, 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Vitrified Tiles'})
+
+            else:
+                # Variant 2: Linear High-Efficiency Circulation
+                rooms.append({'id': 'g_liv', 'name': 'Formal Living Room', 'type': 'living', 'zone': 'public',
+                              'x': start_x, 'y': start_y, 'width': build_width, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Vitrified Tiles'})
+
+                col_w = round(build_width / 3.0, 1)
+                rooms.append({'id': 'g_dining', 'name': 'Central Dining Spine', 'type': 'living', 'zone': 'public',
+                              'x': start_x, 'y': round(start_y + front_len, 1), 'width': col_w, 'height': mid_len, 'color': COLORS['living'], 'floorName': 'Vitrified Tiles'})
+                rooms.append({'id': 'g_kit', 'name': 'Enclosed Kitchen', 'type': 'kitchen', 'zone': 'service',
+                              'x': round(start_x + col_w, 1), 'y': round(start_y + front_len, 1), 'width': col_w, 'height': mid_len, 'color': COLORS['kitchen'], 'floorName': 'Anti-Skid Vitrified'})
+                rooms.append({'id': 'g_bed1', 'name': 'Guest / Study Bedroom', 'type': 'bedroom', 'zone': 'private',
+                              'x': round(start_x + col_w * 2, 1), 'y': round(start_y + front_len, 1), 'width': round(build_width - col_w * 2, 1), 'height': mid_len, 'color': COLORS['bedroom'], 'floorName': 'Wooden Flooring'})
+
+                bath_w = round(min(7.0, build_width * 0.25), 1)
+                mbed_w = round(build_width - bath_w, 1)
+                rooms.append({'id': 'g_bath1', 'name': 'Common Bath', 'type': 'bath', 'zone': 'wet',
+                              'x': start_x, 'y': round(start_y + front_len + mid_len, 1), 'width': bath_w, 'height': rear_len, 'color': COLORS['bath'], 'floorName': 'Anti-Skid Tiles'})
+                rooms.append({'id': 'g_mbed', 'name': 'Master Bedroom Suite', 'type': 'masterBed', 'zone': 'private',
+                              'x': round(start_x + bath_w, 1), 'y': round(start_y + front_len + mid_len, 1), 'width': mbed_w, 'height': rear_len, 'color': COLORS['masterBed'], 'floorName': 'Laminated Hardwood'})
 
     else:
-        # FIRST FLOOR
+        # First Floor (Upper Level Duplex)
         front_len = round(build_length * 0.35, 1)
-        balcony_w = round(build_width * 0.40, 1)
+        balcony_w = round(build_width * 0.38, 1)
         lounge_w = round(build_width - balcony_w, 1)
 
-        rooms.append({
-            'id': 'f1_lounge',
-            'name': 'Upper Family Lounge',
-            'type': 'living',
-            'zone': 'public',
-            'x': start_x,
-            'y': start_y,
-            'width': lounge_w,
-            'height': front_len,
-            'color': COLORS['living'],
-            'floorName': 'Vitrified Tiles'
-        })
-        rooms.append({
-            'id': 'f1_balcony',
-            'name': 'Front Sunset Balcony',
-            'type': 'balcony',
-            'zone': 'public',
-            'x': round(start_x + lounge_w, 1),
-            'y': start_y,
-            'width': balcony_w,
-            'height': front_len,
-            'color': COLORS['balcony'],
-            'floorName': 'Weatherproof Deck Tiles'
-        })
+        rooms.append({'id': 'f1_lounge', 'name': 'Upper Family Lounge', 'type': 'living', 'zone': 'public',
+                      'x': start_x, 'y': start_y, 'width': lounge_w, 'height': front_len, 'color': COLORS['living'], 'floorName': 'Vitrified Tiles'})
+        rooms.append({'id': 'f1_balcony', 'name': 'Open Terrace Balcony', 'type': 'balcony', 'zone': 'public',
+                      'x': round(start_x + lounge_w, 1), 'y': start_y, 'width': balcony_w, 'height': front_len, 'color': COLORS['balcony'], 'floorName': 'Weatherproof Deck Tiles'})
 
         mid_y = round(start_y + front_len, 1)
-        mid_len = round(build_length * 0.40, 1)
+        mid_len = round(build_length * 0.38, 1)
         master_w = round(build_width * 0.60, 1)
         bath_w = round(build_width - master_w, 1)
 
-        rooms.append({
-            'id': 'f1_master_suite',
-            'name': 'Master Bedroom Suite',
-            'type': 'masterBed',
-            'zone': 'private',
-            'x': start_x,
-            'y': mid_y,
-            'width': master_w,
-            'height': mid_len,
-            'color': COLORS['masterBed'],
-            'floorName': 'Solid Wood Parquet'
-        })
-
-        dress_len = round(mid_len * 0.45, 1)
-        rooms.append({
-            'id': 'f1_master_bath',
-            'name': 'Master Ensuite Bath',
-            'type': 'bath',
-            'zone': 'wet',
-            'x': round(start_x + master_w, 1),
-            'y': mid_y,
-            'width': bath_w,
-            'height': dress_len,
-            'color': COLORS['bath'],
-            'floorName': 'Italian Porcelain Tiles'
-        })
-        rooms.append({
-            'id': 'f1_walkin_dress',
-            'name': 'Walk-In Wardrobe / Dress',
-            'type': 'corridor',
-            'zone': 'private',
-            'x': round(start_x + master_w, 1),
-            'y': round(mid_y + dress_len, 1),
-            'width': bath_w,
-            'height': round(mid_len - dress_len, 1),
-            'color': COLORS['corridor'],
-            'floorName': 'Hardwood Flooring'
-        })
+        rooms.append({'id': 'f1_master_suite', 'name': 'Master Bedroom Suite', 'type': 'masterBed', 'zone': 'private',
+                      'x': start_x, 'y': mid_y, 'width': master_w, 'height': mid_len, 'color': COLORS['masterBed'], 'floorName': 'Solid Wood Parquet'})
+        rooms.append({'id': 'f1_master_bath', 'name': 'Master Ensuite Bath', 'type': 'bath', 'zone': 'wet',
+                      'x': round(start_x + master_w, 1), 'y': mid_y, 'width': bath_w, 'height': mid_len, 'color': COLORS['bath'], 'floorName': 'Italian Porcelain Tiles'})
 
         rear_y = round(mid_y + mid_len, 1)
         rear_len = round(max(7.0, build_length - (front_len + mid_len)), 1)
+        rooms.append({'id': 'f1_bed2', 'name': 'Children / Bedroom 3', 'type': 'bedroom', 'zone': 'private',
+                      'x': start_x, 'y': rear_y, 'width': build_width, 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Laminated Wood Flooring'})
 
-        if bhk >= 4 or 'Study Room' in features:
-            bed2_w = round(build_width * 0.58, 1)
-            study_w = round(build_width - bed2_w, 1)
-            rooms.append({
-                'id': 'f1_bed2',
-                'name': 'Bedroom 2 (Children)',
-                'type': 'bedroom',
-                'zone': 'private',
-                'x': start_x,
-                'y': rear_y,
-                'width': bed2_w,
-                'height': rear_len,
-                'color': COLORS['bedroom'],
-                'floorName': 'Laminated Wood Flooring'
-            })
-            rooms.append({
-                'id': 'f1_study',
-                'name': 'Study / Home Office',
-                'type': 'study',
-                'zone': 'private',
-                'x': round(start_x + bed2_w, 1),
-                'y': rear_y,
-                'width': study_w,
-                'height': rear_len,
-                'color': COLORS['study'],
-                'floorName': 'Acoustic Hardwood'
-            })
-        else:
-            rooms.append({
-                'id': 'f1_bed2',
-                'name': 'Bedroom 2 (Kids Room)',
-                'type': 'bedroom',
-                'zone': 'private',
-                'x': start_x,
-                'y': rear_y,
-                'width': build_width,
-                'height': rear_len,
-                'color': COLORS['bedroom'],
-                'floorName': 'Laminated Wood Flooring'
-            })
-
+    # Compute Canonical Walls, Doors, Windows, and Areas
     total_carpet = 0.0
-    for idx, r in enumerate(rooms):
+    walls = []
+    
+    # 4 Perimeter Structural Walls
+    walls.append({'id': 'wall_ext_north', 'x1': start_x, 'y1': start_y, 'x2': round(start_x + build_width, 1), 'y2': start_y, 'thickness': 0.75, 'type': 'exterior'})
+    walls.append({'id': 'wall_ext_south', 'x1': start_x, 'y1': round(start_y + build_length, 1), 'x2': round(start_x + build_width, 1), 'y2': round(start_y + build_length, 1), 'thickness': 0.75, 'type': 'exterior'})
+    walls.append({'id': 'wall_ext_west', 'x1': start_x, 'y1': start_y, 'x2': start_x, 'y2': round(start_y + build_length, 1), 'thickness': 0.75, 'type': 'exterior'})
+    walls.append({'id': 'wall_ext_east', 'x1': round(start_x + build_width, 1), 'y1': start_y, 'x2': round(start_x + build_width, 1), 'y2': round(start_y + build_length, 1), 'thickness': 0.75, 'type': 'exterior'})
+
+    wall_counter = 1
+    for r in rooms:
         w = float(r['width'])
         h = float(r['height'])
         area = round(w * h, 1)
         r['area'] = area
-        total_carpet += area
+        if r['type'] not in ['parking', 'balcony']:
+            total_carpet += area
 
         rx = float(r['x'])
         ry = float(r['y'])
 
-        if abs(ry - start_y) < 0.2:
+        # Internal partition walls
+        if abs((rx + w) - (start_x + build_width)) > 0.3:
+            walls.append({'id': f'wall_int_{wall_counter}', 'x1': round(rx + w, 1), 'y1': ry, 'x2': round(rx + w, 1), 'y2': round(ry + h, 1), 'thickness': 0.38, 'type': 'interior'})
+            wall_counter += 1
+        if abs((ry + h) - (start_y + build_length)) > 0.3:
+            walls.append({'id': f'wall_int_{wall_counter}', 'x1': rx, 'y1': round(ry + h, 1), 'x2': round(rx + w, 1), 'y2': round(ry + h, 1), 'thickness': 0.38, 'type': 'interior'})
+            wall_counter += 1
+
+        # Windows on external boundaries
+        if abs(ry - start_y) < 0.3:
             windows.append({'x': round(rx + w * 0.5, 1), 'y': ry, 'width': 4.0, 'wall': 'north'})
-        if abs((ry + h) - (start_y + build_length)) < 0.2:
+        if abs((ry + h) - (start_y + build_length)) < 0.3:
             windows.append({'x': round(rx + w * 0.5, 1), 'y': round(ry + h, 1), 'width': 4.0, 'wall': 'south'})
-        if abs(rx - start_x) < 0.2:
+        if abs(rx - start_x) < 0.3:
             windows.append({'x': rx, 'y': round(ry + h * 0.5, 1), 'width': 3.5, 'wall': 'west'})
-        if abs((rx + w) - (start_x + build_width)) < 0.2:
+        if abs((rx + w) - (start_x + build_width)) < 0.3:
             windows.append({'x': round(rx + w, 1), 'y': round(ry + h * 0.5, 1), 'width': 3.5, 'wall': 'east'})
 
         doors.append({'x': round(rx + 2.0, 1), 'y': round(ry + h, 1), 'width': 3.0, 'swing': 'inward'})
@@ -612,6 +425,7 @@ def generate_deterministic_floor_plan(config, floor=0, variant=0):
 
     return {
         'floor': floor,
+        'floors': list(range(total_floors)),
         'variant': variant,
         'variantName': VARIANT_NAMES[variant],
         'dimensions': {
@@ -626,6 +440,7 @@ def generate_deterministic_floor_plan(config, floor=0, variant=0):
             'side': setback_side
         },
         'rooms': rooms,
+        'walls': walls,
         'doors': doors,
         'windows': windows,
         'carpetArea': round(total_carpet),
@@ -1023,6 +838,95 @@ def api_risk(city):
 @app.route('/api/data/layouts', methods=['GET'])
 def api_layouts():
     return jsonify(read_json_data('house_layouts.json'))
+
+# --- ML INFERENCE API ---
+from ml.inference.predictor import get_inference_service
+
+from ml.security import rate_limit, validate_ml_numeric_input, sanitize_prompt_for_llm
+
+@app.route('/api/ml/health', methods=['GET'])
+def api_ml_health():
+    service = get_inference_service()
+    return jsonify(service.get_health_status())
+
+@app.route('/api/ml/metadata', methods=['GET'])
+def api_ml_metadata():
+    service = get_inference_service()
+    return jsonify(service.get_metadata())
+
+@app.route('/api/ml/predict-property-price', methods=['POST'])
+@app.route('/api/ml/predict-cost', methods=['POST'])  # Backward compatibility alias
+@rate_limit(max_per_minute=120)
+def api_ml_predict_property_price():
+    payload = request.get_json(silent=True) or {}
+    is_valid, error_msg = validate_ml_numeric_input(payload)
+    if not is_valid:
+        return jsonify({'status': 'error', 'error_code': 'INVALID_INPUT_BOUNDS', 'message': error_msg}), 400
+    service = get_inference_service()
+    result = service.predict_property_price(payload)
+    return jsonify(result)
+
+@app.route('/api/ml/calculate-construction-cost', methods=['POST'])
+@rate_limit(max_per_minute=120)
+def api_ml_calculate_construction_cost():
+    payload = request.get_json(silent=True) or {}
+    is_valid, error_msg = validate_ml_numeric_input(payload)
+    if not is_valid:
+        return jsonify({'status': 'error', 'error_code': 'INVALID_INPUT_BOUNDS', 'message': error_msg}), 400
+    service = get_inference_service()
+    result = service.calculate_construction_cost(payload)
+    return jsonify(result)
+
+@app.route('/api/ml/predict', methods=['POST'])
+@rate_limit(max_per_minute=120)
+def api_ml_predict():
+    payload = request.get_json(silent=True) or {}
+    is_valid, error_msg = validate_ml_numeric_input(payload)
+    if not is_valid:
+        return jsonify({'status': 'error', 'error_code': 'INVALID_INPUT_BOUNDS', 'message': error_msg}), 400
+    service = get_inference_service()
+    property_res = service.predict_property_price(payload)
+    construction_res = service.calculate_construction_cost(payload)
+    return jsonify({
+        'status': 'success',
+        'property_valuation_ml': property_res,
+        'construction_cost_cpwd': construction_res,
+    })
+
+# --- LLM NATURAL LANGUAGE REQUIREMENT PARSER ---
+from ml.llm.client import get_llm_service
+
+@app.route('/api/ml/parse-requirements', methods=['POST'])
+@rate_limit(max_per_minute=60)
+def api_ml_parse_requirements():
+    payload = request.get_json(silent=True) or {}
+    raw_prompt = payload.get('prompt', '')
+    prompt = sanitize_prompt_for_llm(raw_prompt)
+    if not prompt:
+        return jsonify({'status': 'error', 'error_code': 'EMPTY_PROMPT', 'message': 'Prompt cannot be empty.'}), 400
+    service = get_llm_service()
+    parsed_req, warnings = service.parse_requirements(prompt)
+    return jsonify({
+        'status': 'success',
+        'requirements': parsed_req.model_dump(),
+        'physical_constraint_warnings': warnings,
+    })
+
+# --- HYBRID ARCHITECTURAL PLANNING ENGINE ---
+from ml.planner.hybrid_engine import generate_hybrid_plan
+
+@app.route('/api/ml/hybrid-plan', methods=['POST'])
+@rate_limit(max_per_minute=120)
+def api_ml_hybrid_plan():
+    payload = request.get_json(silent=True) or {}
+    is_valid, error_msg = validate_ml_numeric_input(payload)
+    if not is_valid:
+        return jsonify({'status': 'error', 'error_code': 'INVALID_INPUT_BOUNDS', 'message': error_msg}), 400
+    floor = int(payload.get('floor', 0))
+    variant = int(payload.get('variant', 0))
+    result = generate_hybrid_plan(payload, floor=floor, variant=variant)
+    return jsonify(result)
+
 
 @app.route('/static/<path:filename>')
 def serve_static_assets(filename):

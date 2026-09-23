@@ -538,15 +538,24 @@ const PlanGenerator = {
             // Interior entry doors
             doors.push({ x: Math.round((r.x + 2.0) * 10) / 10, y: Math.round((r.y + r.height) * 10) / 10, width: 3.0, swing: 'inward' });
         });
+        // Canonical wall boundaries
+        const walls = [
+            { id: 'wall_ext_north', x1: startX, y1: startY, x2: Math.round((startX + buildWidth) * 10) / 10, y2: startY, thickness: 0.75, type: 'exterior' },
+            { id: 'wall_ext_south', x1: startX, y1: Math.round((startY + buildLength) * 10) / 10, x2: Math.round((startX + buildWidth) * 10) / 10, y2: Math.round((startY + buildLength) * 10) / 10, thickness: 0.75, type: 'exterior' },
+            { id: 'wall_ext_west', x1: startX, y1: startY, x2: startX, y2: Math.round((startY + buildLength) * 10) / 10, thickness: 0.75, type: 'exterior' },
+            { id: 'wall_ext_east', x1: Math.round((startX + buildWidth) * 10) / 10, y1: startY, x2: Math.round((startX + buildWidth) * 10) / 10, y2: Math.round((startY + buildLength) * 10) / 10, thickness: 0.75, type: 'exterior' }
+        ];
 
         const builtup = Math.round(buildWidth * buildLength);
         const efficiency = builtup > 0 ? Math.round((totalCarpet / builtup) * 1000) / 10 : 0;
 
         return {
             floor: floor,
+            floors: Array.from({ length: totalFloors }, (_, i) => i),
             variant: variant,
             variantName: this.VARIANT_NAMES[variant],
             rooms: rooms,
+            walls: walls,
             doors: doors,
             windows: windows,
             setbacks: { front: setbackFront, rear: setbackRear, side: setbackSide },

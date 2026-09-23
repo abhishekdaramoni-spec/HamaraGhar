@@ -1,0 +1,156 @@
+{
+  "generated_at_utc": "2026-09-22T14:48:57.497421+00:00",
+  "manifest_version": "1.0.0",
+  "artifacts": {
+    "property_price_regressor_v1.joblib": {
+      "sha256": "10b8a92acc124df39d1f24f9e7fccf5208ae06a8c96acceee1b8bc93491267fb",
+      "size_bytes": 955383,
+      "size_kb": 932.99,
+      "model_name": "Indian Residential Property Price Regressor",
+      "version": "1.0.0",
+      "algorithm": "HistGradientBoostingRegressor",
+      "framework": "scikit-learn",
+      "dataset": "Kaggle House Price Prediction Challenge (29,451 records)",
+      "target": "TARGET(PRICE_IN_LAKHS)"
+    },
+    "property_preprocessor_v1.joblib": {
+      "sha256": "c2fe596f2848703892d8404d0605eb186c26b12e0ff3f041fca1bb001f3bfe8a",
+      "size_bytes": 4816,
+      "size_kb": 4.7,
+      "model_name": "Property Feature Preprocessor Pipeline",
+      "version": "1.0.0",
+      "algorithm": "ColumnTransformer (RobustScaler + OneHotEncoder + SimpleImputer)",
+      "framework": "scikit-learn",
+      "dataset": "Kaggle House Price Prediction Challenge (29,451 records)",
+      "target": "Features Pipeline"
+    },
+    "layout_quality_ranker_v1.joblib": {
+      "sha256": "ca348fc713a998a8e8a9e84c561d68d5e9d2188d66817617cce4e1db6a523049",
+      "type": "HistGradientBoostingRegressor",
+      "description": "ML Architectural Layout Livability & Quality Ranker",
+      "r2_score": 0.938,
+      "mae": 1.1647,
+      "features": [
+        "circulation_efficiency",
+        "daylight_exposure_factor",
+        "aspect_ratio_quality",
+        "zoning_privacy_score",
+        "service_clustering_index",
+        "vastu_orientation_score",
+        "carpet_efficiency_ratio",
+        "bhk",
+        "total_rooms",
+        "plot_aspect_ratio"
+      ],
+      "size_bytes": 559792,
+      "size_kb": 546.67,
+      "model_name": "ML Architectural Layout Livability & Quality Ranker",
+      "version": "1.0.0"
+    },
+    "layout_ranker_preprocessor_v1.joblib": {
+      "sha256": "f6a4f56e6aa7b68837433b30e2097912fffc7fa94e739fcd7767db93f92ec3d1",
+      "type": "StandardScaler",
+      "description": "Preprocessor feature scaler for Layout Quality Ranker",
+      "size_bytes": 1287,
+      "size_kb": 1.26,
+      "model_name": "Preprocessor feature scaler for Layout Quality Ranker",
+      "version": "1.0.0"
+    },
+    "floorplan_model_v1.joblib": {
+      "sha256": "61b755b86248c2327a901f4587309ed0cdfa6e1ac1e70c78947bb7721e61673b",
+      "size_bytes": 605657,
+      "size_kb": 591.46,
+      "model_name": "CubiCasa5K Real Floor-Plan Spatial Viability Regressor",
+      "version": "1.0.0",
+      "algorithm": "HistGradientBoostingRegressor",
+      "framework": "scikit-learn",
+      "target": "Spatial Viability & Livability Index (0-100)",
+      "dataset": "CubiCasa5K Benchmark (CC BY 4.0, 1,200 records)",
+      "r2_score": 0.9865,
+      "mae": 0.7586,
+      "features": [
+        "plot_width_ft",
+        "plot_length_ft",
+        "plot_aspect_ratio",
+        "total_builtup_sqft",
+        "total_carpet_sqft",
+        "carpet_efficiency",
+        "bhk",
+        "bathroom_count",
+        "room_count",
+        "living_area_sqft",
+        "kitchen_area_sqft",
+        "circulation_ratio",
+        "daylight_perimeter_ratio",
+        "avg_room_aspect_ratio",
+        "doors_count",
+        "windows_count",
+        "wet_core_distance_ratio"
+      ],
+      "status": "LEGACY_DEMONSTRATION_ONLY",
+      "note": "Trained on synthetic records calibrated from distributions; superseded by v2."
+    },
+    "floorplan_model_v2.joblib": {
+      "sha256": "cd8117c3549cb044b87a0347289b142198de4a22a476c5233459f03c98afeeb1",
+      "size_bytes": 2873,
+      "size_kb": 2.81,
+      "model_name": "CubiCasa5K Real Floor-Plan Typology Classifier",
+      "version": "2.0.0",
+      "algorithm": "Multinomial Logistic Regression",
+      "framework": "scikit-learn",
+      "target": "Architectural Typology (0: Compact Studio, 1: Zoned Residence, 2: Linear Spine, 3: Multi-Wing Villa)",
+      "dataset": "CubiCasa5K Official Benchmark (Zenodo DOI 10.5281/zenodo.2613548 / CC BY-NC 4.0, 500 verified records)",
+      "train_samples": 350,
+      "val_samples": 75,
+      "test_samples": 75,
+      "test_accuracy": 1.0,
+      "test_macro_f1": 1.0,
+      "benchmark_comparison": {
+        "Dummy (Majority Class)": {
+          "accuracy": 0.2933,
+          "macro_f1": 0.1134,
+          "precision": 0.0733,
+          "recall": 0.25
+        },
+        "Multinomial Logistic Regression": {
+          "accuracy": 1.0,
+          "macro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "Random Forest Classifier": {
+          "accuracy": 1.0,
+          "macro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "HistGradientBoostingClassifier": {
+          "accuracy": 1.0,
+          "macro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0
+        }
+      },
+      "provenance_verified": true,
+      "features_used": [
+        "plot_width_ft",
+        "plot_length_ft",
+        "plot_aspect_ratio",
+        "total_builtup_sqft",
+        "total_carpet_sqft",
+        "carpet_efficiency",
+        "total_wall_length_ft",
+        "wall_density_ratio",
+        "room_count",
+        "bhk",
+        "bathroom_count",
+        "door_count",
+        "window_count",
+        "openings_per_wall_ratio",
+        "avg_room_aspect_ratio",
+        "circulation_area_ratio",
+        "wet_core_distance_ratio"
+      ]
+    }
+  }
+}

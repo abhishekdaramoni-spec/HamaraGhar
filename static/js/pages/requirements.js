@@ -418,6 +418,118 @@ const RequirementsWizard = {
                 window.location.href = '/floor-plan';
             }
         }, 600);
+    },
+
+    fillExamplePrompt(promptText) {
+        const input = document.getElementById('nlPromptInput');
+        if (input) {
+            input.value = promptText;
+            this.parseNaturalLanguage();
+        }
+    },
+
+    async parseNaturalLanguage() {
+        const input = document.getElementById('nlPromptInput');
+        const prompt = input ? input.value.trim() : '';
+        const btn = document.getElementById('btnParsePrompt');
+        const btnText = document.getElementById('btnParseText');
+        const feedbackBox = document.getElementById('nlFeedbackBox');
+
+        if (!prompt) {
+            if (window.Utils?.notify) window.Utils.notify('Please enter a description for your home.', 'warning');
+            return;
+        }
+
+        if (btn) btn.disabled = true;
+        if (btnText) btnText.textContent = 'Analyzing with AI...';
+
+        try {
+            const response = await fetch('/api/ml/parse-requirements', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success' && data.requirements) {
+                const req = data.requirements;
+                const warnings = data.physical_constraint_warnings || [];
+
+                // Map parsed fields to this.data
+                if (req.city) {
+                    this.data.city = req.city;
+                    const stateMap = {
+                        'Bengaluru': 'Karnataka', 'Bangalore': 'Karnataka',
+                        'Hyderabad': 'Telangana', 'Mumbai': 'Maharashtra',
+                        'Pune': 'Maharashtra', 'Delhi': 'Delhi NCR',
+                        'Chennai': 'Tamil Nadu', 'Kolkata': 'West Bengal',
+                        'Ahmedabad': 'Gujarat', 'Jaipur': 'Rajasthan'
+                    };
+                    this.data.state = stateMap[req.city] || this.data.state;
+                }
+
+                if (req.plot_width) this.data.plotWidth = req.plot_width;
+                if (req.plot_length) this.data.plotLength = req.plot_length;
+                if (req.bhk) this.data.bedrooms = req.bhk;
+                if (req.floors) this.data.floors = req.floors;
+                if (req.facing_direction) this.data.vastuDirection = req.facing_direction;
+                if (req.target_budget_lakhs) this.data.budget = Math.round(req.target_budget_lakhs * 100000);
+                if (req.finishing_tier) this.data.style = req.finishing_tier;
+                if (Array.isArray(req.features) && req.features.length > 0) {
+                    this.data.features = req.features;
+                }
+                this.data.projectName = `${req.bhk || 3}BHK ${req.city || 'Custom'} Residence`;
+
+                // Update UI elements
+                this.syncInputsFromData();
+                this.updatePlotPreview();
+                this.updateBudgetDisplay();
+
+                // Render Feedback
+                if (feedbackBox) {
+                    feedbackBox.style.display = 'block';
+                    if (warnings.length > 0) {
+                        feedbackBox.style.background = 'rgba(217, 119, 6, 0.12)';
+                        feedbackBox.style.border = '1px solid rgba(217, 119, 6, 0.3)';
+                        feedbackBox.style.color = '#b45309';
+                        feedbackBox.innerHTML = `
+                            <strong>Physical Constraints Adjusted (NBC 2016):</strong>
+                            <ul style="margin: 4px 0 0 16px; padding: 0;">
+                                ${warnings.map(w => `<li>${w}</li>`).join('')}
+                            </ul>
+                            <div style="margin-top: 4px; font-weight: 500;">✓ Form auto-filled with structurally compliant specifications.</div>
+                        `;
+                    } else {
+                        feedbackBox.style.background = 'rgba(13, 148, 136, 0.12)';
+                        feedbackBox.style.border = '1px solid rgba(13, 148, 136, 0.3)';
+                        feedbackBox.style.color = '#0f766e';
+                        feedbackBox.innerHTML = `
+                            <strong>✓ Requirements Extracted & NBC 2016 Validated:</strong>
+                            ${req.bhk} BHK on ${req.plot_width}×${req.plot_length} ft plot in ${req.city}. Budget target: ₹${req.target_budget_lakhs} Lakhs.
+                        `;
+                    }
+                }
+
+                if (window.Utils?.notify) {
+                    window.Utils.notify('Requirements auto-populated and verified against building norms!', 'success');
+                }
+            } else {
+                throw new Error(data.message || 'Could not parse requirements');
+            }
+        } catch (err) {
+            console.error('NLP Parse error:', err);
+            if (feedbackBox) {
+                feedbackBox.style.display = 'block';
+                feedbackBox.style.background = 'rgba(239, 68, 68, 0.1)';
+                feedbackBox.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+                feedbackBox.style.color = '#b91c1c';
+                feedbackBox.innerHTML = `<strong>Notice:</strong> Using standard architectural defaults. ${err.message}`;
+            }
+        } finally {
+            if (btn) btn.disabled = false;
+            if (btnText) btnText.textContent = 'Auto-Fill Form';
+        }
     }
 };
 

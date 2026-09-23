@@ -153,18 +153,49 @@ const FloorPlanStudio = {
 
     async loadFloorPlan(floorIndex, variant = 0) {
         let layout = null;
-        if (this.projectId && window.API) {
+        let hybridData = null;
+
+        // 1. Fetch from Hybrid Architectural Intelligence Engine (ML + NBC + CPWD)
+        try {
+            const payload = Object.assign({}, this.config, {
+                plot_width: this.config.plotWidth || this.config.plot_width || 40,
+                plot_length: this.config.plotLength || this.config.plot_length || 50,
+                bhk: this.config.bedrooms || this.config.bhk || 3,
+                floors: this.config.floors || 1,
+                city: this.config.city || 'Bangalore',
+                finishing_tier: this.config.finishing_tier || this.config.style || 'Standard',
+                floor: floorIndex,
+                variant: variant
+            });
+
+            const res = await fetch('/api/ml/hybrid-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                hybridData = await res.json();
+                if (hybridData && hybridData.geometry) {
+                    layout = hybridData.geometry;
+                }
+            }
+        } catch (e) {
+            console.warn('Hybrid plan endpoint fetch error, trying legacy/client fallback:', e);
+        }
+
+        // 2. Fallback to project API or client PlanGenerator
+        if (!layout && this.projectId && window.API) {
             try {
                 const res = await window.API.get(`/api/projects/${this.projectId}/floor-plan?floor=${floorIndex}&variant=${variant}`);
                 if (res && res.layout) {
                     layout = res.layout;
                 }
             } catch (e) {
-                console.warn('Could not fetch layout from API, using client PlanGenerator:', e);
+                console.warn('Could not fetch layout from API:', e);
             }
         }
 
-        // Fallback to client PlanGenerator
         if (!layout && window.PlanGenerator) {
             layout = window.PlanGenerator.generate(this.config, floorIndex, variant);
         }
@@ -173,38 +204,154 @@ const FloorPlanStudio = {
 
         this.currentPlan = layout;
         this.updateScheduleAndStats(layout);
+        if (hybridData) {
+            this.updateHybridPanels(hybridData);
+        }
         this.adjustScaleAndOffsets();
         this.draw();
     },
 
     async regenerateVariant(variant) {
-        let layout = null;
-        if (this.projectId && window.API) {
-            try {
-                const res = await window.API.post(`/api/projects/${this.projectId}/floor-plan/generate`, {
-                    floor: this.activeFloor,
-                    variant: variant
-                });
-                if (res && res.layout) {
-                    layout = res.layout;
+        await this.loadFloorPlan(this.activeFloor, variant);
+        if (window.Utils?.notify) {
+            window.Utils.notify(`Switched to: ${this.currentPlan?.variantName || 'Alternative Layout'}`, 'info');
+        }
+    },
+
+    updateHybridPanels(data) {
+        if (!data) return;
+
+        // 1. NBC 2016 Compliance Audit
+        const nbc = data.nbc_compliance;
+        if (nbc) {
+            const scoreEl = document.getElementById('nbcScoreBadge');
+            const setbackEl = document.getElementById('nbcSetbackSummary');
+            const collisionEl = document.getElementById('nbcCollisionStatus');
+            const roomStatusEl = document.getElementById('nbcRoomStatus');
+            const warnBox = document.getElementById('nbcWarningContainer');
+
+            if (scoreEl) {
+                scoreEl.textContent = `Score: ${nbc.compliance_score}/100`;
+                scoreEl.className = nbc.is_compliant ? 'badge badge-accent' : 'badge badge-outline';
+            }
+
+            if (setbackEl && data.geometry?.setbacks) {
+                const sb = data.geometry.setbacks;
+                setbackEl.textContent = `F: ${sb.front}ft | R: ${sb.rear}ft | S: ${sb.side}ft`;
+            }
+
+            if (collisionEl) {
+                if (nbc.overlap_detected) {
+                    collisionEl.textContent = 'Room Collision Detected!';
+                    collisionEl.style.color = '#ef4444';
+                } else {
+                    collisionEl.textContent = '0 Overlaps (Disjoint)';
+                    collisionEl.style.color = '#0d9488';
                 }
-            } catch (e) {
-                console.warn('API regenerate failed, using client generator:', e);
+            }
+
+            if (roomStatusEl) {
+                if (nbc.warnings && nbc.warnings.length > 0) {
+                    roomStatusEl.textContent = `${nbc.warnings.length} Notices Active`;
+                    roomStatusEl.style.color = '#d97706';
+                } else {
+                    roomStatusEl.textContent = 'NBC Minimums Met';
+                    roomStatusEl.style.color = '#0d9488';
+                }
+            }
+
+            if (warnBox) {
+                const msgs = [ ...(nbc.violations || []), ...(nbc.warnings || []) ];
+                if (msgs.length > 0) {
+                    warnBox.style.display = 'block';
+                    warnBox.innerHTML = msgs.slice(0, 3).map(m => `<div>&bull; ${m}</div>`).join('');
+                } else {
+                    warnBox.style.display = 'none';
+                }
             }
         }
 
-        if (!layout && window.PlanGenerator) {
-            layout = window.PlanGenerator.generate(this.config, this.activeFloor, variant);
+        // 2. Real Kaggle ML Property Valuation
+        const ml = data.property_valuation_ml;
+        if (ml && ml.prediction) {
+            const valEl = document.getElementById('mlValuationAmount');
+            const rateEl = document.getElementById('mlRatePerSqft');
+            const ciEl = document.getElementById('mlConfidenceInterval');
+            const driversEl = document.getElementById('mlDriversList');
+
+            if (valEl) valEl.textContent = `₹ ${ml.prediction.property_price_lakhs.toLocaleString('en-IN')} Lakhs`;
+            if (rateEl) rateEl.textContent = `₹ ${Math.round(ml.prediction.market_price_per_sqft_inr).toLocaleString('en-IN')} / sq.ft`;
+            if (ciEl && ml.prediction.confidence_interval_90) {
+                const ci = ml.prediction.confidence_interval_90;
+                ciEl.textContent = `₹ ${ci.lower_lakhs} - ${ci.upper_lakhs} L`;
+            }
+            if (driversEl && Array.isArray(ml.valuation_drivers)) {
+                driversEl.innerHTML = ml.valuation_drivers.slice(0, 2).map(d => 
+                    `<div>&bull; <strong>${d.driver}:</strong> ${d.impact}</div>`
+                ).join('');
+            }
         }
 
-        if (layout) {
-            this.currentPlan = layout;
-            this.updateScheduleAndStats(layout);
-            this.adjustScaleAndOffsets();
-            this.draw();
-            if (window.Utils?.notify) {
-                window.Utils.notify(`Switched to: ${layout.variantName || 'Alternative Layout'}`, 'info');
+        // 3. Deterministic CPWD DSR 2024 Construction Cost
+        const cpwd = data.construction_cost_cpwd;
+        if (cpwd && cpwd.calculation) {
+            const cpwdEl = document.getElementById('cpwdCostAmount');
+            const cpwdRateEl = document.getElementById('cpwdRatePerSqft');
+            const cpwdTierEl = document.getElementById('cpwdFinishingTier');
+
+            if (cpwdEl) cpwdEl.textContent = `₹ ${cpwd.calculation.total_construction_cost_lakhs.toLocaleString('en-IN')} Lakhs`;
+            if (cpwdRateEl) cpwdRateEl.textContent = `₹ ${Math.round(cpwd.calculation.rate_per_sqft_inr).toLocaleString('en-IN')} / sq.ft`;
+            if (cpwdTierEl && cpwd.parameters_applied) {
+                cpwdTierEl.textContent = `${cpwd.parameters_applied.finishing_tier} Tier`;
             }
+        }
+
+        // 4. ML Layout Quality & Livability Assessment
+        const mlLayout = data.ml_layout_assessment;
+        if (mlLayout) {
+            const overallScoreEl = document.getElementById('mlOverallScore');
+            const tierTextEl = document.getElementById('mlTierText');
+            const daylightEl = document.getElementById('mlDaylightScore');
+            const circEl = document.getElementById('mlCirculationScore');
+            const aspectEl = document.getElementById('mlAspectScore');
+            const privacyEl = document.getElementById('mlPrivacyScore');
+            const vastuEl = document.getElementById('mlVastuScore');
+            const rankBadgeEl = document.getElementById('mlQualityRankBadge');
+
+            if (overallScoreEl) overallScoreEl.textContent = `${mlLayout.overall_ml_score} / 100`;
+            if (tierTextEl) tierTextEl.textContent = `Tier: ${mlLayout.quality_tier} (HistGradientBoosting ML)`;
+
+            const subs = mlLayout.sub_scores || {};
+            if (daylightEl && subs.daylight_exposure !== undefined) daylightEl.textContent = `${subs.daylight_exposure}%`;
+            if (circEl && subs.circulation_efficiency !== undefined) circEl.textContent = `${subs.circulation_efficiency}%`;
+            if (aspectEl && subs.aspect_ratio_quality !== undefined) aspectEl.textContent = `${subs.aspect_ratio_quality}%`;
+            if (privacyEl && subs.zoning_privacy !== undefined) privacyEl.textContent = `${subs.zoning_privacy}%`;
+            if (vastuEl && subs.vastu_compliance !== undefined) vastuEl.textContent = `${subs.vastu_compliance}%`;
+
+            if (rankBadgeEl) {
+                const rank = data.summary?.ml_rank || 1;
+                const isRec = data.summary?.is_recommended;
+                rankBadgeEl.textContent = `Rank #${rank}${isRec ? ' (Recommended)' : ''}`;
+                rankBadgeEl.className = isRec ? 'badge badge-accent' : 'badge badge-outline';
+            }
+        }
+
+        // 5. Populate Ranked Candidates List
+        const candidatesList = document.getElementById('mlCandidateVariantsList');
+        if (candidatesList && Array.isArray(data.candidate_rankings)) {
+            const activeVariant = data.variant;
+            candidatesList.innerHTML = data.candidate_rankings.map(c => {
+                const isActive = (c.variant_id === activeVariant);
+                const recBadge = c.is_recommended ? '<span style="color:#0d9488; font-weight:700;">★ Best</span>' : '';
+                return `
+                    <button type="button" class="btn ${isActive ? 'btn-primary' : 'btn-outline'}" 
+                        style="width: 100%; justify-content: space-between; padding: 5px 8px; font-size: 11px; text-align: left; display: flex; align-items: center;"
+                        onclick="FloorPlanStudio.regenerateVariant(${c.variant_id})">
+                        <span><strong>#${c.rank}</strong> ${c.variant_name}</span>
+                        <span><b style="color:${c.overall_ml_score >= 80 ? '#0d9488' : '#eab308'};">${c.overall_ml_score}</b> ${recBadge}</span>
+                    </button>
+                `;
+            }).join('');
         }
     },
 

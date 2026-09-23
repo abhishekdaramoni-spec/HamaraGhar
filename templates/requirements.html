@@ -9,6 +9,38 @@
         <p>Step-by-step architectural configuration for your plot, living spaces, and budget.</p>
     </header>
 
+    <!-- Conversational Natural Language Requirement Parser -->
+    <div class="ai-prompt-card" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.08) 0%, rgba(13, 148, 136, 0.08) 100%); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-5);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <h3 style="margin: 0; font-size: var(--text-base); font-weight: 600;">Describe Your Dream Home in Plain Language</h3>
+            </div>
+            <span class="badge badge-accent" style="font-size: 11px;">Schema-Validated NLP Gate</span>
+        </div>
+        <p style="margin: 0 0 var(--space-3) 0; font-size: var(--text-xs); color: var(--color-text-muted);">
+            Type your ideas (city, plot size, bedrooms, budget, vastu, special spaces). Our physical constraint solver will validate feasibility against NBC 2016 building norms and auto-populate the form.
+        </p>
+        
+        <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-3);">
+            <input type="text" id="nlPromptInput" class="form-input" style="flex: 1; min-width: 280px;" placeholder="e.g. 3BHK duplex on 30x50 plot in Bangalore with pooja room and parking, budget 85 lakhs">
+            <button type="button" id="btnParsePrompt" class="btn btn-primary" onclick="RequirementsWizard.parseNaturalLanguage()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                <span id="btnParseText">Auto-Fill Form</span>
+            </button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-text-muted); flex-wrap: wrap;">
+            <span>Try examples:</span>
+            <button type="button" class="chip-btn" style="padding: 2px 8px; font-size: 11px;" onclick="RequirementsWizard.fillExamplePrompt('3BHK duplex on 30x50 plot in Bangalore with pooja room and parking, budget 85 lakhs')">3BHK Bangalore (30x50, 85L)</button>
+            <button type="button" class="chip-btn" style="padding: 2px 8px; font-size: 11px;" onclick="RequirementsWizard.fillExamplePrompt('4BHK luxury villa on 40x60 plot in Hyderabad with home office and garden, budget 1.5 crore')">4BHK Hyderabad (40x60, 1.5Cr)</button>
+            <button type="button" class="chip-btn" style="padding: 2px 8px; font-size: 11px;" onclick="RequirementsWizard.fillExamplePrompt('2BHK compact house on 25x40 plot in Pune, budget 45 lakhs')">2BHK Pune (25x40, 45L)</button>
+        </div>
+
+        <!-- Dynamic Warnings & Confirmation Container -->
+        <div id="nlFeedbackBox" style="display: none; margin-top: var(--space-3); padding: var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-xs);"></div>
+    </div>
+
     <!-- Step Progress Indicator -->
     <div class="step-indicator">
         <div class="step-dot-wrapper active" data-step="1" onclick="RequirementsWizard.goToStep(1)">
