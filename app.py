@@ -495,19 +495,6 @@ def generate_deterministic_floor_plan(config, floor=0, variant=0):
     }
 
 # --- PAGE ROUTES ---
-@app.errorhandler(404)
-def handle_404(e):
-    return jsonify({
-        'error': '404 Not Found',
-        'request_path': request.path,
-        'request_full_path': request.full_path,
-        'environ_PATH_INFO': request.environ.get('PATH_INFO'),
-        'environ_SCRIPT_NAME': request.environ.get('SCRIPT_NAME'),
-        'environ_HTTP_X_MATCHED_PATH': request.environ.get('HTTP_X_MATCHED_PATH'),
-        'environ_HTTP_X_FORWARDED_URI': request.environ.get('HTTP_X_FORWARDED_URI'),
-        'headers': dict(request.headers)
-    }), 404
-
 @app.route('/')
 def index():
     return render_template('landing.html', current_user=get_current_user(), page='landing')
