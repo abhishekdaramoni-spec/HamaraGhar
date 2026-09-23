@@ -33,9 +33,20 @@ class TestEndToEndPipeline(unittest.TestCase):
         self.client = app.test_client()
         with app.app_context():
             db.create_all()
+            # Clean up test user if already present
+            existing = User.query.filter_by(email='pooja.sharma@example.com').first()
+            if existing:
+                Project.query.filter_by(user_id=existing.id).delete()
+                db.session.delete(existing)
+                db.session.commit()
 
     def tearDown(self):
         with app.app_context():
+            existing = User.query.filter_by(email='pooja.sharma@example.com').first()
+            if existing:
+                Project.query.filter_by(user_id=existing.id).delete()
+                db.session.delete(existing)
+                db.session.commit()
             db.session.remove()
 
     def test_full_system_lifecycle_and_end_to_end_pipeline(self):

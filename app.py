@@ -19,7 +19,13 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'hamaraghar-session-secret-key-prod-2024')
 
 # Database URI: serverless instances have a read-only filesystem except for /tmp
-default_db_uri = 'sqlite:////tmp/smartbuild.db' if (os.environ.get('VERCEL') == '1' or os.environ.get('AWS_LAMBDA_FUNCTION_NAME')) else 'sqlite:///smartbuild.db'
+is_serverless = bool(
+    os.environ.get('VERCEL') or
+    os.environ.get('VERCEL_ENV') or
+    os.environ.get('AWS_LAMBDA_FUNCTION_NAME') or
+    os.environ.get('LAMBDA_TASK_ROOT')
+)
+default_db_uri = 'sqlite:////tmp/smartbuild.db' if is_serverless else 'sqlite:///smartbuild.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', default_db_uri)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -46,7 +52,12 @@ class Project(db.Model):
                            onupdate=lambda: datetime.now(timezone.utc))
 
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        app.logger.warning(f"Initial db.create_all() failed: {e}. Switching to /tmp/smartbuild.db")
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/smartbuild.db'
+        db.create_all()
 
 # Decorators
 def login_required(f):
