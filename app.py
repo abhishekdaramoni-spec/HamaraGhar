@@ -496,10 +496,6 @@ def generate_deterministic_floor_plan(config, floor=0, variant=0):
 
 # --- PAGE ROUTES ---
 @app.route('/')
-@app.route('/api')
-@app.route('/api/')
-@app.route('/api/index')
-@app.route('/api/index.py')
 def index():
     return render_template('landing.html', current_user=get_current_user(), page='landing')
 

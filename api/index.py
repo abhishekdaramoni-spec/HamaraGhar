@@ -17,31 +17,36 @@ try:
             self.wsgi_app = wsgi_app
 
         def __call__(self, environ, start_response):
-            if 'debug' in environ.get('PATH_INFO', '') or 'debug' in environ.get('QUERY_STRING', ''):
-                import json
-                safe_env = {k: str(v) for k, v in environ.items() if not k.startswith('wsgi.') and 'SECRET' not in k}
-                body = json.dumps(safe_env, indent=2).encode('utf-8')
-                start_response('200 OK', [('Content-Type', 'application/json'), ('Content-Length', str(len(body)))])
-                return [body]
-
-            qs = environ.get('QUERY_STRING', '')
-            params = urllib.parse.parse_qs(qs, keep_blank_values=True)
-
-            if '_route' in params:
-                route_val = params['_route'][0].strip('/')
-                params.pop('_route', None)
-                new_qs = urllib.parse.urlencode(params, doseq=True)
-                environ['QUERY_STRING'] = new_qs
-                environ['PATH_INFO'] = '/' + route_val if route_val else '/'
-                environ['REQUEST_URI'] = environ['PATH_INFO'] + ('?' + new_qs if new_qs else '')
+            # Check Vercel edge reverse proxy headers for real client path
+            real_path = (
+                environ.get('HTTP_X_MATCHED_PATH') or
+                environ.get('HTTP_X_FORWARDED_URI') or
+                environ.get('HTTP_X_ORIGINAL_URI') or
+                environ.get('HTTP_X_REWRITE_URL')
+            )
+            if real_path:
+                path_only = real_path.split('?', 1)[0]
+                environ['PATH_INFO'] = path_only if path_only else '/'
             else:
-                path = environ.get('PATH_INFO', '')
-                if path in ('/api/index.py', '/api/index', '/api'):
-                    environ['PATH_INFO'] = '/'
-                elif path.startswith('/api/index.py/'):
-                    environ['PATH_INFO'] = path[len('/api/index.py'):]
-                elif path.startswith('/api/index/'):
-                    environ['PATH_INFO'] = path[len('/api/index'):]
+                qs = environ.get('QUERY_STRING', '')
+                params = urllib.parse.parse_qs(qs, keep_blank_values=True)
+                if '_route' in params:
+                    route_val = params['_route'][0].strip('/')
+                    params.pop('_route', None)
+                    new_qs = urllib.parse.urlencode(params, doseq=True)
+                    environ['QUERY_STRING'] = new_qs
+                    environ['PATH_INFO'] = '/' + route_val if route_val else '/'
+                else:
+                    path = environ.get('PATH_INFO', '')
+                    if path in ('/api/index.py', '/api/index', '/api'):
+                        environ['PATH_INFO'] = '/'
+                    elif path.startswith('/api/index.py/'):
+                        environ['PATH_INFO'] = path[len('/api/index.py'):]
+                    elif path.startswith('/api/index/'):
+                        environ['PATH_INFO'] = path[len('/api/index'):]
+
+            # Ensure SCRIPT_NAME is clean so url_for builds clean root URLs
+            environ['SCRIPT_NAME'] = ''
 
             return self.wsgi_app(environ, start_response)
 
