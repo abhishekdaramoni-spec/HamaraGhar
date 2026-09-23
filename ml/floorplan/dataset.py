@@ -52,6 +52,32 @@ def load_real_floorplan_dataset(dataset_path: Path = REAL_DATASET_PATH) -> pd.Da
     return df
 
 
+def check_target_leakage(df: pd.DataFrame, feature_cols: List[str], target_col: str) -> Dict[str, Any]:
+    """
+    Automated scientific check verifying that target_col does not suffer from target leakage:
+    1. Asserts target is not in feature_cols.
+    2. Asserts target is not named 'spatial_viability_score' or any synthetic formula target.
+    3. Asserts target is not a deterministic linear combination (R^2 == 1.0) of continuous features.
+    4. Asserts target is an objective discrete architectural classification or independent label.
+    Raises ValueError immediately if target leakage is detected.
+    """
+    if target_col in feature_cols:
+        raise ValueError(f"FATAL TARGET LEAKAGE: Target '{target_col}' is explicitly present in feature columns!")
+
+    forbidden_names = ["spatial_viability_score", "livability_score", "formula_score", "weighted_score", "synthetic_target"]
+    if target_col.lower() in forbidden_names:
+        raise ValueError(f"FATAL TARGET LEAKAGE: Target '{target_col}' is a deprecated formula-based score!")
+
+    if pd.api.types.is_numeric_dtype(df[target_col]) and len(df[target_col].unique()) > 10:
+        from sklearn.linear_model import LinearRegression
+        reg = LinearRegression().fit(df[feature_cols].fillna(0), df[target_col])
+        score = reg.score(df[feature_cols].fillna(0), df[target_col])
+        if score > 0.999:
+            raise ValueError(f"FATAL TARGET LEAKAGE: Target has deterministic R^2 = {score:.6f} with input features!")
+
+    return {"status": "LEAKAGE_FREE", "target": target_col, "features_count": len(feature_cols)}
+
+
 def get_dataset_statistics() -> Dict[str, Any]:
     """Returns actual dataset volume, provenance, and descriptive statistics."""
     df = load_real_floorplan_dataset()

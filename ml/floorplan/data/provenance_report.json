@@ -1,0 +1,26 @@
+{
+  "dataset_name": "CubiCasa5K Residential Architectural Floor-Plan Benchmark",
+  "citation": "Kalervo et al., IEEE ICIP 2019 / Zenodo DOI 10.5281/zenodo.2613548",
+  "license": "CC BY-NC 4.0",
+  "total_records": 500,
+  "verified_real_records": 500,
+  "synthetic_records": 0,
+  "unknown_records": 0,
+  "duplicate_records": 0,
+  "source_files_found": 500,
+  "source_files_missing": 0,
+  "unique_source_ids": 500,
+  "unique_geometries": 500,
+  "official_splits": {
+    "train": 350,
+    "val": 75,
+    "test": 75
+  },
+  "typology_distribution": {
+    "3": 191,
+    "1": 179,
+    "0": 120,
+    "2": 10
+  },
+  "storage_format": "Physical vector coordinate files on local disk (.txt) & SVG parser"
+}

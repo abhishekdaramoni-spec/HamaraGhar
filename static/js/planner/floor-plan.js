@@ -306,11 +306,12 @@ const FloorPlanStudio = {
             }
         }
 
-        // 4. ML Layout Quality & Livability Assessment
+        // 4. ML Layout Quality & Manifold Proximity Assessment
         const mlLayout = data.ml_layout_assessment;
         if (mlLayout) {
             const overallScoreEl = document.getElementById('mlOverallScore');
             const tierTextEl = document.getElementById('mlTierText');
+            const refIdEl = document.getElementById('mlReferenceId');
             const daylightEl = document.getElementById('mlDaylightScore');
             const circEl = document.getElementById('mlCirculationScore');
             const aspectEl = document.getElementById('mlAspectScore');
@@ -319,7 +320,16 @@ const FloorPlanStudio = {
             const rankBadgeEl = document.getElementById('mlQualityRankBadge');
 
             if (overallScoreEl) overallScoreEl.textContent = `${mlLayout.overall_ml_score} / 100`;
-            if (tierTextEl) tierTextEl.textContent = `Tier: ${mlLayout.quality_tier} (HistGradientBoosting ML)`;
+            const typName = mlLayout.predicted_typology || 'Zoned Family Residence';
+            if (tierTextEl) tierTextEl.textContent = `Typology: ${typName} (${mlLayout.quality_tier})`;
+            if (refIdEl) {
+                if (mlLayout.closest_cubicasa_id) {
+                    refIdEl.textContent = `Ref: ${mlLayout.closest_cubicasa_id}`;
+                    refIdEl.title = `Closest verified CubiCasa5K sample: ${mlLayout.closest_cubicasa_id}`;
+                } else {
+                    refIdEl.textContent = '';
+                }
+            }
 
             const subs = mlLayout.sub_scores || {};
             if (daylightEl && subs.daylight_exposure !== undefined) daylightEl.textContent = `${subs.daylight_exposure}%`;

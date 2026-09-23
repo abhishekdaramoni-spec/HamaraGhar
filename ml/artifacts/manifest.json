@@ -88,50 +88,191 @@
         "wet_core_distance_ratio"
       ],
       "status": "LEGACY_DEMONSTRATION_ONLY",
-      "note": "Trained on synthetic records calibrated from distributions; superseded by v2."
+      "note": "Legacy synthetic demonstration model \u2014 not used for production inference."
     },
     "floorplan_model_v2.joblib": {
+      "model_name": "CubiCasa5K Real Floor-Plan Typology Classifier",
+      "model_version": "2.0.0",
       "sha256": "cd8117c3549cb044b87a0347289b142198de4a22a476c5233459f03c98afeeb1",
+      "training_dataset_hash": "36e645c846b0a4915442129ebbeb538a53e3b1d07a054bc980dd9030c9f5b6fa",
+      "feature_schema_hash": "4475c0a8f771823f922aa27710b11faef5d1b81bc858379138a7ba097165f716",
+      "created_at": "2026-09-23T13:07:35.124769+00:00",
       "size_bytes": 2873,
       "size_kb": 2.81,
-      "model_name": "CubiCasa5K Real Floor-Plan Typology Classifier",
-      "version": "2.0.0",
       "algorithm": "Multinomial Logistic Regression",
       "framework": "scikit-learn",
-      "target": "Architectural Typology (0: Compact Studio, 1: Zoned Residence, 2: Linear Spine, 3: Multi-Wing Villa)",
-      "dataset": "CubiCasa5K Official Benchmark (Zenodo DOI 10.5281/zenodo.2613548 / CC BY-NC 4.0, 500 verified records)",
-      "train_samples": 350,
-      "val_samples": 75,
-      "test_samples": 75,
-      "test_accuracy": 1.0,
-      "test_macro_f1": 1.0,
-      "benchmark_comparison": {
-        "Dummy (Majority Class)": {
-          "accuracy": 0.2933,
-          "macro_f1": 0.1134,
-          "precision": 0.0733,
-          "recall": 0.25
-        },
-        "Multinomial Logistic Regression": {
-          "accuracy": 1.0,
-          "macro_f1": 1.0,
-          "precision": 1.0,
-          "recall": 1.0
-        },
-        "Random Forest Classifier": {
-          "accuracy": 1.0,
-          "macro_f1": 1.0,
-          "precision": 1.0,
-          "recall": 1.0
-        },
-        "HistGradientBoostingClassifier": {
-          "accuracy": 1.0,
-          "macro_f1": 1.0,
-          "precision": 1.0,
-          "recall": 1.0
+      "target": "layout_typology (0: Compact Studio, 1: Zoned Residence, 2: Linear Spine, 3: Multi-Wing Villa)",
+      "dataset": "CubiCasa5K Benchmark (Zenodo DOI 10.5281/zenodo.2613548 / CC BY-NC 4.0)",
+      "provenance_verified": true,
+      "source_count": 500,
+      "split_strategy": "Official Source-Level 70/15/15 Partition (350 train, 75 val, 75 test)",
+      "metrics": {
+        "test_accuracy": 1.0,
+        "test_macro_f1": 1.0,
+        "test_weighted_f1": 1.0,
+        "test_precision": 1.0,
+        "test_recall": 1.0,
+        "test_confusion_matrix": [
+          [
+            16,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            27,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            2,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            30
+          ]
+        ],
+        "validation_benchmarks": {
+          "Dummy (Majority Class)": {
+            "accuracy": 0.2933,
+            "macro_f1": 0.1134,
+            "weighted_f1": 0.1331,
+            "macro_precision": 0.0733,
+            "macro_recall": 0.25,
+            "confusion_matrix": [
+              [
+                0,
+                16,
+                0,
+                0
+              ],
+              [
+                0,
+                22,
+                0,
+                0
+              ],
+              [
+                0,
+                2,
+                0,
+                0
+              ],
+              [
+                0,
+                35,
+                0,
+                0
+              ]
+            ]
+          },
+          "Multinomial Logistic Regression": {
+            "accuracy": 1.0,
+            "macro_f1": 1.0,
+            "weighted_f1": 1.0,
+            "macro_precision": 1.0,
+            "macro_recall": 1.0,
+            "confusion_matrix": [
+              [
+                16,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                22,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                2,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                35
+              ]
+            ]
+          },
+          "Random Forest Classifier": {
+            "accuracy": 1.0,
+            "macro_f1": 1.0,
+            "weighted_f1": 1.0,
+            "macro_precision": 1.0,
+            "macro_recall": 1.0,
+            "confusion_matrix": [
+              [
+                16,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                22,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                2,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                35
+              ]
+            ]
+          },
+          "HistGradientBoostingClassifier": {
+            "accuracy": 1.0,
+            "macro_f1": 1.0,
+            "weighted_f1": 1.0,
+            "macro_precision": 1.0,
+            "macro_recall": 1.0,
+            "confusion_matrix": [
+              [
+                16,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                22,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                2,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                35
+              ]
+            ]
+          }
         }
       },
-      "provenance_verified": true,
       "features_used": [
         "plot_width_ft",
         "plot_length_ft",

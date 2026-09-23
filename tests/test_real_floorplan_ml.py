@@ -177,6 +177,7 @@ class TestRealFloorPlanML(unittest.TestCase):
     def test_project_isolation_and_idor_prevention(self):
         """Verify User A cannot access or overwrite User B's floor-plan project."""
         with app.app_context():
+            db.create_all()
             u1 = User.query.filter_by(email="alice_test@example.com").first()
             if not u1:
                 u1 = User(name="Alice", email="alice_test@example.com", password_hash=generate_password_hash("SecurePass123!"))

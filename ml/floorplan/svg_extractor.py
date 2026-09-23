@@ -238,9 +238,35 @@ class RealFloorPlanSVGExtractor:
                 "doors_detected": door_count,
                 "windows_detected": window_count,
                 "total_vertices": len(all_points),
-                "scale_ft_per_unit": round(scale_ft_per_unit, 2)
+                "scale_ft_per_unit": round(scale_ft_per_unit, 2),
+                "bounding_box": (round(gx0, 3), round(gy0, 3), round(gx1, 3), round(gy1, 3)),
+                "orientation": None,  # Not annotated in CubiCasa5K vector label coordinate format
+                "adjacency_relationships": None,  # Flat polygon format does not encode explicit topological graph
+                "total_usable_area_sqft": total_carpet
             }
         }
+
+    @classmethod
+    def extract_from_vector_file(cls, filepath: Any) -> Dict[str, Any]:
+        """Reads a physical vector coordinate file (.txt) from local disk and extracts features."""
+        p = Path(filepath)
+        if not p.exists():
+            return {"error": f"File not found: {p}", "source_id": str(p)}
+        with open(p, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        source_id = f"cubicasa5k/labels/{p.parent.name}/{p.name}"
+        return cls.extract_from_cubicasa_vector_label(lines, source_id=source_id)
+
+    @classmethod
+    def extract_from_svg_file(cls, filepath: Any) -> Dict[str, Any]:
+        """Reads a physical SVG XML file (.svg) from local disk and extracts features."""
+        p = Path(filepath)
+        if not p.exists():
+            return {"error": f"File not found: {p}", "source_id": str(p)}
+        with open(p, "r", encoding="utf-8") as f:
+            svg_text = f.read()
+        source_id = f"cubicasa5k/svg/{p.name}"
+        return cls.extract_from_svg_string(svg_text, source_id=source_id)
 
     @classmethod
     def extract_from_svg_string(cls, svg_text: str, source_id: str = "unknown") -> Dict[str, Any]:

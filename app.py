@@ -375,8 +375,15 @@ def generate_deterministic_floor_plan(config, floor=0, variant=0):
 
         rear_y = round(mid_y + mid_len, 1)
         rear_len = round(max(7.0, build_length - (front_len + mid_len)), 1)
-        rooms.append({'id': 'f1_bed2', 'name': 'Children / Bedroom 3', 'type': 'bedroom', 'zone': 'private',
-                      'x': start_x, 'y': rear_y, 'width': build_width, 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Laminated Wood Flooring'})
+        if bhk >= 5:
+            half_w = round(build_width / 2.0, 1)
+            rooms.append({'id': 'f1_bed3', 'name': 'Bedroom 4', 'type': 'bedroom', 'zone': 'private',
+                          'x': start_x, 'y': rear_y, 'width': half_w, 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Laminated Wood Flooring'})
+            rooms.append({'id': 'f1_bed4', 'name': 'Bedroom 5 / Study', 'type': 'bedroom', 'zone': 'private',
+                          'x': round(start_x + half_w, 1), 'y': rear_y, 'width': round(build_width - half_w, 1), 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Laminated Wood Flooring'})
+        else:
+            rooms.append({'id': 'f1_bed2', 'name': 'Children / Bedroom 3', 'type': 'bedroom', 'zone': 'private',
+                          'x': start_x, 'y': rear_y, 'width': build_width, 'height': rear_len, 'color': COLORS['bedroom'], 'floorName': 'Laminated Wood Flooring'})
 
     # Compute Canonical Walls, Doors, Windows, and Areas
     total_carpet = 0.0

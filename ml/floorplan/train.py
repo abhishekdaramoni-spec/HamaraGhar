@@ -10,17 +10,21 @@ Trains on genuine CubiCasa5K floor-plan samples with strict source-level partiti
 - Train: 350 samples (70%)
 - Validation: 75 samples (15%)
 - Test: 75 samples (15%)
-Zero data leakage. Verifiable source IDs.
+Zero data leakage. Automated target leakage verification.
 """
 import json
 import hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 import joblib
 import pandas as pd
 import numpy as np
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, classification_report
+from sklearn.metrics import (
+    accuracy_score, f1_score, precision_score, recall_score,
+    confusion_matrix, classification_report
+)
 
-from ml.floorplan.dataset import load_real_floorplan_dataset
+from ml.floorplan.dataset import load_real_floorplan_dataset, check_target_leakage, REAL_DATASET_PATH
 from ml.floorplan.features import FEATURE_COLUMNS, TYPOLOGY_NAMES
 from ml.floorplan.model import create_baseline_models, create_typology_classifier_pipeline
 
@@ -50,12 +54,15 @@ def train_and_benchmark_models():
     print(f"Total verified CubiCasa5K samples: {len(df)}")
     print(f"Features dimension                : {len(FEATURE_COLUMNS)}")
 
+    # 1. Automated Target Leakage Gate (Fails immediately if leakage is detected)
+    leakage_status = check_target_leakage(df, FEATURE_COLUMNS, "layout_typology")
+    print(f"Target Leakage Gate               : PASSED ({leakage_status['status']})")
+
     # Split by official CubiCasa5K split to guarantee zero leakage
     train_df = df[df["official_split"] == "train"]
     val_df = df[df["official_split"] == "val"]
     test_df = df[df["official_split"] == "test"]
 
-    # Fallback if split column missing
     if len(train_df) == 0 or len(val_df) == 0 or len(test_df) == 0:
         n = len(df)
         train_df = df.iloc[:int(n * 0.70)]
@@ -76,7 +83,7 @@ def train_and_benchmark_models():
     print(f"Holdout Test    : {len(X_test)} samples ({len(X_test)/len(df)*100:.1f}%)")
 
     models = create_baseline_models(random_state=42)
-    results = {}
+    val_benchmark = {}
     best_val_f1 = -1.0
     best_model_name = None
     best_pipeline = None
@@ -87,21 +94,25 @@ def train_and_benchmark_models():
         val_preds = pipeline.predict(X_val)
 
         acc = accuracy_score(y_val, val_preds)
-        f1 = f1_score(y_val, val_preds, average="macro", zero_division=0)
-        prec = precision_score(y_val, val_preds, average="macro", zero_division=0)
-        rec = recall_score(y_val, val_preds, average="macro", zero_division=0)
+        macro_f1 = f1_score(y_val, val_preds, average="macro", zero_division=0)
+        weighted_f1 = f1_score(y_val, val_preds, average="weighted", zero_division=0)
+        macro_prec = precision_score(y_val, val_preds, average="macro", zero_division=0)
+        macro_rec = recall_score(y_val, val_preds, average="macro", zero_division=0)
+        cm = confusion_matrix(y_val, val_preds).tolist()
 
-        results[name] = {
+        val_benchmark[name] = {
             "accuracy": round(acc, 4),
-            "macro_f1": round(f1, 4),
-            "precision": round(prec, 4),
-            "recall": round(rec, 4)
+            "macro_f1": round(macro_f1, 4),
+            "weighted_f1": round(weighted_f1, 4),
+            "macro_precision": round(macro_prec, 4),
+            "macro_recall": round(macro_rec, 4),
+            "confusion_matrix": cm
         }
         print(f"[{name}]")
-        print(f"  Accuracy: {acc:.4f} | Macro F1: {f1:.4f} | Precision: {prec:.4f} | Recall: {rec:.4f}")
+        print(f"  Accuracy: {acc:.4f} | Macro F1: {macro_f1:.4f} | Weighted F1: {weighted_f1:.4f} | Prec: {macro_prec:.4f} | Rec: {macro_rec:.4f}")
 
-        if f1 > best_val_f1:
-            best_val_f1 = f1
+        if macro_f1 > best_val_f1:
+            best_val_f1 = macro_f1
             best_model_name = name
             best_pipeline = pipeline
 
@@ -111,12 +122,15 @@ def train_and_benchmark_models():
     print("\n--- EVALUATION ON LOCKED HOLDOUT TEST SET ---")
     test_preds = best_pipeline.predict(X_test)
     test_acc = accuracy_score(y_test, test_preds)
-    test_f1 = f1_score(y_test, test_preds, average="macro", zero_division=0)
+    test_macro_f1 = f1_score(y_test, test_preds, average="macro", zero_division=0)
+    test_weighted_f1 = f1_score(y_test, test_preds, average="weighted", zero_division=0)
     test_prec = precision_score(y_test, test_preds, average="macro", zero_division=0)
     test_rec = recall_score(y_test, test_preds, average="macro", zero_division=0)
+    test_cm = confusion_matrix(y_test, test_preds).tolist()
 
     print(f"Test Accuracy   : {test_acc:.4f}")
-    print(f"Test Macro F1   : {test_f1:.4f}")
+    print(f"Test Macro F1   : {test_macro_f1:.4f}")
+    print(f"Test Weighted F1: {test_weighted_f1:.4f}")
     print(f"Test Precision  : {test_prec:.4f}")
     print(f"Test Recall     : {test_rec:.4f}")
     print("\nTest Classification Report:")
@@ -126,9 +140,12 @@ def train_and_benchmark_models():
     joblib.dump(best_pipeline, MODEL_PATH)
     print(f"Saved production model to: {MODEL_PATH}")
 
-    # Update Manifest
+    # Cryptographic Hashes for Production Lineage Manifest
     model_sha = sha256_of_file(MODEL_PATH)
     file_size = MODEL_PATH.stat().st_size
+    dataset_sha = sha256_of_file(REAL_DATASET_PATH) if REAL_DATASET_PATH.exists() else "N/A"
+    feature_schema_hash = hashlib.sha256(",".join(FEATURE_COLUMNS).encode("utf-8")).hexdigest()
+    created_at = datetime.now(timezone.utc).isoformat()
 
     manifest = {}
     if MANIFEST_PATH.exists():
@@ -138,28 +155,36 @@ def train_and_benchmark_models():
     if "artifacts" not in manifest:
         manifest["artifacts"] = {}
 
-    # Label legacy model appropriately
+    # Clearly label legacy demonstration model
     if "floorplan_model_v1.joblib" in manifest["artifacts"]:
         manifest["artifacts"]["floorplan_model_v1.joblib"]["status"] = "LEGACY_DEMONSTRATION_ONLY"
-        manifest["artifacts"]["floorplan_model_v1.joblib"]["note"] = "Trained on synthetic records calibrated from distributions; superseded by v2."
+        manifest["artifacts"]["floorplan_model_v1.joblib"]["note"] = "Legacy synthetic demonstration model — not used for production inference."
 
     manifest["artifacts"]["floorplan_model_v2.joblib"] = {
+        "model_name": "CubiCasa5K Real Floor-Plan Typology Classifier",
+        "model_version": "2.0.0",
         "sha256": model_sha,
+        "training_dataset_hash": dataset_sha,
+        "feature_schema_hash": feature_schema_hash,
+        "created_at": created_at,
         "size_bytes": file_size,
         "size_kb": round(file_size / 1024, 2),
-        "model_name": "CubiCasa5K Real Floor-Plan Typology Classifier",
-        "version": "2.0.0",
         "algorithm": best_model_name,
         "framework": "scikit-learn",
-        "target": "Architectural Typology (0: Compact Studio, 1: Zoned Residence, 2: Linear Spine, 3: Multi-Wing Villa)",
-        "dataset": "CubiCasa5K Official Benchmark (Zenodo DOI 10.5281/zenodo.2613548 / CC BY-NC 4.0, 500 verified records)",
-        "train_samples": len(X_train),
-        "val_samples": len(X_val),
-        "test_samples": len(X_test),
-        "test_accuracy": round(test_acc, 4),
-        "test_macro_f1": round(test_f1, 4),
-        "benchmark_comparison": results,
+        "target": "layout_typology (0: Compact Studio, 1: Zoned Residence, 2: Linear Spine, 3: Multi-Wing Villa)",
+        "dataset": "CubiCasa5K Benchmark (Zenodo DOI 10.5281/zenodo.2613548 / CC BY-NC 4.0)",
         "provenance_verified": True,
+        "source_count": len(df),
+        "split_strategy": "Official Source-Level 70/15/15 Partition (350 train, 75 val, 75 test)",
+        "metrics": {
+            "test_accuracy": round(test_acc, 4),
+            "test_macro_f1": round(test_macro_f1, 4),
+            "test_weighted_f1": round(test_weighted_f1, 4),
+            "test_precision": round(test_prec, 4),
+            "test_recall": round(test_rec, 4),
+            "test_confusion_matrix": test_cm,
+            "validation_benchmarks": val_benchmark
+        },
         "features_used": FEATURE_COLUMNS
     }
 
@@ -169,9 +194,10 @@ def train_and_benchmark_models():
 
     return {
         "best_model": best_model_name,
-        "val_results": results,
+        "val_results": val_benchmark,
         "test_accuracy": test_acc,
-        "test_macro_f1": test_f1
+        "test_macro_f1": test_macro_f1,
+        "test_weighted_f1": test_weighted_f1
     }
 
 

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <g id="Wall">
+    <polygon points="100,100 900,100 900,120 100,120" />
+    <polygon points="100,100 120,100 120,900 100,900" />
+    <polygon points="880,100 900,100 900,900 880,900" />
+    <polygon points="100,880 900,880 900,900 100,900" />
+    <polygon points="500,100 520,100 520,900 500,900" />
+  </g>
+  <g id="Door">
+    <rect x="250" y="880" width="80" height="20" />
+    <rect x="500" y="450" width="20" height="80" />
+  </g>
+  <g id="Window">
+    <rect x="200" y="100" width="120" height="20" />
+    <rect x="700" y="100" width="120" height="20" />
+  </g>
+  <g id="Room">
+    <polygon points="120,120 500,120 500,880 120,880" class="Living" />
+    <polygon points="520,120 880,120 880,880 520,880" class="Bedroom" />
+  </g>
+</svg>

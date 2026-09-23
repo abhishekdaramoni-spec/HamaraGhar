@@ -22,6 +22,30 @@
             Type your ideas (city, plot size, bedrooms, budget, vastu, special spaces). Our physical constraint solver will validate feasibility against NBC 2016 building norms and auto-populate the form.
         </p>
         
+        <!-- Subsystem Transparency Banner -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin-bottom: var(--space-4); font-size: 11px;">
+            <div style="padding: 6px 10px; border-radius: 6px; background: rgba(30,58,95,0.06); border: 1px solid var(--color-border);">
+                <strong style="color: var(--color-primary); display: block;">1. AI Requirement Intake</strong>
+                <span style="color: var(--color-text-muted);">GenAI + Pydantic Bounds</span>
+            </div>
+            <div style="padding: 6px 10px; border-radius: 6px; background: rgba(124,58,237,0.06); border: 1px solid var(--color-border);">
+                <strong style="color: #7c3aed; display: block;">2. Floor-Plan Intelligence</strong>
+                <span style="color: var(--color-text-muted);">CubiCasa5K ML + Similarity</span>
+            </div>
+            <div style="padding: 6px 10px; border-radius: 6px; background: rgba(13,148,136,0.06); border: 1px solid var(--color-border);">
+                <strong style="color: #0d9488; display: block;">3. Engineering Gate</strong>
+                <span style="color: var(--color-text-muted);">NBC 2016 Clearance</span>
+            </div>
+            <div style="padding: 6px 10px; border-radius: 6px; background: rgba(2,132,199,0.06); border: 1px solid var(--color-border);">
+                <strong style="color: #0284c7; display: block;">4. Property Valuation</strong>
+                <span style="color: var(--color-text-muted);">Kaggle Market ML Regressor</span>
+            </div>
+            <div style="padding: 6px 10px; border-radius: 6px; background: rgba(217,119,6,0.06); border: 1px solid var(--color-border);">
+                <strong style="color: #d97706; display: block;">5. Construction Cost</strong>
+                <span style="color: var(--color-text-muted);">CPWD DSR 2024 (Non-ML)</span>
+            </div>
+        </div>
+
         <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-3);">
             <input type="text" id="nlPromptInput" class="form-input" style="flex: 1; min-width: 280px;" placeholder="e.g. 3BHK duplex on 30x50 plot in Bangalore with pooja room and parking, budget 85 lakhs">
             <button type="button" id="btnParsePrompt" class="btn btn-primary" onclick="RequirementsWizard.parseNaturalLanguage()">
