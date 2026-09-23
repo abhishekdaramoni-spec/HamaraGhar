@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let autoRotate = true;
 
     // Create 3D Container
-    heroViewport.style.perspective = ${zoom}px;
+    heroViewport.style.perspective = `${zoom}px`;
     heroViewport.style.overflow = 'hidden';
 
     const stage = document.createElement('div');
@@ -24,37 +24,32 @@ document.addEventListener('DOMContentLoaded', () => {
     heroViewport.appendChild(stage);
 
     function updateStage() {
-        stage.style.transform = 	ranslate(-50%, -46%) rotateX(deg) rotateY(deg);
+        stage.style.transform = `translate(-50%, -46%) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
     }
     updateStage();
 
     // Create Architectural Villa Elements
     function createBox(w, h, d, x, y, z, bg, border, extraClass = '') {
         const box = document.createElement('div');
-        box.className = rch-cuboid ;
-        box.style.width = ${w}px;
-        box.style.height = ${h}px;
-        box.style.transform = 	ranslate3d(px, px, px);
+        box.className = `arch-cuboid ${extraClass}`;
+        box.style.width = `${w}px`;
+        box.style.height = `${h}px`;
+        box.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
 
         const faces = [
-            { name: 'front', transform: 	ranslateZ(px), w: w, h: h },
-            { name: 'back', transform: 
-otateY(180deg) translateZ(px), w: w, h: h },
-            { name: 'right', transform: 
-otateY(90deg) translateZ(px), w: d, h: h },
-            { name: 'left', transform: 
-otateY(-90deg) translateZ(px), w: d, h: h },
-            { name: 'top', transform: 
-otateX(90deg) translateZ(px), w: w, h: d },
-            { name: 'bottom', transform: 
-otateX(-90deg) translateZ(px), w: w, h: d }
+            { name: 'front', transform: `translateZ(${d / 2}px)`, w: w, h: h },
+            { name: 'back', transform: `rotateY(180deg) translateZ(${d / 2}px)`, w: w, h: h },
+            { name: 'right', transform: `rotateY(90deg) translateZ(${w / 2}px)`, w: d, h: h },
+            { name: 'left', transform: `rotateY(-90deg) translateZ(${w / 2}px)`, w: d, h: h },
+            { name: 'top', transform: `rotateX(90deg) translateZ(${h / 2}px)`, w: w, h: d },
+            { name: 'bottom', transform: `rotateX(-90deg) translateZ(${h / 2}px)`, w: w, h: d }
         ];
 
         faces.forEach(f => {
             const face = document.createElement('div');
-            face.className = rch-face face-;
-            face.style.width = ${f.w}px;
-            face.style.height = ${f.h}px;
+            face.className = `arch-face face-${f.name}`;
+            face.style.width = `${f.w}px`;
+            face.style.height = `${f.h}px`;
             face.style.backgroundColor = bg;
             if (border) face.style.border = border;
             face.style.transform = f.transform;

@@ -10,19 +10,32 @@ if str(ROOT) not in sys.path:
 try:
     from app import app as flask_app
 
+    import urllib.parse
+
     class VercelPathMiddleware:
         def __init__(self, wsgi_app):
             self.wsgi_app = wsgi_app
 
         def __call__(self, environ, start_response):
-            path = environ.get('PATH_INFO', '')
-            # If Vercel rewrites forwarded /api/index.py or /api/index as the path
-            if path in ('/api/index.py', '/api/index', '/api'):
-                environ['PATH_INFO'] = '/'
-            elif path.startswith('/api/index.py/'):
-                environ['PATH_INFO'] = path[len('/api/index.py'):]
-            elif path.startswith('/api/index/'):
-                environ['PATH_INFO'] = path[len('/api/index'):]
+            qs = environ.get('QUERY_STRING', '')
+            params = urllib.parse.parse_qs(qs, keep_blank_values=True)
+
+            if '_route' in params:
+                route_val = params['_route'][0].strip('/')
+                params.pop('_route', None)
+                new_qs = urllib.parse.urlencode(params, doseq=True)
+                environ['QUERY_STRING'] = new_qs
+                environ['PATH_INFO'] = '/' + route_val if route_val else '/'
+                environ['REQUEST_URI'] = environ['PATH_INFO'] + ('?' + new_qs if new_qs else '')
+            else:
+                path = environ.get('PATH_INFO', '')
+                if path in ('/api/index.py', '/api/index', '/api'):
+                    environ['PATH_INFO'] = '/'
+                elif path.startswith('/api/index.py/'):
+                    environ['PATH_INFO'] = path[len('/api/index.py'):]
+                elif path.startswith('/api/index/'):
+                    environ['PATH_INFO'] = path[len('/api/index'):]
+
             return self.wsgi_app(environ, start_response)
 
     app = VercelPathMiddleware(flask_app)
