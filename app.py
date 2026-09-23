@@ -78,8 +78,11 @@ with app.app_context():
         db.create_all()
     except Exception as e:
         app.logger.warning(f"Initial db.create_all() failed: {e}. Switching to /tmp/smartbuild.db")
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/smartbuild.db'
-        db.create_all()
+        try:
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/smartbuild.db'
+            db.create_all()
+        except Exception as inner_e:
+            app.logger.warning(f"Serverless SQLite initialization fallback skipped: {inner_e}")
 
 # Decorators
 def login_required(f):
@@ -880,17 +883,21 @@ def api_layouts():
     return jsonify(read_json_data('house_layouts.json'))
 
 # --- ML INFERENCE API ---
-from ml.inference.predictor import get_inference_service
-
 from ml.security import rate_limit, validate_ml_numeric_input, sanitize_prompt_for_llm
+
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
 
 @app.route('/api/ml/health', methods=['GET'])
 def api_ml_health():
+    from ml.inference.predictor import get_inference_service
     service = get_inference_service()
     return jsonify(service.get_health_status())
 
 @app.route('/api/ml/metadata', methods=['GET'])
 def api_ml_metadata():
+    from ml.inference.predictor import get_inference_service
     service = get_inference_service()
     return jsonify(service.get_metadata())
 
@@ -902,6 +909,7 @@ def api_ml_predict_property_price():
     is_valid, error_msg = validate_ml_numeric_input(payload)
     if not is_valid:
         return jsonify({'status': 'error', 'error_code': 'INVALID_INPUT_BOUNDS', 'message': error_msg}), 400
+    from ml.inference.predictor import get_inference_service
     service = get_inference_service()
     result = service.predict_property_price(payload)
     return jsonify(result)
@@ -913,6 +921,7 @@ def api_ml_calculate_construction_cost():
     is_valid, error_msg = validate_ml_numeric_input(payload)
     if not is_valid:
         return jsonify({'status': 'error', 'error_code': 'INVALID_INPUT_BOUNDS', 'message': error_msg}), 400
+    from ml.inference.predictor import get_inference_service
     service = get_inference_service()
     result = service.calculate_construction_cost(payload)
     return jsonify(result)
@@ -924,6 +933,7 @@ def api_ml_predict():
     is_valid, error_msg = validate_ml_numeric_input(payload)
     if not is_valid:
         return jsonify({'status': 'error', 'error_code': 'INVALID_INPUT_BOUNDS', 'message': error_msg}), 400
+    from ml.inference.predictor import get_inference_service
     service = get_inference_service()
     property_res = service.predict_property_price(payload)
     construction_res = service.calculate_construction_cost(payload)
@@ -934,8 +944,6 @@ def api_ml_predict():
     })
 
 # --- LLM NATURAL LANGUAGE REQUIREMENT PARSER ---
-from ml.llm.client import get_llm_service
-
 @app.route('/api/ml/parse-requirements', methods=['POST'])
 @rate_limit(max_per_minute=60)
 def api_ml_parse_requirements():
@@ -944,6 +952,7 @@ def api_ml_parse_requirements():
     prompt = sanitize_prompt_for_llm(raw_prompt)
     if not prompt:
         return jsonify({'status': 'error', 'error_code': 'EMPTY_PROMPT', 'message': 'Prompt cannot be empty.'}), 400
+    from ml.llm.client import get_llm_service
     service = get_llm_service()
     parsed_req, warnings = service.parse_requirements(prompt)
     return jsonify({
@@ -953,8 +962,6 @@ def api_ml_parse_requirements():
     })
 
 # --- HYBRID ARCHITECTURAL PLANNING ENGINE ---
-from ml.planner.hybrid_engine import generate_hybrid_plan
-
 @app.route('/api/ml/hybrid-plan', methods=['POST'])
 @rate_limit(max_per_minute=120)
 def api_ml_hybrid_plan():
@@ -964,6 +971,7 @@ def api_ml_hybrid_plan():
         return jsonify({'status': 'error', 'error_code': 'INVALID_INPUT_BOUNDS', 'message': error_msg}), 400
     floor = int(payload.get('floor', 0))
     variant = int(payload.get('variant', 0))
+    from ml.planner.hybrid_engine import generate_hybrid_plan
     result = generate_hybrid_plan(payload, floor=floor, variant=variant)
     return jsonify(result)
 
