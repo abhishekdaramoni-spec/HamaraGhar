@@ -17,6 +17,13 @@ try:
             self.wsgi_app = wsgi_app
 
         def __call__(self, environ, start_response):
+            if 'debug' in environ.get('PATH_INFO', '') or 'debug' in environ.get('QUERY_STRING', ''):
+                import json
+                safe_env = {k: str(v) for k, v in environ.items() if not k.startswith('wsgi.') and 'SECRET' not in k}
+                body = json.dumps(safe_env, indent=2).encode('utf-8')
+                start_response('200 OK', [('Content-Type', 'application/json'), ('Content-Length', str(len(body)))])
+                return [body]
+
             qs = environ.get('QUERY_STRING', '')
             params = urllib.parse.parse_qs(qs, keep_blank_values=True)
 
