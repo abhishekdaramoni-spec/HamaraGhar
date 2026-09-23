@@ -8,7 +8,24 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 try:
-    from app import app
+    from app import app as flask_app
+
+    class VercelPathMiddleware:
+        def __init__(self, wsgi_app):
+            self.wsgi_app = wsgi_app
+
+        def __call__(self, environ, start_response):
+            path = environ.get('PATH_INFO', '')
+            # If Vercel rewrites forwarded /api/index.py or /api/index as the path
+            if path in ('/api/index.py', '/api/index', '/api'):
+                environ['PATH_INFO'] = '/'
+            elif path.startswith('/api/index.py/'):
+                environ['PATH_INFO'] = path[len('/api/index.py'):]
+            elif path.startswith('/api/index/'):
+                environ['PATH_INFO'] = path[len('/api/index'):]
+            return self.wsgi_app(environ, start_response)
+
+    app = VercelPathMiddleware(flask_app)
 except Exception as e:
     import traceback
     tb = traceback.format_exc()
