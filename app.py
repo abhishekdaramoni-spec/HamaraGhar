@@ -34,7 +34,23 @@ class ServerlessDebugMiddleware:
             ])
             return [response_body]
 
-app.wsgi_app = ServerlessDebugMiddleware(app.wsgi_app)
+class VercelPathMiddleware:
+    """Normalizes PATH_INFO from Vercel serverless rewrites and ensures clean root URLs."""
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO', '')
+        if path.startswith('/api/index.py'):
+            remainder = path[len('/api/index.py'):]
+            environ['PATH_INFO'] = remainder if remainder else '/'
+        elif path.startswith('/api/index'):
+            remainder = path[len('/api/index'):]
+            environ['PATH_INFO'] = remainder if remainder else '/'
+        environ['SCRIPT_NAME'] = ''
+        return self.wsgi_app(environ, start_response)
+
+app.wsgi_app = VercelPathMiddleware(ServerlessDebugMiddleware(app.wsgi_app))
 
 # Stable secret key fallback for serverless functions (Vercel/Lambda)
 app.secret_key = os.environ.get('SECRET_KEY', 'hamaraghar-session-secret-key-prod-2024')

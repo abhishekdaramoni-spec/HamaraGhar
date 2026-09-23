@@ -17,6 +17,14 @@ try:
             self.wsgi_app = wsgi_app
 
         def __call__(self, environ, start_response):
+            path = environ.get('PATH_INFO', '')
+            if path.startswith('/api/index.py'):
+                remainder = path[len('/api/index.py'):]
+                environ['PATH_INFO'] = remainder if remainder else '/'
+            elif path.startswith('/api/index'):
+                remainder = path[len('/api/index'):]
+                environ['PATH_INFO'] = remainder if remainder else '/'
+
             qs = environ.get('QUERY_STRING', '')
             params = urllib.parse.parse_qs(qs, keep_blank_values=True)
             if '__path' in params:
@@ -24,27 +32,8 @@ try:
                 environ['PATH_INFO'] = '/' + p if p else '/'
                 params.pop('__path', None)
                 environ['QUERY_STRING'] = urllib.parse.urlencode(params, doseq=True)
-            elif '_route' in params:
-                p = params['_route'][0].strip('/')
-                environ['PATH_INFO'] = '/' + p if p else '/'
-                params.pop('_route', None)
-                environ['QUERY_STRING'] = urllib.parse.urlencode(params, doseq=True)
-            else:
-                real_path = (
-                    environ.get('HTTP_X_MATCHED_PATH') or
-                    environ.get('HTTP_X_FORWARDED_URI') or
-                    environ.get('HTTP_X_ORIGINAL_URI') or
-                    environ.get('HTTP_X_REWRITE_URL')
-                )
-                if real_path:
-                    path_only = real_path.split('?', 1)[0]
-                    environ['PATH_INFO'] = path_only if path_only else '/'
-                elif environ.get('PATH_INFO') in ('/api/index.py', '/api/index', '/api'):
-                    environ['PATH_INFO'] = '/'
 
-            # Ensure SCRIPT_NAME is clean so url_for builds clean root URLs
             environ['SCRIPT_NAME'] = ''
-
             return self.wsgi_app(environ, start_response)
 
     app = VercelPathMiddleware(flask_app)
