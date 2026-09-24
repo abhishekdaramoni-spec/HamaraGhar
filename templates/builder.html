@@ -1,12 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %}Architectural 3D Studio — HamaraGhar{% endblock %}
+{% block title %}Architectural 2D ↔ 3D Synchronized Studio — HamaraGhar{% endblock %}
 
 {% block content %}
-<div class="studio-workspace">
-    <!-- Studio Top Bar -->
-    <header class="studio-topbar">
-        <div class="st-left">
+<div class="studio-split-container">
+    <!-- Server Data Embedding -->
+    <script id="server-project-data" type="application/json">
+        {{ (project_dict | tojson) if project_dict else 'null' }}
+    </script>
+
+    <!-- Studio Top Bar Navigation -->
+    <header class="studio-topbar-nav">
+        <div class="st-brand-group">
             <span class="st-brand-mark">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
@@ -15,233 +20,233 @@
                 </svg>
             </span>
             <div class="st-project-info">
-                <span class="st-label">Project</span>
-                <span class="st-project-name" id="builderProjectName">Modern Residence</span>
+                <span class="st-label">Active Project</span>
+                <span class="st-project-name" id="builderProjectName">{{ project.name if project else 'Modern Residence' }}</span>
             </div>
             <div class="st-actions-history">
-                <button type="button" class="st-btn-icon" id="btnUndo" title="Undo (Ctrl+Z)">
+                <button type="button" class="st-btn-icon" id="btnStudioUndo" title="Undo (Ctrl+Z)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
                 </button>
-                <button type="button" class="st-btn-icon" id="btnRedo" title="Redo (Ctrl+Y)">
+                <button type="button" class="st-btn-icon" id="btnStudioRedo" title="Redo (Ctrl+Y)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
                 </button>
             </div>
             <span class="st-save-status" id="saveStatusIndicator">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Saved</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Live Synced</span>
             </span>
         </div>
 
+        <!-- Center View Switcher & Floor Selector -->
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div class="st-mode-selector">
+                <button type="button" class="st-mode-btn" data-mode="2d">2D</button>
+                <button type="button" class="st-mode-btn" data-mode="3d">3D</button>
+                <button type="button" class="st-mode-btn active" data-mode="split">Split</button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
+                <label for="studioFloorSelect" style="color: #94a3b8; font-weight: 600;">Floor:</label>
+                <select id="studioFloorSelect" style="background: rgba(255,255,255,0.08); color: #ffffff; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 4px 8px; font-size: 11px; outline: none; cursor: pointer;">
+                    <option value="0" selected>Ground Floor</option>
+                    <option value="1">First Floor</option>
+                    <option value="all">All Floors</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Right Action Buttons -->
         <div class="st-right">
-            <button type="button" class="btn btn-outline btn-sm" id="btnShareStudio">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                <span>Share</span>
-            </button>
-            <button type="button" class="btn btn-outline btn-sm" id="btnExportStudio">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <button type="button" class="btn btn-outline btn-sm" id="btnStudioExport" title="Export High-Resolution Blueprint PNG">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 <span>Export</span>
             </button>
-            <button type="button" class="btn btn-primary btn-sm" id="save-project-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                <span>Save Project</span>
+            <button type="button" class="btn btn-primary btn-sm" id="btnStudioSave">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>Save</span>
             </button>
         </div>
     </header>
 
-    <div class="studio-body">
-        <!-- Left Vertical Floating CAD Toolbar -->
+    <!-- Studio Main Body with CAD Tools & Split Viewports -->
+    <div class="studio-main-body">
+        <!-- Left Vertical CAD Toolbar -->
         <aside class="studio-cad-toolbar" aria-label="CAD Tools">
-            <button type="button" class="cad-tool-btn active" data-tool="select" title="Select Tool (V)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7 18 3-7 7-3L3 3z"></path></svg>
+            <button type="button" class="cad-tool-btn active" data-tool="select" title="Select / Move Room (V)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7 18 3-7 7-3L3 3z"></path></svg>
             </button>
-            <button type="button" class="cad-tool-btn" data-tool="room" title="Add Room (R)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="12" x2="21" y2="12"></line><line x1="12" y1="3" x2="12" y2="21"></line></svg>
+            <button type="button" class="cad-tool-btn" data-tool="door" title="Add Door to Room (D)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
             </button>
-            <button type="button" class="cad-tool-btn" data-tool="wall" title="Wall Tool (W)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="1"></rect><line x1="9" y1="8" x2="9" y2="16"></line><line x1="15" y1="8" x2="15" y2="16"></line></svg>
+            <button type="button" class="cad-tool-btn" data-tool="window" title="Add Window to Room (W)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"></rect><line x1="12" y1="3" x2="12" y2="21"></line><line x1="3" y1="12" x2="21" y2="12"></line></svg>
             </button>
-            <button type="button" class="cad-tool-btn" data-tool="door" title="Door (D)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
+            <button type="button" class="cad-tool-btn" data-tool="stairs" title="Stairway Zone (S)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 20 8 20 8 14 14 14 14 8 20 8 20 2"></polyline></svg>
             </button>
-            <button type="button" class="cad-tool-btn" data-tool="window" title="Window (O)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"></rect><line x1="12" y1="3" x2="12" y2="21"></line><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+            <button type="button" class="cad-tool-btn" data-tool="furniture" title="Toggle Furniture Placement (F)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"></path><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path><line x1="6" y1="18" x2="6" y2="21"></line><line x1="18" y1="18" x2="18" y2="21"></line></svg>
             </button>
-            <button type="button" class="cad-tool-btn" data-tool="furniture" title="Interior Furniture (F)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"></path><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path><line x1="6" y1="18" x2="6" y2="21"></line><line x1="18" y1="18" x2="18" y2="21"></line></svg>
-            </button>
-            <button type="button" class="cad-tool-btn" data-tool="material" title="Material Palette (M)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>
-            </button>
-            <button type="button" class="cad-tool-btn" data-tool="measure" title="Measure Distance (T)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.3 15.3l-6.6 6.6c-.4.4-1 .4-1.4 0l-11-11c-.4-.4-.4-1 0-1.4l6.6-6.6c.4-.4 1-.4 1.4 0l11 11c.4.4.4 1 0 1.4z"></path><path d="M14.5 4.5l3 3"></path><path d="M11.5 7.5l2 2"></path><path d="M8.5 10.5l3 3"></path><path d="M5.5 13.5l2 2"></path></svg>
+            <button type="button" class="cad-tool-btn" data-tool="measure" title="Dimension Tool (T)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.3 15.3l-6.6 6.6c-.4.4-1 .4-1.4 0l-11-11c-.4-.4-.4-1 0-1.4l6.6-6.6c.4-.4 1-.4 1.4 0l11 11c.4.4.4 1 0 1.4z"></path></svg>
             </button>
         </aside>
 
-        <!-- Center Viewport (Primary Visual Focal Point - 85%+ screen) -->
-        <main class="studio-viewport-container">
-            <div class="scene-container" id="studioSceneContainer">
-                <div id="scene">
-                    <div id="house">
-                        <!-- 3D Architectural house rendered here -->
-                    </div>
+        <!-- Center Synchronized Split Workspaces -->
+        <main class="studio-split-workspace" id="studioSplitWorkspace">
+            <!-- Left Pane: 2D Floor Plan (Editable) -->
+            <section class="studio-pane" id="panel2D" style="flex: 1;">
+                <div class="studio-pane-header">
+                    <span>2D Floor Plan (Editable)</span>
+                    <span style="font-size: 10px; color: #94a3b8; font-family: monospace;">CANONICAL CAD BLUEPRINT</span>
+                </div>
+                <div class="studio-pane-canvas" id="canvas2DContainer">
+                    <canvas id="floorPlan2DCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+            </section>
+
+            <!-- Right Pane: 3D House View (Interactive) -->
+            <section class="studio-pane" id="panel3D" style="flex: 1.1;">
+                <div class="studio-pane-header">
+                    <span>3D House View (Interactive)</span>
+                    <span style="font-size: 10px; color: #38bdf8; font-family: monospace;">WEBGL THREE.JS ENGINE</span>
+                </div>
+                <div class="studio-pane-canvas" id="three3DContainer">
+                    <!-- Three.js Canvas injected dynamically here -->
                 </div>
 
-                <!-- Floating Context Cards Over Workspace -->
-                <div class="studio-floating-card top-left" id="floatingSelectedRoom" style="display: none;">
-                    <div class="sfc-header">
-                        <span class="sfc-type">SELECTED ROOM</span>
-                        <button type="button" class="sfc-close" id="closeFloatingRoom">&times;</button>
-                    </div>
-                    <div class="sfc-title" id="flRoomName">BEDROOM</div>
-                    <div class="sfc-specs">
-                        <span id="flRoomDim">14' × 13'</span> &bull; <span id="flRoomFloor">Floor 1</span>
-                    </div>
-                    <div class="sfc-actions">
-                        <button type="button" class="btn btn-outline btn-xs" id="btnEditRoom">Edit Space</button>
-                    </div>
+                <!-- Floating 3D Camera Controls Toolbar (Left) -->
+                <div class="cam-floating-toolbar">
+                    <button type="button" class="cam-tool-btn" data-cam="orbit" title="Free Orbit View">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span>Orbit</span>
+                    </button>
+                    <button type="button" class="cam-tool-btn" data-cam="top" title="Top Down Plan View">
+                        <span>Top</span>
+                    </button>
+                    <button type="button" class="cam-tool-btn" data-cam="front" title="Front Elevation View">
+                        <span>Front</span>
+                    </button>
+                    <button type="button" class="cam-tool-btn" data-cam="left" title="Left Side Elevation">
+                        <span>Left</span>
+                    </button>
+                    <button type="button" class="cam-tool-btn" data-cam="right" title="Right Side Elevation">
+                        <span>Right</span>
+                    </button>
+                    <button type="button" class="cam-tool-btn" data-cam="iso" title="Isometric 3D Angle">
+                        <span>Iso</span>
+                    </button>
+                    <button type="button" class="cam-tool-btn" data-cam="reset" title="Reset Camera View">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                        <span>Reset</span>
+                    </button>
                 </div>
 
-                <div class="studio-floating-card top-right">
-                    <div class="sfc-type">PROJECT SPECIFICATION</div>
-                    <div class="sfc-title" id="flProjectName">Modern Residence</div>
-                    <div class="sfc-specs">
-                        <span id="flFloors">2 Floors</span> &bull; <span id="flRooms">6 Rooms</span> &bull; <span id="flArea">1,850 sq.ft</span>
+                <!-- Floating 3D View Options (Right) -->
+                <div class="view-options-floating-card">
+                    <div class="vo-title">View Options</div>
+                    <div class="vo-toggle-row">
+                        <label for="toggleWalls">Walls</label>
+                        <input type="checkbox" id="toggleWalls" checked>
+                    </div>
+                    <div class="vo-toggle-row">
+                        <label for="toggleFurniture">Furniture</label>
+                        <input type="checkbox" id="toggleFurniture" checked>
+                    </div>
+                    <div class="vo-toggle-row">
+                        <label for="toggleRoof">Roof</label>
+                        <input type="checkbox" id="toggleRoof">
+                    </div>
+                    <div class="vo-toggle-row">
+                        <label for="toggleDimensions">Dimensions</label>
+                        <input type="checkbox" id="toggleDimensions" checked>
+                    </div>
+                    <div class="vo-toggle-row">
+                        <label for="toggleLabels">Room Labels</label>
+                        <input type="checkbox" id="toggleLabels" checked>
+                    </div>
+                    <div class="vo-toggle-row">
+                        <label for="toggleSite">Site / Garden</label>
+                        <input type="checkbox" id="toggleSite" checked>
+                    </div>
+
+                    <div class="vo-title" style="margin-top: 10px;">Rendering Mode</div>
+                    <div class="vo-modes">
+                        <button type="button" class="vo-mode-btn" data-render-mode="exterior">Exterior</button>
+                        <button type="button" class="vo-mode-btn active" data-render-mode="interior">Interior</button>
+                        <button type="button" class="vo-mode-btn" data-render-mode="construction">Construct</button>
+                        <button type="button" class="vo-mode-btn" data-render-mode="exploded">Exploded</button>
                     </div>
                 </div>
-
-                <div class="studio-floating-card bottom-left">
-                    <div class="sfc-type">ESTIMATED COST</div>
-                    <div class="sfc-cost" id="flCost">₹38,40,000</div>
-                    <a href="{{ url_for('cost') }}" class="sfc-link">View Full BOQ &rarr;</a>
-                </div>
-
-                <!-- Hidden Form for Param Controls -->
-                <form id="builderForm" style="display: none;">
-                    <input type="number" id="floors" name="floors" value="2">
-                    <input type="number" id="rooms" name="rooms" value="3">
-                    <input type="number" id="land" name="land" value="2000">
-                    <input type="checkbox" id="compound" name="compound" checked>
-                    <input type="checkbox" id="garden" name="garden" checked>
-                    <select id="wallMaterial" name="wallMaterial"><option value="brick" selected>Brick</option></select>
-                    <select id="floorMaterial" name="floorMaterial"><option value="tile" selected>Tile</option></select>
-                    <select id="roofType" name="roofType"><option value="flat" selected>Flat</option></select>
-                    <input type="radio" name="viewMode" id="viewModeFull" value="full" checked>
-                    <input type="radio" name="viewMode" id="viewModeSketch" value="sketch">
-                </form>
-            </div>
-
-            <!-- Bottom Floating Studio Control Strip -->
-            <footer class="studio-bottom-strip">
-                <div class="sbs-left">
-                    <div class="sbs-segmented-view">
-                        <a href="{{ url_for('floor_plan') }}" class="sbs-view-btn" id="sbsView2D">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="12" x2="21" y2="12"></line><line x1="12" y1="3" x2="12" y2="21"></line></svg>
-                            <span>2D PLAN</span>
-                        </a>
-                        <button type="button" class="sbs-view-btn active" id="sbsView3D">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                            <span>3D VIEW</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="sbs-center">
-                    <div class="floor-selector-strip">
-                        <button type="button" class="sbs-floor-pill active" data-floor="1">Floor 1</button>
-                        <button type="button" class="sbs-floor-pill" data-floor="2">Floor 2</button>
-                        <button type="button" class="sbs-floor-add" id="btnAddFloor" title="Add Floor Level">+ Add Floor</button>
-                    </div>
-                </div>
-
-                <div class="sbs-right">
-                    <div class="camera-controls-strip">
-                        <button type="button" class="cam-btn" id="btnCamIso" title="Isometric Angle">Isometric</button>
-                        <button type="button" class="cam-btn" id="btnCamFront" title="Front Elevation">Elevation</button>
-                        <button type="button" class="cam-btn" id="btnCamTop" title="Top Plan View">Top</button>
-                        <button type="button" class="cam-btn" id="btnResetView" title="Reset Orbit">Orbit</button>
-                        <button type="button" class="cam-btn-icon" id="btnZoomIn" title="Zoom In">+</button>
-                        <button type="button" class="cam-btn-icon" id="btnZoomOut" title="Zoom Out">-</button>
-                    </div>
-                </div>
-            </footer>
+            </section>
         </main>
-
-        <!-- Right Context-Aware Properties Panel -->
-        <aside class="studio-properties-panel" id="studioPropertiesPanel">
-            <div class="prop-header">
-                <h3 id="propPanelTitle">PROJECT</h3>
-                <span class="badge badge-accent">INSPECTOR</span>
-            </div>
-
-            <div class="prop-body" id="propertiesContent">
-                <!-- Injected dynamically based on selection state -->
-                <div class="prop-section">
-                    <div class="prop-row">
-                        <span class="prop-label">Project Name</span>
-                        <span class="prop-val font-semibold" id="propProjectName">Modern Residence</span>
-                    </div>
-                    <div class="prop-row">
-                        <span class="prop-label">Plot Footprint</span>
-                        <span class="prop-val font-mono" id="propPlot">30' × 50' ft</span>
-                    </div>
-                    <div class="prop-row">
-                        <span class="prop-label">Total Built-up</span>
-                        <span class="prop-val font-mono" id="propArea">1,850 sq.ft</span>
-                    </div>
-                    <div class="prop-row">
-                        <span class="prop-label">Floor Levels</span>
-                        <span class="prop-val font-mono" id="propFloors">2 (Ground + 1)</span>
-                    </div>
-                    <div class="prop-row">
-                        <span class="prop-label">Planned Rooms</span>
-                        <span class="prop-val font-mono" id="propRooms">6 Rooms</span>
-                    </div>
-                </div>
-
-                <div class="prop-section">
-                    <h4>Architectural Finishes</h4>
-                    <div class="prop-swatches mt-2">
-                        <span class="prop-label mb-1">Exterior Wall Tone</span>
-                        <div class="swatches" id="wallColors" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
-                            <div class="swatch active" style="background: #ffffff; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#ffffff" title="Pure White"></div>
-                            <div class="swatch" style="background: #f1f5f9; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#f1f5f9" title="Off-White"></div>
-                            <div class="swatch" style="background: #e2e8f0; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#e2e8f0" title="Concrete Mist"></div>
-                            <div class="swatch" style="background: #fed7aa; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#fed7aa" title="Terracotta Hue"></div>
-                            <div class="swatch" style="background: #fef08a; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#fef08a" title="Sandstone"></div>
-                            <div class="swatch" style="background: #fca5a5; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#fca5a5" title="Clay Brick"></div>
-                            <div class="swatch" style="background: #93c5fd; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#93c5fd" title="Coastal Slate"></div>
-                            <div class="swatch" style="background: #86efac; border: 1px solid #cbd5e1; height: 24px; border-radius: 4px; cursor: pointer;" data-color="#86efac" title="Sage Olive"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="prop-section">
-                    <h4>IS 1893:2016 Structural Audit</h4>
-                    <ul class="prop-checklist">
-                        <li>
-                            <span class="chk-label">Seismic Detailing</span>
-                            <span class="chk-status pass">Compliant</span>
-                        </li>
-                        <li>
-                            <span class="chk-label">Plinth Clearance</span>
-                            <span class="chk-val">600 mm</span>
-                        </li>
-                        <li>
-                            <span class="chk-label">Ceiling Clear Ht</span>
-                            <span class="chk-val">10'0" (3.05m)</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </aside>
     </div>
+
+    <!-- Studio Bottom Split Dashboard (Selected Room & House Summary) -->
+    <footer class="studio-bottom-dashboard">
+        <!-- Left: Selected Room Information -->
+        <div class="sb-card">
+            <div class="sb-card-title">SELECTED ROOM INFORMATION</div>
+            <div id="selectedRoomInfoPanel">
+                <div style="color: var(--color-text-muted); font-size: 11px; padding: 6px 0;">
+                    Click any room in the 2D Plan or 3D House to inspect properties and edit dimensions.
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: House Summary -->
+        <div class="sb-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div class="sb-card-title" style="margin-bottom: 0;">HOUSE SUMMARY</div>
+                <div style="display: flex; gap: 6px;">
+                    <span class="badge badge-accent" id="studioNBCBadge">NBC 2016 ✓</span>
+                    <span class="badge badge-outline" id="studioMLTypologyBadge" style="display: none;">Typology: ML</span>
+                    <span class="badge badge-outline" id="studioManifoldBadge" style="display: none;">Ref: CC5K</span>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr) 1.2fr 1.2fr; gap: 8px; font-size: 11px;">
+                <div class="stat-pill" style="background: rgba(255,255,255,0.04); padding: 5px 6px; border-radius: 4px;">
+                    <div style="color: var(--color-text-muted); font-size: 9px;">BUILT-UP</div>
+                    <div style="font-weight: 700;" id="summaryBuiltupArea">1,850 sq.ft</div>
+                </div>
+                <div class="stat-pill" style="background: rgba(255,255,255,0.04); padding: 5px 6px; border-radius: 4px;">
+                    <div style="color: var(--color-text-muted); font-size: 9px;">BEDS</div>
+                    <div style="font-weight: 700;" id="summaryBedrooms">3</div>
+                </div>
+                <div class="stat-pill" style="background: rgba(255,255,255,0.04); padding: 5px 6px; border-radius: 4px;">
+                    <div style="color: var(--color-text-muted); font-size: 9px;">BATHS</div>
+                    <div style="font-weight: 700;" id="summaryBathrooms">3</div>
+                </div>
+                <div class="stat-pill" style="background: rgba(255,255,255,0.04); padding: 5px 6px; border-radius: 4px;">
+                    <div style="color: var(--color-text-muted); font-size: 9px;">FLOORS</div>
+                    <div style="font-weight: 700;" id="summaryFloors">1</div>
+                </div>
+                <div class="stat-pill" style="background: rgba(255,255,255,0.04); padding: 5px 6px; border-radius: 4px;">
+                    <div style="color: var(--color-text-muted); font-size: 9px;">PARKING</div>
+                    <div style="font-weight: 700;">1 Slot</div>
+                </div>
+                <div class="stat-pill" style="background: rgba(13, 148, 136, 0.12); padding: 5px 8px; border-radius: 4px; border: 1px solid rgba(13, 148, 136, 0.3);">
+                    <div style="color: #0d9488; font-size: 9px; font-weight: 700;">EST. COST (CPWD)</div>
+                    <div style="font-weight: 800; font-size: 12px; color: #10b981;" id="summaryEstimatedCost">₹ 38.4 Lakhs</div>
+                </div>
+                <div class="stat-pill" style="background: rgba(2, 132, 199, 0.12); padding: 5px 8px; border-radius: 4px; border: 1px solid rgba(2, 132, 199, 0.3);">
+                    <div style="color: #38bdf8; font-size: 9px; font-weight: 700;">EST. VALUE (ML)</div>
+                    <div style="font-weight: 800; font-size: 12px; color: #38bdf8;" id="summaryEstimatedValuation">₹ 52.0 Lakhs</div>
+                </div>
+            </div>
+        </div>
+    </footer>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<!-- Three.js & OrbitControls -->
+<script src="{{ url_for('static', filename='vendor/three.min.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/OrbitControls.js') }}"></script>
+
+<!-- Plan Generator & Cost Engine Helpers -->
+<script src="{{ url_for('static', filename='js/planner/plan-generator.js') }}"></script>
 <script src="{{ url_for('static', filename='js/data/cost-engine.js') }}"></script>
-<script src="{{ url_for('static', filename='js/data/materials.js') }}"></script>
-<script src="{{ url_for('static', filename='js/builder/controls.js') }}"></script>
-<script src="{{ url_for('static', filename='js/builder/house-builder.js') }}"></script>
-<script src="{{ url_for('static', filename='js/pages/builder-page.js') }}"></script>
+
+<!-- Architectural Studio Core Synchronized Controller -->
+<script type="module" src="{{ url_for('static', filename='js/pages/studio-page.js') }}"></script>
 {% endblock %}
