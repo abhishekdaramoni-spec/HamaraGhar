@@ -15,7 +15,6 @@ import pandas as pd
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 REAL_DATASET_PATH = DATA_DIR / "processed_floorplans.json"
-LEGACY_DATASET_PATH = DATA_DIR / "demo_floorplans_legacy.json"
 
 
 def load_real_floorplan_dataset(dataset_path: Path = REAL_DATASET_PATH) -> pd.DataFrame:
@@ -24,10 +23,7 @@ def load_real_floorplan_dataset(dataset_path: Path = REAL_DATASET_PATH) -> pd.Da
     Flattens physical feature vectors and enforces verifiable source_id provenance.
     """
     if not dataset_path.exists():
-        if LEGACY_DATASET_PATH.exists():
-            dataset_path = LEGACY_DATASET_PATH
-        else:
-            raise FileNotFoundError(f"Floor-plan benchmark dataset not found at {dataset_path}")
+        raise FileNotFoundError(f"Floor-plan benchmark dataset not found at {dataset_path}")
 
     with open(dataset_path, "r", encoding="utf-8") as f:
         data = json.load(f)

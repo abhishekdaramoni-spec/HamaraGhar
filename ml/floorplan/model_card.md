@@ -73,21 +73,31 @@ Extracted deterministically without fabrication via `RealFloorPlanSVGExtractor`:
 
 ---
 
-## 8. Empirical Performance Metrics
+## 8. Empirical Performance Metrics & Scientific Investigation
 
-### Validation Set Benchmark (75 Samples)
-| Model | Accuracy | Macro F1 | Weighted F1 | Macro Precision | Macro Recall |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Dummy (Majority)** | 0.2933 | 0.1134 | 0.1331 | 0.0733 | 0.2500 |
-| **Multinomial Logistic Regression (WINNER)** | **1.0000** | **1.0000** | **1.0000** | **1.0000** | **1.0000** |
-| **Random Forest** | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
-| **HistGradientBoosting** | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
+### Experiment A: 17 Architectural Features (Rule Reconstruction Formulation)
+Includes structural & spatial proxies (`bhk`, `room_count`, `bathroom_count`). Simple linear models achieve 100% because they reconstruct the piecewise architectural decision rules used in typology labeling:
 
-### Holdout Test Evaluation (75 Unseen Real Samples)
-- **Accuracy**: 1.0000 (100.0%)
-- **Macro F1**: 1.0000
-- **Weighted F1**: 1.0000
-- **Classifier Inference Latency**: **0.016 ms / sample** (SLA < 5.0 ms)
+| Model Architecture | Test Accuracy | Macro F1 | Weighted F1 | Note |
+| :--- | :--- | :--- | :--- | :--- |
+| **Majority Dummy** | 36.00% | 0.1324 | 0.1906 | Predicts Class 3 always |
+| **Decision Tree (depth=3)** | 100.0% | 1.0000 | 1.0000 | Fits threshold rules |
+| **Multinomial Logistic Regression** | **100.0%** | **1.0000** | **1.0000** | Linear separation on scaled features |
+| **Random Forest (n=100)** | 100.0% | 1.0000 | 1.0000 | Zero ensemble variance |
+
+### Experiment B: Strict Pure External Geometry Set (7 Features — Zero Feature Leakage)
+Excludes `bhk`, `room_count`, `bathroom_count`, `door_count`, and direct built-up threshold variables:  
+*Features: `plot_width_ft`, `plot_length_ft`, `plot_aspect_ratio`, `carpet_efficiency`, `wall_density_ratio`, `openings_per_wall_ratio`, `avg_room_aspect_ratio`*
+
+| Model Architecture | Test Accuracy | Macro F1 | Weighted F1 | Scientific Finding |
+| :--- | :--- | :--- | :--- | :--- |
+| **Majority Dummy** | 36.00% | 0.1324 | 0.1906 | Naive baseline |
+| **Decision Tree (depth=3)** | 80.00% | 0.6043 | 0.7812 | Non-linear geometric partitions |
+| **Multinomial Logistic Regression** | **86.67%** | **0.7772** | **0.8624** | **Defensible linear spatial generalization** |
+| **Random Forest (n=100)** | **88.00%** | **0.8603** | **0.8784** | **Defensible non-linear spatial generalization** |
+
+### Inference Latency Benchmarks (CPU Synchronous)
+- **Classifier Inference Latency**: **0.016 ms / sample** (16 µs; SLA < 5.0 ms)
 - **Manifold Similarity Search Latency**: **0.757 ms / sample** (SLA < 10.0 ms)
 
 ---

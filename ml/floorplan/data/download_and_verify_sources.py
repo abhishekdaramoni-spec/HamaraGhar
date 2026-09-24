@@ -197,7 +197,7 @@ def download_and_verify():
     # Human readable MD report
     md_content = f"""# CubiCasa5K Floor-Plan Benchmark Dataset Provenance Report
 
-**Generated**: {pd.Timestamp.utcnow().isoformat()}Z  
+**Generated**: {pd.Timestamp.now('UTC').isoformat()}Z  
 **Dataset**: CubiCasa5K (Kalervo et al., IEEE ICIP 2019 / Zenodo `10.5281/zenodo.2613548`)  
 **License**: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 

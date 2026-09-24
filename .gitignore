@@ -25,14 +25,25 @@ instance/
 
 # Database
 *.db
+*.sqlite
 *.sqlite3
 
 # OS
 .DS_Store
 Thumbs.db
+ehthumbs.db
 
 # Logs
 *.log
 
 # Byte-compiled
 *.pyc
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Deployment & Local tooling
+.vercel/
+*.tmp

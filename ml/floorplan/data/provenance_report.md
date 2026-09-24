@@ -1,6 +1,6 @@
 # CubiCasa5K Floor-Plan Benchmark Dataset Provenance Report
 
-**Generated**: 2026-09-23T13:03:26.071370+00:00Z  
+**Generated**: 2026-09-24T04:26:34.521420+00:00Z  
 **Dataset**: CubiCasa5K (Kalervo et al., IEEE ICIP 2019 / Zenodo `10.5281/zenodo.2613548`)  
 **License**: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
