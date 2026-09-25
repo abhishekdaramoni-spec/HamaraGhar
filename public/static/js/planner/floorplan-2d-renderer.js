@@ -797,6 +797,15 @@ export class FloorPlan2DRenderer {
         ctx.fillText('N', cx, cy - 22);
         ctx.restore();
     }
+
+    downloadPNG(filename = 'hamaraghar_blueprint.png') {
+        if (!this.canvas) return;
+        this.render();
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = this.canvas.toDataURL('image/png');
+        link.click();
+    }
 }
 
 // Global browser attachment
