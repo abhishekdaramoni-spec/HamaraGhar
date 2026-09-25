@@ -67,6 +67,41 @@
         </div>
     </header>
 
+    <!-- Studio Sub-Bar: Layout Alternatives, Fixed Dimensions, and Exterior Variations -->
+    <div class="studio-sub-bar">
+        <div class="sub-bar-left">
+            <span class="sub-bar-label">LAYOUT:</span>
+            <div class="candidate-btn-group" id="studioCandidatesGroup">
+                <button type="button" class="cand-btn active" data-variant="0" id="candBtn0">Plan A: Central Living</button>
+                <button type="button" class="cand-btn" data-variant="1" id="candBtn1">Plan B: Open-Plan</button>
+                <button type="button" class="cand-btn" data-variant="2" id="candBtn2">Plan C: Side Gallery</button>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs" id="btnStudioGenerateAgain" title="Generate New Non-Duplicate Candidates (New Seed)">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                <span>Generate Again</span>
+            </button>
+            <button type="button" class="btn btn-outline btn-xs" id="btnStudioCompare" title="Compare Plan Alternatives Side-by-Side">
+                <span>Compare</span>
+            </button>
+        </div>
+
+        <div class="sub-bar-right">
+            <label class="dim-lock-checkbox" title="Lock room width/height during rearrangements">
+                <input type="checkbox" id="chkLockDimensions" checked>
+                <span>Fixed Dimensions</span>
+            </label>
+            <span style="color: rgba(255,255,255,0.15); margin: 0 4px;">|</span>
+            <span class="sub-bar-label">EXTERIOR FAÇADE:</span>
+            <div class="exterior-btn-group" id="studioExteriorGroup">
+                <button type="button" class="ext-btn active" data-style="modern" title="Modern Minimalist">A: Modern</button>
+                <button type="button" class="ext-btn" data-style="contemporary" title="Contemporary Terracotta Jali">B: Contemp</button>
+                <button type="button" class="ext-btn" data-style="traditional" title="Traditional Indian Heritage">C: Trad</button>
+                <button type="button" class="ext-btn" data-style="luxury" title="Luxury Travertine Villa">D: Luxury</button>
+                <button type="button" class="ext-btn" data-style="simple" title="Simple & Cost-Effective">E: Nordic</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Studio Main Body with CAD Tools & Split Viewports -->
     <div class="studio-main-body">
         <!-- Left Vertical CAD Toolbar -->
@@ -235,6 +270,19 @@
             </div>
         </div>
     </footer>
+
+    <!-- Architectural Layout Alternatives Comparison Modal -->
+    <div class="studio-modal-backdrop" id="studioCompareModal" style="display: none;">
+        <div class="studio-modal-content">
+            <div class="studio-modal-header">
+                <h3>Architectural Layout Alternatives Comparison</h3>
+                <button type="button" class="modal-close-btn" id="btnCloseCompareModal">&times;</button>
+            </div>
+            <div class="studio-modal-body" id="compareModalBody">
+                <div style="text-align: center; padding: 20px; color: #94a3b8;">Loading candidate comparison...</div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

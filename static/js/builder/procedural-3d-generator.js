@@ -261,6 +261,9 @@ export class Procedural3DGenerator {
                 this._buildRoof(flGroup, floor, S);
             }
 
+            // Exterior Façade Design Elements
+            this._buildExteriorFaçadeDecorations(flGroup, floor, S);
+
             this.houseGroup.add(flGroup);
             this.floorGroups.push(flGroup);
         });
@@ -409,8 +412,13 @@ export class Procedural3DGenerator {
         const extThick = 0.28; // ~9 inch brick
         const intThick = 0.14; // ~4.5 inch partition
 
+        let extColorVal = 0xf1f5f9;
+        if (this.model?.exterior?.facadeColor) {
+            extColorVal = parseInt(this.model.exterior.facadeColor.replace('#', '0x'), 16);
+        }
+
         const extMat = new THREE.MeshStandardMaterial({
-            color: 0xf1f5f9, // Crisp modern architectural off-white
+            color: extColorVal, // Dynamic exterior façade color from active exterior style
             roughness: 0.85
         });
         const intMat = new THREE.MeshStandardMaterial({
@@ -548,8 +556,19 @@ export class Procedural3DGenerator {
     }
 
     _buildBalconies(flGroup, floor, S) {
-        const railMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.7, roughness: 0.2 });
-        const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xe0f2fe, opacity: 0.45, transparent: true, roughness: 0.1 });
+        const railStyle = this.model?.exterior?.balconyRailing || 'frameless_glass';
+        let railMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.7, roughness: 0.2 });
+        let glassMat = new THREE.MeshPhysicalMaterial({ color: 0xe0f2fe, opacity: 0.45, transparent: true, roughness: 0.1 });
+
+        if (railStyle === 'ornamental_wrought_iron') {
+            railMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.3 });
+            glassMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, wireframe: true });
+        } else if (railStyle === 'louvered_steel' || railStyle === 'ms_grill') {
+            railMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6, roughness: 0.4 });
+            glassMat = new THREE.MeshStandardMaterial({ color: 0x475569, opacity: 0.8, transparent: true });
+        } else if (railStyle === 'frameless_smoked_glass') {
+            glassMat = new THREE.MeshPhysicalMaterial({ color: 0x1e293b, opacity: 0.65, transparent: true, roughness: 0.1 });
+        }
 
         (floor.balconies || []).forEach(b => {
             const bx = (b.bounds.x + b.bounds.width / 2) * S;
@@ -660,6 +679,48 @@ export class Procedural3DGenerator {
             roof.castShadow = true;
             flGroup.add(roof);
         });
+    }
+
+    _buildExteriorFaçadeDecorations(flGroup, floor, S) {
+        if (!this.model?.exterior) return;
+        const ext = this.model.exterior;
+        const canopyStyle = ext.entranceCanopy || 'cantilever_slab';
+        const colStyle = ext.columns || 'none';
+
+        if (floor.index === 0 && floor.doors && floor.doors.length > 0) {
+            const frontDoor = floor.doors.reduce((prev, curr) => (curr.position.y < prev.position.y ? curr : prev), floor.doors[0]);
+            const dx = (frontDoor.position?.x || 5) * S;
+            const dz = (frontDoor.position?.y || 4) * S;
+            const canopyW = 6.0 * S;
+            const canopyL = 4.0 * S;
+            const canopyH = 0.15;
+            const porchY = (floor.heightFt || 10.0) * S * 0.85;
+
+            let canopyColor = 0x1e293b;
+            if (canopyStyle === 'pergola_wood') canopyColor = 0x78350f;
+            else if (canopyStyle === 'tiled_sloped_chhajja') canopyColor = 0x9a3412;
+            else if (canopyStyle === 'double_height_portal') canopyColor = 0xd97706;
+
+            const canopyMat = new THREE.MeshStandardMaterial({ color: canopyColor, roughness: 0.5 });
+            const slab = new THREE.Mesh(new THREE.BoxGeometry(canopyW, canopyH, canopyL), canopyMat);
+            slab.position.set(dx, porchY, dz - canopyL / 2);
+            slab.castShadow = true;
+            flGroup.add(slab);
+
+            if (colStyle === 'fluted_stone_pillars' || colStyle === 'travertine_monolith' || colStyle === 'square_concrete') {
+                const colGeo = new THREE.CylinderGeometry(0.18, 0.2, porchY, 16);
+                const colMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.6 });
+                const colLeft = new THREE.Mesh(colGeo, colMat);
+                colLeft.position.set(dx - canopyW / 2 + 0.2, porchY / 2, dz - canopyL + 0.2);
+                colLeft.castShadow = true;
+                flGroup.add(colLeft);
+
+                const colRight = new THREE.Mesh(colGeo, colMat);
+                colRight.position.set(dx + canopyW / 2 - 0.2, porchY / 2, dz - canopyL + 0.2);
+                colRight.castShadow = true;
+                flGroup.add(colRight);
+            }
+        }
     }
 
     _applyVisibility() {
