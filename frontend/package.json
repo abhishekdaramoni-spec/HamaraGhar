@@ -1,0 +1,23 @@
+{
+  "name": "hamaraghar-frontend",
+  "version": "2.0.0",
+  "private": true,
+  "description": "HamaraGhar — Synchronized 2D/3D Architectural Web Studio & Presentation Layer",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "npx serve public -l 3000"
+  },
+  "keywords": [
+    "architecture",
+    "floorplan",
+    "threejs",
+    "cad",
+    "bim",
+    "hamaraghar"
+  ],
+  "author": "HamaraGhar Engineering Team",
+  "license": "UNLICENSED"
+}
