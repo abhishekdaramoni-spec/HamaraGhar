@@ -22,6 +22,7 @@ export class FloorPlan2DRenderer {
         this.showGrid = true;
         this.showFurniture = true;
         this.showLabels = true;
+        this.debugMode = options.debugMode || false;
 
         // Interactive dragging & resizing state
         this.isPanning = false;
@@ -38,6 +39,11 @@ export class FloorPlan2DRenderer {
         this.onModelChanged = options.onModelChanged || null;
 
         this._setupEvents();
+    }
+
+    setDebugMode(enabled) {
+        this.debugMode = Boolean(enabled);
+        this.render();
     }
 
     setModel(model, floorIndex = 0) {
@@ -315,6 +321,11 @@ export class FloorPlan2DRenderer {
         // 5. Architectural Walls (Perimeter & Partitions)
         this._drawWalls(ctx, floor.walls || [], floor.rooms || []);
 
+        // 5b. Overlap Collision Visualizer (Debug Mode)
+        if (this.debugMode) {
+            this._drawDebugOverlaps(ctx, floor.rooms || []);
+        }
+
         // 6. Doors (Openings & Swing Arcs)
         this._drawDoors(ctx, floor.doors || []);
 
@@ -536,31 +547,56 @@ export class FloorPlan2DRenderer {
             const dx = this.offsetX + d.position.x * this.scale;
             const dy = this.offsetY + d.position.y * this.scale;
             const dw = (d.widthFt || 3.0) * this.scale;
+            const isVertical = (d.orientation === 'vertical' || d.wall === 'east' || d.wall === 'west');
 
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 2;
 
-            // Clear wall opening gap
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(dx, dy);
-            ctx.lineTo(dx + dw, dy);
-            ctx.stroke();
+            if (isVertical) {
+                // Clear wall opening gap
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(dx, dy);
+                ctx.lineTo(dx, dy + dw);
+                ctx.stroke();
 
-            // Door leaf
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(dx, dy);
-            ctx.lineTo(dx + dw * 0.85, dy - dw * 0.5);
-            ctx.stroke();
+                // Door leaf
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(dx, dy);
+                ctx.lineTo(dx + dw * 0.5, dy + dw * 0.85);
+                ctx.stroke();
 
-            // Swing Arc (dashed)
-            ctx.setLineDash([2, 3]);
-            ctx.beginPath();
-            ctx.arc(dx, dy, dw, 0, -Math.PI / 3, true);
-            ctx.stroke();
+                // Swing Arc (dashed)
+                ctx.setLineDash([2, 3]);
+                ctx.beginPath();
+                ctx.arc(dx, dy, dw, 0, Math.PI / 3, false);
+                ctx.stroke();
+            } else {
+                // Clear wall opening gap
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(dx, dy);
+                ctx.lineTo(dx + dw, dy);
+                ctx.stroke();
+
+                // Door leaf
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(dx, dy);
+                ctx.lineTo(dx + dw * 0.85, dy - dw * 0.5);
+                ctx.stroke();
+
+                // Swing Arc (dashed)
+                ctx.setLineDash([2, 3]);
+                ctx.beginPath();
+                ctx.arc(dx, dy, dw, 0, -Math.PI / 3, true);
+                ctx.stroke();
+            }
         });
         ctx.restore();
     }
@@ -571,13 +607,14 @@ export class FloorPlan2DRenderer {
             const wx = this.offsetX + w.position.x * this.scale;
             const wy = this.offsetY + w.position.y * this.scale;
             const ww = (w.widthFt || 4.0) * this.scale;
+            const isVertical = (w.orientation === 'vertical' || w.wall === 'east' || w.wall === 'west');
 
             // Double line CAD architectural window
             ctx.fillStyle = '#0284c7';
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 1.5;
 
-            if (w.wall === 'north' || w.wall === 'south') {
+            if (!isVertical) {
                 ctx.fillRect(wx - ww / 2, wy - 3, ww, 6);
                 ctx.strokeRect(wx - ww / 2, wy - 3, ww, 6);
                 ctx.beginPath();
@@ -594,6 +631,63 @@ export class FloorPlan2DRenderer {
             }
         });
         ctx.restore();
+    }
+
+    _drawDebugOverlaps(ctx, rooms) {
+        for (let i = 0; i < rooms.length; i++) {
+            for (let j = i + 1; j < rooms.length; j++) {
+                const r1 = rooms[i];
+                const r2 = rooms[j];
+                const b1 = r1.bounds;
+                const b2 = r2.bounds;
+                if (!b1 || !b2) continue;
+
+                const ix1 = Math.max(b1.x, b2.x);
+                const iy1 = Math.max(b1.y, b2.y);
+                const ix2 = Math.min(b1.x + b1.width, b2.x + b2.width);
+                const iy2 = Math.min(b1.y + b1.height, b2.y + b2.height);
+
+                const iw = ix2 - ix1;
+                const ih = iy2 - iy1;
+
+                if (iw > 0.05 && ih > 0.05) {
+                    const area = iw * ih;
+                    if (area > 0.01) {
+                        const px = this.offsetX + ix1 * this.scale;
+                        const py = this.offsetY + iy1 * this.scale;
+                        const pw = iw * this.scale;
+                        const ph = ih * this.scale;
+
+                        ctx.save();
+                        // Glowing translucent red fill
+                        ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+                        ctx.fillRect(px, py, pw, ph);
+
+                        // Diagonal red hatching
+                        ctx.strokeStyle = '#ef4444';
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        for (let d = -ph; d < pw; d += 8) {
+                            ctx.moveTo(Math.max(px, px + d), Math.max(py, py - d));
+                            ctx.lineTo(Math.min(px + pw, px + d + ph), Math.min(py + ph, py + ph));
+                        }
+                        ctx.stroke();
+
+                        // High-visibility border
+                        ctx.strokeStyle = '#f87171';
+                        ctx.lineWidth = 2.5;
+                        ctx.strokeRect(px, py, pw, ph);
+
+                        // Overlap measurement label
+                        ctx.fillStyle = '#fef08a';
+                        ctx.font = 'bold 10px "JetBrains Mono", monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`OVERLAP: ${area.toFixed(2)} sq.ft`, px + pw / 2, py + ph / 2);
+                        ctx.restore();
+                    }
+                }
+            }
+        }
     }
 
     _drawStairs(ctx, stairs) {

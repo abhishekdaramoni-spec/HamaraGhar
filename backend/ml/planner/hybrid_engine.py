@@ -87,12 +87,13 @@ def verify_nbc_compliance(
             x2_min, x2_max = r2["x"], r2["x"] + r2["width"]
             y2_min, y2_max = r2["y"], r2["y"] + r2["height"]
 
-            # Intersection rectangle (tolerance of 0.3ft for shared structural walls)
+            # Intersection rectangle (tolerance of 0.01 sq.ft for touching boundaries)
             inter_w = max(0.0, min(x1_max, x2_max) - max(x1_min, x2_min))
             inter_h = max(0.0, min(y1_max, y2_max) - max(y1_min, y2_min))
+            inter_area = inter_w * inter_h
 
-            if inter_w > 0.3 and inter_h > 0.3:
-                overlap_area = inter_w * inter_h
+            if inter_area > 0.01 and inter_w > 0.05 and inter_h > 0.05:
+                overlap_area = inter_area
                 overlap_detected = True
                 violations.append(
                     f"Room Overlap Collision: '{r1['name']}' and '{r2['name']}' intersect by {overlap_area:.1f} sq.ft."

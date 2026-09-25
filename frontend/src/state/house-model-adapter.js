@@ -174,21 +174,31 @@ export const HouseModelAdapter = {
 
         if (rawWalls && rawWalls.length > 0) {
             rawWalls.forEach(w => {
+                const sx = Number(w.x1 ?? w.start?.x ?? 0);
+                const sy = Number(w.y1 ?? w.start?.y ?? 0);
+                const ex = Number(w.x2 ?? w.end?.x ?? 0);
+                const ey = Number(w.y2 ?? w.end?.y ?? 0);
+                const len = Math.sqrt((ex - sx) ** 2 + (ey - sy) ** 2);
+                if (len < 0.2) return;
+
+                const isExt = (w.type === 'exterior');
                 walls.push({
-                    id: `wall-f${floorIndex}-${w.id || wallCounter++}`,
-                    start: { x: Number(w.x1), y: Number(w.y1) },
-                    end: { x: Number(w.x2), y: Number(w.y2) },
-                    thicknessFt: Number(w.thickness || (w.type === 'exterior' ? 0.75 : 0.38)),
-                    heightFt: 10.0,
+                    id: w.id ? `wall-f${floorIndex}-${w.id}` : `wall-f${floorIndex}-${wallCounter++}`,
+                    start: { x: Number(sx.toFixed(2)), y: Number(sy.toFixed(2)) },
+                    end: { x: Number(ex.toFixed(2)), y: Number(ey.toFixed(2)) },
+                    length: Number(len.toFixed(2)),
+                    thicknessFt: Number(w.thickness || w.thicknessFt || (isExt ? 0.75 : 0.38)),
+                    heightFt: Number(w.heightFt || 10.0),
                     floorIndex: floorIndex,
                     type: w.type || 'interior',
-                    material: w.type === 'exterior' ? 'brick' : 'white_plaster'
+                    material: isExt ? 'brick' : 'white_plaster',
+                    orientation: Math.abs(ey - sy) < 0.15 ? 'horizontal' : 'vertical'
                 });
             });
             return walls;
         }
 
-        // Synthesize perimeter and interior partition walls from rooms if not provided
+        // Deduplicated wall network synthesis from room boundaries
         if (rooms.length > 0) {
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             rooms.forEach(r => {
@@ -198,25 +208,81 @@ export const HouseModelAdapter = {
                 maxY = Math.max(maxY, r.bounds.y + r.bounds.height);
             });
 
-            // 4 Exterior perimeter walls
-            walls.push({ id: `wall-f${floorIndex}-ext-north`, start: { x: minX, y: minY }, end: { x: maxX, y: minY }, thicknessFt: 0.75, heightFt: 10.0, floorIndex, type: 'exterior', material: 'brick' });
-            walls.push({ id: `wall-f${floorIndex}-ext-south`, start: { x: minX, y: maxY }, end: { x: maxX, y: maxY }, thicknessFt: 0.75, heightFt: 10.0, floorIndex, type: 'exterior', material: 'brick' });
-            walls.push({ id: `wall-f${floorIndex}-ext-west`, start: { x: minX, y: minY }, end: { x: minX, y: maxY }, thicknessFt: 0.75, heightFt: 10.0, floorIndex, type: 'exterior', material: 'brick' });
-            walls.push({ id: `wall-f${floorIndex}-ext-east`, start: { x: maxX, y: minY }, end: { x: maxX, y: maxY }, thicknessFt: 0.75, heightFt: 10.0, floorIndex, type: 'exterior', material: 'brick' });
+            const hSegs = [];
+            const vSegs = [];
 
-            // Interior walls derived from room boundaries
-            rooms.forEach((r, idx) => {
-                const rx = r.bounds.x;
-                const ry = r.bounds.y;
-                const rw = r.bounds.width;
-                const rh = r.bounds.height;
+            rooms.forEach(r => {
+                const b = r.bounds;
+                const x1 = b.x, x2 = b.x + b.width;
+                const y1 = b.y, y2 = b.y + b.height;
+                hSegs.push({ y: y1, start: Math.min(x1, x2), end: Math.max(x1, x2) });
+                hSegs.push({ y: y2, start: Math.min(x1, x2), end: Math.max(x1, x2) });
+                vSegs.push({ x: x1, start: Math.min(y1, y2), end: Math.max(y1, y2) });
+                vSegs.push({ x: x2, start: Math.min(y1, y2), end: Math.max(y1, y2) });
+            });
 
-                if (Math.abs((rx + rw) - maxX) > 0.3) {
-                    walls.push({ id: `wall-f${floorIndex}-int-${wallCounter++}`, start: { x: rx + rw, y: ry }, end: { x: rx + rw, y: ry + rh }, thicknessFt: 0.38, heightFt: 10.0, floorIndex, type: 'interior', material: 'warm_plaster' });
+            const mergeIntervals = (segs, coordKey) => {
+                const groups = {};
+                segs.forEach(s => {
+                    const k = Number(s[coordKey].toFixed(1));
+                    if (!groups[k]) groups[k] = [];
+                    groups[k].push([s.start, s.end]);
+                });
+                const result = [];
+                for (const [kStr, list] of Object.entries(groups)) {
+                    const k = Number(kStr);
+                    list.sort((a, b) => a[0] - b[0]);
+                    let curStart = list[0][0], curEnd = list[0][1];
+                    for (let i = 1; i < list.length; i++) {
+                        if (list[i][0] <= curEnd + 0.15) {
+                            curEnd = Math.max(curEnd, list[i][1]);
+                        } else {
+                            result.push({ coord: k, start: curStart, end: curEnd });
+                            curStart = list[i][0];
+                            curEnd = list[i][1];
+                        }
+                    }
+                    result.push({ coord: k, start: curStart, end: curEnd });
                 }
-                if (Math.abs((ry + rh) - maxY) > 0.3) {
-                    walls.push({ id: `wall-f${floorIndex}-int-${wallCounter++}`, start: { x: rx, y: ry + rh }, end: { x: rx + rw, y: ry + rh }, thicknessFt: 0.38, heightFt: 10.0, floorIndex, type: 'interior', material: 'warm_plaster' });
-                }
+                return result;
+            };
+
+            const mergedH = mergeIntervals(hSegs, 'y');
+            mergedH.forEach(seg => {
+                const len = seg.end - seg.start;
+                if (len < 0.4) return;
+                const isExt = Math.abs(seg.coord - minY) < 0.25 || Math.abs(seg.coord - maxY) < 0.25;
+                walls.push({
+                    id: `wall-f${floorIndex}-h${wallCounter++}`,
+                    start: { x: Number(seg.start.toFixed(2)), y: Number(seg.coord.toFixed(2)) },
+                    end: { x: Number(seg.end.toFixed(2)), y: Number(seg.coord.toFixed(2)) },
+                    length: Number(len.toFixed(2)),
+                    thicknessFt: isExt ? 0.75 : 0.38,
+                    heightFt: 10.0,
+                    floorIndex,
+                    type: isExt ? 'exterior' : 'interior',
+                    material: isExt ? 'brick' : 'white_plaster',
+                    orientation: 'horizontal'
+                });
+            });
+
+            const mergedV = mergeIntervals(vSegs, 'x');
+            mergedV.forEach(seg => {
+                const len = seg.end - seg.start;
+                if (len < 0.4) return;
+                const isExt = Math.abs(seg.coord - minX) < 0.25 || Math.abs(seg.coord - maxX) < 0.25;
+                walls.push({
+                    id: `wall-f${floorIndex}-v${wallCounter++}`,
+                    start: { x: Number(seg.coord.toFixed(2)), y: Number(seg.start.toFixed(2)) },
+                    end: { x: Number(seg.coord.toFixed(2)), y: Number(seg.end.toFixed(2)) },
+                    length: Number(len.toFixed(2)),
+                    thicknessFt: isExt ? 0.75 : 0.38,
+                    heightFt: 10.0,
+                    floorIndex,
+                    type: isExt ? 'exterior' : 'interior',
+                    material: isExt ? 'brick' : 'white_plaster',
+                    orientation: 'vertical'
+                });
             });
         }
 

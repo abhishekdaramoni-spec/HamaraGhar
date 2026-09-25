@@ -27,6 +27,7 @@ class ArchitecturalStudioApp {
         this.fixedDimensionsLocked = true;
         this.activeExteriorStyle = 'modern';
         this.lastHybridResponse = null;
+        this.debugMode = false;
     }
 
     async init() {
@@ -38,9 +39,12 @@ class ArchitecturalStudioApp {
             return;
         }
 
+        const urlParams = new URLSearchParams(window.location.search);
+        this.debugMode = (urlParams.get('debug') === '1' || urlParams.get('debug') === 'true');
+
         // 1. Initialize Renderers
-        this.renderer2d = new FloorPlan2DRenderer(canvas2d);
-        this.renderer3d = new Procedural3DGenerator(container3d);
+        this.renderer2d = new FloorPlan2DRenderer(canvas2d, { debugMode: this.debugMode });
+        this.renderer3d = new Procedural3DGenerator(container3d, { debugMode: this.debugMode });
         this.syncManager = new StudioSyncManager({
             renderer2d: this.renderer2d,
             renderer3d: this.renderer3d
@@ -604,8 +608,18 @@ class ArchitecturalStudioApp {
             } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
                 e.preventDefault();
                 this.syncManager.redo();
+            } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                this.toggleDebugMode();
             }
         });
+    }
+
+    toggleDebugMode() {
+        this.debugMode = !this.debugMode;
+        if (this.renderer2d) this.renderer2d.setDebugMode(this.debugMode);
+        if (this.renderer3d) this.renderer3d.setDebugMode(this.debugMode);
+        console.info(`[HamaraGhar] Visual Overlap Debug Mode: ${this.debugMode ? 'ENABLED' : 'DISABLED'}`);
     }
 }
 

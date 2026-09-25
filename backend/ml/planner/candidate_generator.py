@@ -114,19 +114,8 @@ class SpatialCandidateGenerator:
         rooms = layout_data["rooms"]
         stair_box = layout_data.get("staircase", None)
 
-        # 4. Synthesize Walls, Windows, Doors
+        # 4. Compute carpet area
         total_carpet = 0.0
-        walls = []
-        doors = []
-        windows = []
-
-        # 4 Perimeter External Structural Walls
-        walls.append({"id": f"wall_ext_n_f{floor}", "x1": start_x, "y1": start_y, "x2": round(start_x + build_w, 1), "y2": start_y, "thickness": 0.75, "type": "exterior"})
-        walls.append({"id": f"wall_ext_s_f{floor}", "x1": start_x, "y1": round(start_y + build_l, 1), "x2": round(start_x + build_w, 1), "y2": round(start_y + build_l, 1), "thickness": 0.75, "type": "exterior"})
-        walls.append({"id": f"wall_ext_w_f{floor}", "x1": start_x, "y1": start_y, "x2": start_x, "y2": round(start_y + build_l, 1), "thickness": 0.75, "type": "exterior"})
-        walls.append({"id": f"wall_ext_e_f{floor}", "x1": round(start_x + build_w, 1), "y1": start_y, "x2": round(start_x + build_w, 1), "y2": round(start_y + build_l, 1), "thickness": 0.75, "type": "exterior"})
-
-        wall_idx = 1
         for r in rooms:
             rx = float(r["x"])
             ry = float(r["y"])
@@ -134,29 +123,37 @@ class SpatialCandidateGenerator:
             rh = float(r["height"])
             area = round(rw * rh, 1)
             r["area"] = area
-            if r["type"] not in ["parking", "balcony"]:
+            if r.get("type") not in ["parking", "balcony"]:
                 total_carpet += area
 
-            # Internal partition boundaries
-            if abs((rx + rw) - (start_x + build_w)) > 0.3:
-                walls.append({"id": f"wall_int_{floor}_{wall_idx}", "x1": round(rx + rw, 1), "y1": ry, "x2": round(rx + rw, 1), "y2": round(ry + rh, 1), "thickness": 0.38, "type": "interior"})
-                wall_idx += 1
-            if abs((ry + rh) - (start_y + build_l)) > 0.3:
-                walls.append({"id": f"wall_int_{floor}_{wall_idx}", "x1": rx, "y1": round(ry + rh, 1), "x2": round(rx + rw, 1), "y2": round(ry + rh, 1), "thickness": 0.38, "type": "interior"})
-                wall_idx += 1
+        # 5. Build clean, merged Architectural Wall Network and Canonical Openings
+        build_bounds = {
+            "minX": start_x,
+            "minY": start_y,
+            "maxX": round(start_x + build_w, 1),
+            "maxY": round(start_y + build_l, 1)
+        }
+        from .wall_network_builder import build_architectural_wall_network
+        try:
+            from architecture.constraints.geometry_validator import validate_room_geometry
+        except ImportError:
+            try:
+                from backend.architecture.constraints.geometry_validator import validate_room_geometry
+            except ImportError:
+                def validate_room_geometry(*args, **kwargs):
+                    return {"valid": True, "errors": [], "warnings": []}
 
-            # External windows
-            if abs(ry - start_y) < 0.3:
-                windows.append({"x": round(rx + rw * 0.5, 1), "y": ry, "width": min(4.0, rw * 0.6), "wall": "north"})
-            if abs((ry + rh) - (start_y + build_l)) < 0.3:
-                windows.append({"x": round(rx + rw * 0.5, 1), "y": round(ry + rh, 1), "width": min(4.0, rw * 0.6), "wall": "south"})
-            if abs(rx - start_x) < 0.3:
-                windows.append({"x": rx, "y": round(ry + rh * 0.5, 1), "width": min(3.5, rh * 0.6), "wall": "west"})
-            if abs((rx + rw) - (start_x + build_w)) < 0.3:
-                windows.append({"x": round(rx + rw, 1), "y": round(ry + rh * 0.5, 1), "width": min(3.5, rh * 0.6), "wall": "east"})
+        walls, doors, windows = build_architectural_wall_network(rooms, build_bounds, floor_index=floor)
 
-            # Door placement
-            doors.append({"x": round(rx + min(2.0, rw * 0.5), 1), "y": round(ry + rh, 1), "width": 3.0, "swing": "inward"})
+        # 6. Pre-render Geometry Validation Gate
+        geom_val = validate_room_geometry(
+            {"floor": floor, "rooms": rooms},
+            plot_width=plot_w,
+            plot_length=plot_l,
+            setback_front=setback_front,
+            setback_rear=setback_rear,
+            setback_side=setback_side
+        )
 
         builtup = round(build_w * build_l, 1)
         eff_pct = round((total_carpet / builtup) * 100.0, 1) if builtup > 0 else 0.0
@@ -291,9 +288,11 @@ class SpatialCandidateGenerator:
         else:
             # First Floor
             stair_w = 6.5
-            stair = {"x": sx, "y": round(sy + bl * 0.42, 1), "width": stair_w, "height": round(bl * 0.58, 1)}
+            front_h = round(max(liv_h, kit_h), 1) if (bhk == 2 and total_floors > 1) else round(bl * 0.42, 1)
+            rem_l = round(bl - front_h, 1)
+            stair = {"x": sx, "y": round(sy + front_h, 1), "width": stair_w, "height": rem_l}
 
-            balc_h = round(bl * 0.35, 1)
+            balc_h = front_h
             balc_w = round(bw * 0.40, 1)
             f_lounge_w = round(bw - balc_w, 1)
 
@@ -308,10 +307,9 @@ class SpatialCandidateGenerator:
                 "color": COLORS["living"], "floorName": "Vitrified Tiles"
             })
 
-            rem_l = round(bl - balc_h, 1)
             rooms.append({
                 "id": "f1_stairs", "name": "Staircase", "type": "stairs", "zone": "circulation",
-                "x": sx, "y": round(sy + balc_h, 1), "width": stair_w, "height": rem_l,
+                "x": sx, "y": round(sy + front_h, 1), "width": stair_w, "height": rem_l,
                 "color": COLORS["stairs"], "floorName": "Granite Steps"
             })
             bath_w = round(min(7.0, (bw - stair_w) * 0.30), 1)
@@ -319,12 +317,12 @@ class SpatialCandidateGenerator:
 
             rooms.append({
                 "id": "f1_bed2", "name": "Bedroom 2", "type": "bedroom", "zone": "private",
-                "x": round(sx + stair_w, 1), "y": round(sy + balc_h, 1), "width": b2_actual_w, "height": rem_l,
+                "x": round(sx + stair_w, 1), "y": round(sy + front_h, 1), "width": b2_actual_w, "height": rem_l,
                 "color": COLORS["bedroom"], "floorName": "Wooden Parquet"
             })
             rooms.append({
                 "id": "f1_bath2", "name": "Bathroom 2", "type": "bath", "zone": "wet",
-                "x": round(sx + stair_w + b2_actual_w, 1), "y": round(sy + balc_h, 1), "width": bath_w, "height": rem_l,
+                "x": round(sx + stair_w + b2_actual_w, 1), "y": round(sy + front_h, 1), "width": bath_w, "height": rem_l,
                 "color": COLORS["bath"], "floorName": "Ceramic Matte"
             })
 

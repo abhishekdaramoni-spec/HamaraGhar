@@ -466,31 +466,21 @@ def generate_deterministic_floor_plan(config, floor=0, variant=0):
         if r['type'] not in ['parking', 'balcony']:
             total_carpet += area
 
-        rx = float(r['x'])
-        ry = float(r['y'])
-
-        # Internal partition walls
-        if abs((rx + w) - (start_x + build_width)) > 0.3:
-            walls.append({'id': f'wall_int_{wall_counter}', 'x1': round(rx + w, 1), 'y1': ry, 'x2': round(rx + w, 1), 'y2': round(ry + h, 1), 'thickness': 0.38, 'type': 'interior'})
-            wall_counter += 1
-        if abs((ry + h) - (start_y + build_length)) > 0.3:
-            walls.append({'id': f'wall_int_{wall_counter}', 'x1': rx, 'y1': round(ry + h, 1), 'x2': round(rx + w, 1), 'y2': round(ry + h, 1), 'thickness': 0.38, 'type': 'interior'})
-            wall_counter += 1
-
-        # Windows on external boundaries
-        if abs(ry - start_y) < 0.3:
-            windows.append({'x': round(rx + w * 0.5, 1), 'y': ry, 'width': 4.0, 'wall': 'north'})
-        if abs((ry + h) - (start_y + build_length)) < 0.3:
-            windows.append({'x': round(rx + w * 0.5, 1), 'y': round(ry + h, 1), 'width': 4.0, 'wall': 'south'})
-        if abs(rx - start_x) < 0.3:
-            windows.append({'x': rx, 'y': round(ry + h * 0.5, 1), 'width': 3.5, 'wall': 'west'})
-        if abs((rx + w) - (start_x + build_width)) < 0.3:
-            windows.append({'x': round(rx + w, 1), 'y': round(ry + h * 0.5, 1), 'width': 3.5, 'wall': 'east'})
-
-        doors.append({'x': round(rx + 2.0, 1), 'y': round(ry + h, 1), 'width': 3.0, 'swing': 'inward'})
-
     builtup = round(build_width * build_length, 1)
     efficiency = round((total_carpet / builtup) * 100.0, 1) if builtup > 0 else 0.0
+
+    # Build clean merged architectural wall network
+    build_bounds = {
+        'minX': start_x,
+        'minY': start_y,
+        'maxX': round(start_x + build_width, 1),
+        'maxY': round(start_y + build_length, 1)
+    }
+    try:
+        from architecture.generator.wall_network_builder import build_architectural_wall_network
+    except ImportError:
+        from backend.architecture.generator.wall_network_builder import build_architectural_wall_network
+    walls, doors, windows = build_architectural_wall_network(rooms, build_bounds, floor_index=floor)
 
     return {
         'floor': floor,

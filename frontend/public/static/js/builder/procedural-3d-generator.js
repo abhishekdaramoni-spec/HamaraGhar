@@ -23,6 +23,7 @@ export class Procedural3DGenerator {
             labels: true,
             site: true
         };
+        this.debugMode = options.debugMode || false;
 
         // Three.js Core Components
         this.scene = null;
@@ -201,6 +202,11 @@ export class Procedural3DGenerator {
         this._highlightSelectedRoom();
     }
 
+    setDebugMode(enabled) {
+        this.debugMode = Boolean(enabled);
+        this.build();
+    }
+
     build() {
         if (!this.model) return;
 
@@ -263,6 +269,11 @@ export class Procedural3DGenerator {
 
             // Exterior Façade Design Elements
             this._buildExteriorFaçadeDecorations(flGroup, floor, S);
+
+            // Visual Geometry Overlap Collisions Debugger
+            if (this.debugMode) {
+                this._buildDebugOverlaps(flGroup, floor, S);
+            }
 
             this.houseGroup.add(flGroup);
             this.floorGroups.push(flGroup);
@@ -359,13 +370,50 @@ export class Procedural3DGenerator {
     }
 
     _buildFloorSlabs(flGroup, floor, S) {
-        (floor.rooms || []).forEach(r => {
+        const rooms = floor.rooms || [];
+        if (rooms.length === 0) return;
+
+        // 1. Monolithic structural base slab spanning the entire floor footprint
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        rooms.forEach(r => {
             const b = r.bounds;
+            if (!b) return;
+            if (b.x < minX) minX = b.x;
+            if (b.y < minY) minY = b.y;
+            if (b.x + b.width > maxX) maxX = b.x + b.width;
+            if (b.y + b.height > maxY) maxY = b.y + b.height;
+        });
+
+        if (minX < Infinity && maxX > -Infinity) {
+            const baseW = (maxX - minX) * S;
+            const baseL = (maxY - minY) * S;
+            const baseCenterX = (minX + (maxX - minX) / 2) * S;
+            const baseCenterZ = (minY + (maxY - minY) / 2) * S;
+            const baseThick = 0.15; // Structural concrete slab
+
+            const baseMat = new THREE.MeshStandardMaterial({
+                color: 0x1e293b,
+                roughness: 0.9,
+                metalness: 0.1
+            });
+            const baseMesh = new THREE.Mesh(new THREE.BoxGeometry(baseW, baseThick, baseL), baseMat);
+            baseMesh.position.set(baseCenterX, -baseThick / 2, baseCenterZ);
+            baseMesh.receiveShadow = true;
+            baseMesh.name = 'structural-base-slab';
+            flGroup.add(baseMesh);
+        }
+
+        // 2. Room finish floorings inset from walls to eliminate coplanar Z-fighting
+        const inset = 0.025; // Inset finish layer ~1 inch inside walls
+        const finishThick = 0.015;
+
+        rooms.forEach(r => {
+            const b = r.bounds;
+            if (!b) return;
+            const rw = Math.max(0.05, b.width * S - inset * 2);
+            const rl = Math.max(0.05, b.height * S - inset * 2);
             const rx = (b.x + b.width / 2) * S;
             const rz = (b.y + b.height / 2) * S;
-            const rw = b.width * S;
-            const rl = b.height * S;
-            const slabThick = 0.2; // ~8 inches
 
             // Choose appropriate floor material
             let color = 0xd1d5db;
@@ -393,8 +441,8 @@ export class Procedural3DGenerator {
                 metalness: metalness
             });
 
-            const slab = new THREE.Mesh(new THREE.BoxGeometry(rw, slabThick, rl), mat);
-            slab.position.set(rx, -slabThick / 2, rz);
+            const slab = new THREE.Mesh(new THREE.BoxGeometry(rw, finishThick, rl), mat);
+            slab.position.set(rx, finishThick / 2, rz);
             slab.receiveShadow = true;
 
             // Attach user data for raycasting
@@ -406,9 +454,9 @@ export class Procedural3DGenerator {
     }
 
     _buildWalls(flGroup, floor, S) {
-        // In 'interior' mode, walls are cut to 4.0 ft height for a dollhouse overview
+        // In 'interior' mode, walls are cut to 4.4 ft height for a dollhouse overview
         const fullHeight = (floor.heightFt || 10.0) * S;
-        const wallH = (this.renderingMode === 'interior') ? 1.35 : fullHeight; // ~4.4 ft or full
+        const wallH = (this.renderingMode === 'interior') ? 1.35 : fullHeight;
         const extThick = 0.28; // ~9 inch brick
         const intThick = 0.14; // ~4.5 inch partition
 
@@ -418,7 +466,7 @@ export class Procedural3DGenerator {
         }
 
         const extMat = new THREE.MeshStandardMaterial({
-            color: extColorVal, // Dynamic exterior façade color from active exterior style
+            color: extColorVal, // Dynamic exterior façade color
             roughness: 0.85
         });
         const intMat = new THREE.MeshStandardMaterial({
@@ -436,11 +484,12 @@ export class Procedural3DGenerator {
 
                 const dx = ex - sx;
                 const dz = ey - sy;
-                const len = Math.sqrt(dx * dx + dz * dz);
+                const len = Math.hypot(dx, dz);
                 if (len < 0.1) return;
 
-                const thick = (w.type === 'exterior') ? extThick : intThick;
-                const mat = (w.type === 'exterior') ? extMat : intMat;
+                const isExt = (w.type === 'exterior');
+                const thick = isExt ? extThick : intThick;
+                const mat = isExt ? extMat : intMat;
 
                 const wallGeo = new THREE.BoxGeometry(len, wallH, thick);
                 const wallMesh = new THREE.Mesh(wallGeo, mat);
@@ -472,8 +521,16 @@ export class Procedural3DGenerator {
             const dx = d.position.x * S;
             const dz = d.position.y * S;
 
+            const isVertical = (d.orientation === 'vertical' || d.wall === 'east' || d.wall === 'west');
+
             const doorGroup = new THREE.Group();
             doorGroup.position.set(dx, 0, dz);
+
+            if (isVertical) {
+                doorGroup.rotation.y = Math.PI / 2;
+            } else if (d.rotationDeg) {
+                doorGroup.rotation.y = -(d.rotationDeg * Math.PI) / 180;
+            }
 
             // Door panel
             const panel = new THREE.Mesh(new THREE.BoxGeometry(dw, doorH, doorThick), woodMat);
@@ -510,8 +567,16 @@ export class Procedural3DGenerator {
             const wx = w.position.x * S;
             const wz = w.position.y * S;
 
+            const isVertical = (w.orientation === 'vertical' || w.wall === 'east' || w.wall === 'west');
+
             const winGroup = new THREE.Group();
             winGroup.position.set(wx, sillH + wh / 2, wz);
+
+            if (isVertical) {
+                winGroup.rotation.y = Math.PI / 2;
+            } else if (w.rotationDeg) {
+                winGroup.rotation.y = -(w.rotationDeg * Math.PI) / 180;
+            }
 
             // Glass pane
             const pane = new THREE.Mesh(new THREE.BoxGeometry(ww, wh, 0.04), glassMat);
@@ -523,6 +588,60 @@ export class Procedural3DGenerator {
 
             flGroup.add(winGroup);
         });
+    }
+
+    _buildDebugOverlaps(flGroup, floor, S) {
+        const rooms = floor.rooms || [];
+        const debugGroup = new THREE.Group();
+        debugGroup.name = 'debugOverlaps';
+
+        for (let i = 0; i < rooms.length; i++) {
+            for (let j = i + 1; j < rooms.length; j++) {
+                const r1 = rooms[i];
+                const r2 = rooms[j];
+                const b1 = r1.bounds;
+                const b2 = r2.bounds;
+                if (!b1 || !b2) continue;
+
+                const ix1 = Math.max(b1.x, b2.x);
+                const iy1 = Math.max(b1.y, b2.y);
+                const ix2 = Math.min(b1.x + b1.width, b2.x + b2.width);
+                const iy2 = Math.min(b1.y + b1.height, b2.y + b2.height);
+
+                const iw = ix2 - ix1;
+                const il = iy2 - iy1;
+
+                if (iw > 0.05 && il > 0.05) {
+                    const area = iw * il;
+                    if (area > 0.01) {
+                        const cx = (ix1 + iw / 2) * S;
+                        const cz = (iy1 + il / 2) * S;
+                        const cw = iw * S;
+                        const cl = il * S;
+                        const ch = 1.6;
+
+                        const boxGeo = new THREE.BoxGeometry(cw, ch, cl);
+                        const boxMat = new THREE.MeshBasicMaterial({
+                            color: 0xef4444,
+                            transparent: true,
+                            opacity: 0.75,
+                            depthTest: false
+                        });
+                        const debugBox = new THREE.Mesh(boxGeo, boxMat);
+                        debugBox.position.set(cx, ch / 2, cz);
+                        debugGroup.add(debugBox);
+
+                        const wireGeo = new THREE.EdgesGeometry(boxGeo);
+                        const wireMat = new THREE.LineBasicMaterial({ color: 0xfacc15, linewidth: 2 });
+                        const wire = new THREE.LineSegments(wireGeo, wireMat);
+                        wire.position.set(cx, ch / 2, cz);
+                        debugGroup.add(wire);
+                    }
+                }
+            }
+        }
+
+        flGroup.add(debugGroup);
     }
 
     _buildStairs(flGroup, floor, S) {
