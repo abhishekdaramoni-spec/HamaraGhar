@@ -998,10 +998,13 @@ def api_ml_hybrid_plan():
 
 @app.route('/static/<path:filename>')
 def serve_static_assets(filename):
-    public_dir = os.path.join(app.root_path, 'public', 'static')
+    if app.static_folder and os.path.exists(os.path.join(app.static_folder, filename)):
+        return send_from_directory(app.static_folder, filename)
+    public_dir = os.path.join(REPO_ROOT, 'frontend', 'public', 'static')
     if os.path.exists(os.path.join(public_dir, filename)):
         return send_from_directory(public_dir, filename)
-    return send_from_directory(os.path.join(app.root_path, 'static'), filename)
+    return send_from_directory(static_dir, filename)
+
 
 if __name__ == '__main__':
     debug = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
