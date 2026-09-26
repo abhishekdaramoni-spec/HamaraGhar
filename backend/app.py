@@ -21,12 +21,30 @@ from datetime import datetime, timezone
 load_dotenv()
 
 REPO_ROOT = BACKEND_DIR.parent
-template_dir = str(REPO_ROOT / 'frontend' / 'public' / 'templates' if (REPO_ROOT / 'frontend' / 'public' / 'templates').exists() else (BACKEND_DIR / 'templates'))
-static_dir = str(REPO_ROOT / 'frontend' / 'public' / 'static' if (REPO_ROOT / 'frontend' / 'public' / 'static').exists() else (BACKEND_DIR / 'static'))
+
+# Robust multi-path resolution for local, serverless, and monorepo structures
+candidate_template_dirs = [
+    REPO_ROOT / 'templates',
+    REPO_ROOT / 'frontend' / 'public' / 'templates',
+    BACKEND_DIR / 'templates',
+    Path('/var/task/templates'),
+    Path('/var/task/frontend/public/templates')
+]
+template_dir = str(next((p for p in candidate_template_dirs if p.exists()), REPO_ROOT / 'templates'))
+
+candidate_static_dirs = [
+    REPO_ROOT / 'static',
+    REPO_ROOT / 'frontend' / 'public' / 'static',
+    BACKEND_DIR / 'static',
+    Path('/var/task/static'),
+    Path('/var/task/frontend/public/static')
+]
+static_dir = str(next((p for p in candidate_static_dirs if p.exists()), REPO_ROOT / 'static'))
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 allowed_origins = [o.strip() for o in os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173,*').split(',') if o.strip()]
 CORS(app, supports_credentials=True, origins=allowed_origins)
+
 
 class ServerlessDebugMiddleware:
     """Catches any uncaught exception in serverless environments and displays the Python traceback."""
@@ -112,6 +130,17 @@ with app.app_context():
             db.create_all()
         except Exception as inner_e:
             app.logger.warning(f"Serverless SQLite initialization fallback skipped: {inner_e}")
+
+@app.errorhandler(500)
+@app.errorhandler(Exception)
+def handle_server_exception(e):
+    import traceback
+    tb = traceback.format_exc()
+    app.logger.error(f"Server exception: {tb}")
+    if is_serverless or app.debug:
+        return f"<!DOCTYPE html><html><body style='background:#0f172a;color:#f8fafc;padding:2rem;font-family:monospace;'><h3 style='color:#ef4444;'>Application Runtime Exception</h3><pre style='background:#1e293b;padding:1rem;color:#fca5a5;overflow:auto;border-radius:6px;'>{tb}</pre></body></html>", 500
+    return "Internal Server Error", 500
+
 
 # Decorators
 def login_required(f):
