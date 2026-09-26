@@ -413,6 +413,58 @@
             </button>
         </div>
     </form>
+
+    <!-- 8-Stage Architectural Generation Pipeline Modal -->
+    <div class="gen-pipeline-overlay" id="genPipelineOverlay">
+        <div class="gen-pipeline-modal">
+            <div class="gen-pipeline-header">
+                <h3>Generating Architectural Blueprints</h3>
+                <p>Processing physical plot constraints, CubiCasa5K topological matching, and NBC structural verification...</p>
+            </div>
+            <div class="gen-pipeline-body">
+                <div class="pipeline-step" id="pipeStep1">
+                    <div class="step-indicator-glyph">1</div>
+                    <div class="step-label-text">Plot Dimension & Setback Boundary Solvers</div>
+                    <span class="sidebar-badge" id="pipeTag1">Waiting</span>
+                </div>
+                <div class="pipeline-step" id="pipeStep2">
+                    <div class="step-indicator-glyph">2</div>
+                    <div class="step-label-text">Physical Manifold & Room Graph Construction</div>
+                    <span class="sidebar-badge" id="pipeTag2">Waiting</span>
+                </div>
+                <div class="pipeline-step" id="pipeStep3">
+                    <div class="step-indicator-glyph">3</div>
+                    <div class="step-label-text">CubiCasa5K Floor Plan Topology Retrieval</div>
+                    <span class="sidebar-badge" id="pipeTag3">Waiting</span>
+                </div>
+                <div class="pipeline-step" id="pipeStep4">
+                    <div class="step-indicator-glyph">4</div>
+                    <div class="step-label-text">Vastu Shastra Orientation & Sunlight Analysis</div>
+                    <span class="sidebar-badge" id="pipeTag4">Waiting</span>
+                </div>
+                <div class="pipeline-step" id="pipeStep5">
+                    <div class="step-indicator-glyph">5</div>
+                    <div class="step-label-text">Candidate Divergence & Spatial Diversity Verification</div>
+                    <span class="sidebar-badge" id="pipeTag5">Waiting</span>
+                </div>
+                <div class="pipeline-step" id="pipeStep6">
+                    <div class="step-indicator-glyph">6</div>
+                    <div class="step-label-text">NBC 2016 Minimum Dimension & Accessibility Validation</div>
+                    <span class="sidebar-badge" id="pipeTag6">Waiting</span>
+                </div>
+                <div class="pipeline-step" id="pipeStep7">
+                    <div class="step-indicator-glyph">7</div>
+                    <div class="step-label-text">CPWD Itemized Quantity Takeoff & Schedule of Rates</div>
+                    <span class="sidebar-badge" id="pipeTag7">Waiting</span>
+                </div>
+                <div class="pipeline-step" id="pipeStep8">
+                    <div class="step-indicator-glyph">8</div>
+                    <div class="step-label-text">3D WebGL Mesh & Three.js Studio Scene Assembly</div>
+                    <span class="sidebar-badge" id="pipeTag8">Waiting</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

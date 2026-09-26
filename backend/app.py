@@ -20,7 +20,11 @@ from datetime import datetime, timezone
 
 load_dotenv()
 
-app = Flask(__name__)
+REPO_ROOT = BACKEND_DIR.parent
+template_dir = str(REPO_ROOT / 'frontend' / 'public' / 'templates' if (REPO_ROOT / 'frontend' / 'public' / 'templates').exists() else (BACKEND_DIR / 'templates'))
+static_dir = str(REPO_ROOT / 'frontend' / 'public' / 'static' if (REPO_ROOT / 'frontend' / 'public' / 'static').exists() else (BACKEND_DIR / 'static'))
+
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 allowed_origins = [o.strip() for o in os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173,*').split(',') if o.strip()]
 CORS(app, supports_credentials=True, origins=allowed_origins)
 
