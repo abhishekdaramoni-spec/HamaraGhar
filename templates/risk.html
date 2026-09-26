@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Location Hazard Intelligence — HamaraGhar{% endblock %}
+
+{% block content %}
+<div class="risk-page-container">
+    <!-- Top Bar -->
+    <header class="risk-topbar">
+        <div>
+            <h1>Location Hazard Intelligence</h1>
+            <p>Geospatial multi-hazard mapping, structural vulnerability analysis, and IS 1893:2016 building standards.</p>
+        </div>
+        <div class="risk-top-actions">
+            <button class="btn btn-outline btn-sm" onclick="window.print()" title="Print Hazard Assessment">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                <span>Export Report</span>
+            </button>
+            <a href="{{ url_for('summary') }}" class="btn btn-primary btn-sm">
+                <span>Executive Summary &rarr;</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Location Selector & Presets -->
+    <div class="risk-search-strip">
+        <div class="risk-search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <input type="text" id="cityInput" placeholder="Enter Indian city (e.g. Ahmedabad, Mumbai, Bengaluru, Delhi)..." value="Ahmedabad">
+            <button type="button" id="btnAnalyze" class="btn btn-primary btn-sm">Analyze</button>
+        </div>
+
+        <div class="risk-presets">
+            <span class="preset-lbl">Quick Presets:</span>
+            <button type="button" class="preset-chip active" onclick="RiskStudio.selectCity('Ahmedabad')">Ahmedabad</button>
+            <button type="button" class="preset-chip" onclick="RiskStudio.selectCity('Mumbai')">Mumbai</button>
+            <button type="button" class="preset-chip" onclick="RiskStudio.selectCity('Bengaluru')">Bengaluru</button>
+            <button type="button" class="preset-chip" onclick="RiskStudio.selectCity('Delhi')">Delhi</button>
+            <button type="button" class="preset-chip" onclick="RiskStudio.selectCity('Chennai')">Chennai</button>
+            <button type="button" class="preset-chip" onclick="RiskStudio.selectCity('Hyderabad')">Hyderabad</button>
+            <button type="button" class="preset-chip" onclick="RiskStudio.selectCity('Kolkata')">Kolkata</button>
+        </div>
+    </div>
+
+    <!-- 2-Column Spatial Layout: Left Map, Right Intelligence Panel -->
+    <div class="risk-spatial-layout">
+        <!-- Left: Interactive Map -->
+        <section class="risk-map-canvas-card">
+            <div class="rmc-header">
+                <div class="rmc-title-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                    <span>GEOSPATIAL HAZARD MAP OF INDIA</span>
+                </div>
+                <div class="rmc-legend">
+                    <span><span class="leg-dot zone2"></span>Zone II</span>
+                    <span><span class="leg-dot zone3"></span>Zone III</span>
+                    <span><span class="leg-dot zone4"></span>Zone IV</span>
+                    <span><span class="leg-dot zone5"></span>Zone V</span>
+                </div>
+            </div>
+
+            <div class="map-viewport">
+                <svg viewBox="0 0 540 560" width="100%" height="100%" class="india-map-svg">
+                    <defs>
+                        <pattern id="mapGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="0.75" />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="#f8fafc" />
+                    <rect width="100%" height="100%" fill="url(#mapGrid)" />
+
+                    <!-- Vector India Boundary Outline (Stylized Geometric) -->
+                    <!-- Northern Himalayas (Zone IV / V) -->
+                    <polygon points="190,40 270,30 330,70 360,110 320,130 250,130 190,90" fill="#fecaca" stroke="#f87171" stroke-width="1.5" />
+                    <text x="250" y="85" font-size="10" font-family="monospace" fill="#b91c1c" font-weight="700">ZONE V / IV</text>
+
+                    <!-- Gangetic Plain & Central Region (Zone IV / III) -->
+                    <polygon points="150,130 250,130 360,110 420,160 380,220 280,240 180,220 140,160" fill="#fed7aa" stroke="#fb923c" stroke-width="1.5" />
+                    <text x="240" y="180" font-size="10" font-family="monospace" fill="#c2410c" font-weight="700">ZONE III / IV</text>
+
+                    <!-- Western & Gujarat Region (Zone III / IV) -->
+                    <polygon points="80,180 180,200 170,280 100,280 60,220" fill="#fed7aa" stroke="#fb923c" stroke-width="1.5" />
+                    
+                    <!-- Deccan Plateau & South India (Zone II / III) -->
+                    <polygon points="140,240 280,240 330,320 280,440 220,510 180,440 130,320" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5" />
+                    <text x="210" y="340" font-size="10" font-family="monospace" fill="#475569" font-weight="700">ZONE II / III</text>
+
+                    <!-- Coastal Cyclone & Storm Surges Strips -->
+                    <path d="M 330,320 Q 340,380 280,440" fill="none" stroke="#0284c7" stroke-width="3" stroke-dasharray="4,4" />
+                    <path d="M 130,320 Q 140,380 180,440" fill="none" stroke="#0284c7" stroke-width="3" stroke-dasharray="4,4" />
+
+                    <!-- Active City Pin (Dynamic via JS) -->
+                    <g id="mapPinGroup" transform="translate(130, 230)">
+                        <circle cx="0" cy="0" r="14" fill="rgba(194, 65, 12, 0.2)" class="pin-pulse" />
+                        <circle cx="0" cy="0" r="6" fill="#c2410c" stroke="#ffffff" stroke-width="2" />
+                        <rect x="12" y="-12" width="100" height="24" rx="4" fill="#0f172a" />
+                        <text x="20" y="4" font-size="11" font-family="sans-serif" fill="#ffffff" font-weight="700" id="mapPinText">Ahmedabad</text>
+                    </g>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Right: Location Intelligence Panel -->
+        <aside class="risk-intel-panel">
+            <!-- Location Header Card -->
+            <div class="intel-card">
+                <div class="intel-card-header">
+                    <div>
+                        <span class="intel-label">LOCATION</span>
+                        <h2 class="intel-city" id="displayLocationName">Ahmedabad, Gujarat</h2>
+                        <span class="intel-coords" id="displayCoords">23.0225° N, 72.5714° E</span>
+                    </div>
+                    <div class="resilience-score-pill">
+                        <span class="rsp-val" id="resilienceScoreVal">84</span>
+                        <span class="rsp-lbl">Resilience</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Overview List -->
+            <div class="intel-card">
+                <div class="intel-section-title">RISK OVERVIEW</div>
+
+                <div class="intel-items-list">
+                    <!-- Seismic -->
+                    <div class="intel-item" id="itemSeismic">
+                        <div class="ii-top">
+                            <div class="ii-left">
+                                <span class="ii-title">Seismic Hazard</span>
+                                <span class="badge" id="badgeSeismic">Zone III &bull; Moderate</span>
+                            </div>
+                        </div>
+                        <p class="ii-desc" id="descSeismic">Moderate probability of tectonic disturbances. IS 1893:2016 ductile detailing required for column-beam junctions.</p>
+                        <div class="ii-meta">
+                            <span>Source: <b>BIS IS 1893:2016</b></span>
+                            <span>&bull;</span>
+                            <span>Updated: <b>2024</b></span>
+                        </div>
+                    </div>
+
+                    <!-- Flood -->
+                    <div class="intel-item" id="itemFlood">
+                        <div class="ii-top">
+                            <div class="ii-left">
+                                <span class="ii-title">Flood Exposure</span>
+                                <span class="badge badge-success" id="badgeFlood">Low</span>
+                            </div>
+                        </div>
+                        <p class="ii-desc" id="descFlood">Standard plinth clearance (+450mm above road crown) provides full inundation safety.</p>
+                        <div class="ii-meta">
+                            <span>Source: <b>NDMA Flood Atlas</b></span>
+                            <span>&bull;</span>
+                            <span>Updated: <b>2024</b></span>
+                        </div>
+                    </div>
+
+                    <!-- Cyclone / Wind -->
+                    <div class="intel-item" id="itemCyclone">
+                        <div class="ii-top">
+                            <div class="ii-left">
+                                <span class="ii-title">Cyclone & Wind</span>
+                                <span class="badge" id="badgeCyclone">Moderate</span>
+                            </div>
+                        </div>
+                        <p class="ii-desc" id="descCyclone">Design for 39 m/s basic wind speed (IS 875 Part 3). Roof anchorage and parapet ties recommended.</p>
+                        <div class="ii-meta">
+                            <span>Source: <b>IMD Wind Zones</b></span>
+                            <span>&bull;</span>
+                            <span>Updated: <b>2024</b></span>
+                        </div>
+                    </div>
+
+                    <!-- Thermal -->
+                    <div class="intel-item" id="itemHeat">
+                        <div class="ii-top">
+                            <div class="ii-left">
+                                <span class="ii-title">Extreme Heat</span>
+                                <span class="badge" id="badgeHeat">High</span>
+                            </div>
+                        </div>
+                        <p class="ii-desc" id="descHeat">Summer temperatures exceed 42°C. Autoclaved aerated concrete (AAC) and cool roof coatings advised.</p>
+                        <div class="ii-meta">
+                            <span>Source: <b>BEE ENS Code</b></span>
+                            <span>&bull;</span>
+                            <span>Updated: <b>2024</b></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statutory IS Code Checklist -->
+            <div class="intel-card">
+                <div class="intel-section-title">STATUTORY CODES</div>
+                <ul class="statutory-list">
+                    <li><span>IS 1893:2016 Part 1</span><span class="text-success font-semibold">&check; Ductile Detailing</span></li>
+                    <li><span>IS 875:2015 Part 3</span><span class="text-success font-semibold">&check; 39 m/s Wind Load</span></li>
+                    <li><span>NBC 2016 Part 4</span><span class="text-success font-semibold">&check; Fire & Egress</span></li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/data/risk-engine.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/risk-page.js') }}"></script>
+{% endblock %}
