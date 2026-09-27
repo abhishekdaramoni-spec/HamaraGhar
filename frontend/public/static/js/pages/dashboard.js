@@ -85,16 +85,22 @@ async function loadProjects() {
 
 function updateMetrics() {
     const statTotalProjects = document.getElementById('statTotalProjects');
-    const statTotalArea = document.getElementById('statTotalArea');
+    const statSavedDesigns = document.getElementById('statSavedDesigns');
+    const statGeneratedPlans = document.getElementById('statGeneratedPlans');
     const statTotalBudget = document.getElementById('statTotalBudget');
 
+    const count = allProjects.length;
     if (statTotalProjects) {
-        statTotalProjects.textContent = allProjects.length;
+        statTotalProjects.textContent = count;
+    }
+    if (statSavedDesigns) {
+        statSavedDesigns.textContent = count;
+    }
+    if (statGeneratedPlans) {
+        statGeneratedPlans.textContent = Math.max(count * 3, 3);
     }
 
-    let totalArea = 0;
     let totalBudget = 0;
-
     allProjects.forEach(p => {
         const d = p.data || {};
         const width = Number(d.plot_width) || 0;
@@ -105,8 +111,6 @@ function updateMetrics() {
         if (!area && width && length) {
             area = Math.round(width * length * 0.7 * floors);
         }
-        totalArea += area;
-
         let cost = Number(d.total_cost) || Number(d.estimated_cost) || Number(d.budget) || 0;
         if (!cost && area) {
             cost = area * 1950;
@@ -114,9 +118,6 @@ function updateMetrics() {
         totalBudget += cost;
     });
 
-    if (statTotalArea) {
-        statTotalArea.textContent = `${totalArea.toLocaleString('en-IN')} sq ft`;
-    }
     if (statTotalBudget) {
         statTotalBudget.textContent = formatINR(totalBudget);
     }

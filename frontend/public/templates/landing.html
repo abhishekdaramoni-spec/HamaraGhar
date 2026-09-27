@@ -19,7 +19,7 @@
             </p>
             
             <div class="hero-ctas">
-                <a href="{{ url_for('requirements') if current_user else url_for('register') }}" class="btn btn-primary btn-large">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-large">
                     <span>Start Designing</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </a>
@@ -216,7 +216,7 @@
                     <li><strong>Architectural Style Selector:</strong> Modern Minimalist, Contemporary Indian, or Traditional Vernacular.</li>
                 </ul>
                 <div class="mt-4">
-                    <a href="{{ url_for('requirements') if current_user else url_for('register') }}" class="btn btn-outline">
+                    <a href="{{ url_for('requirements') }}" class="btn btn-outline">
                         <span>Launch Requirements Wizard</span> &rarr;
                     </a>
                 </div>
@@ -273,7 +273,7 @@
                     <li><strong>One-Click Export:</strong> Download high-resolution PNG blueprints for discussions with your contractor.</li>
                 </ul>
                 <div class="mt-4">
-                    <a href="{{ url_for('floor_plan') if current_user else url_for('register') }}" class="btn btn-outline">
+                    <a href="{{ url_for('floor_plan') }}" class="btn btn-outline">
                         <span>Open 2D Floor Plan Studio</span> &rarr;
                     </a>
                 </div>
@@ -496,7 +496,7 @@
         <h2 class="cta-heading">Ready to design your home with engineering clarity?</h2>
         <p class="cta-sub">Join thousands of home builders designing with 2D precision, 3D visualization, and real construction cost models.</p>
         <div class="cta-actions">
-            <a href="{{ url_for('requirements') if current_user else url_for('register') }}" class="btn btn-primary btn-large">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-large">
                 <span>Start Designing Free</span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </a>
