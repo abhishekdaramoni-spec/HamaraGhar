@@ -279,9 +279,22 @@ export class Procedural3DGenerator {
             this.floorGroups.push(flGroup);
         });
 
-        // 3. Center camera focus
-        if (this.controls) {
-            this.controls.target.set(0, 2.5, 0);
+        // 3. Center camera focus with automatic bounding box framing
+        if (this.controls && this.camera) {
+            const box = new THREE.Box3().setFromObject(this.houseGroup);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z, 8);
+            this.controls.target.set(center.x, Math.max(1.5, center.y), center.z);
+            
+            // Frame nicely based on house dimensions and viewport FOV
+            const fov = this.camera.fov * (Math.PI / 180);
+            let cameraDist = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * 1.35;
+            cameraDist = Math.max(16, Math.min(cameraDist, 38));
+            
+            this.camera.position.set(center.x + cameraDist * 0.65, center.y + cameraDist * 0.65, center.z + cameraDist * 0.9);
+            this.camera.lookAt(this.controls.target);
+            this.controls.update();
         }
 
         this._applyVisibility();
@@ -888,29 +901,38 @@ export class Procedural3DGenerator {
     setCameraView(viewName) {
         if (!this.camera || !this.controls) return;
         const target = this.controls.target;
-        const dist = 38;
+        
+        let dist = 24;
+        try {
+            const box = new THREE.Box3().setFromObject(this.houseGroup);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.z, 8);
+            dist = Math.max(16, maxDim * 1.35);
+        } catch (e) {
+            dist = 24;
+        }
 
         switch (viewName.toLowerCase()) {
             case 'top':
-                this.camera.position.set(target.x, target.y + dist * 1.2, target.z + 0.001);
+                this.camera.position.set(target.x, target.y + dist * 1.3, target.z + 0.001);
                 break;
             case 'front':
-                this.camera.position.set(target.x, target.y + 4, target.z + dist);
+                this.camera.position.set(target.x, target.y + 3, target.z + dist);
                 break;
             case 'left':
-                this.camera.position.set(target.x - dist, target.y + 4, target.z);
+                this.camera.position.set(target.x - dist, target.y + 3, target.z);
                 break;
             case 'right':
-                this.camera.position.set(target.x + dist, target.y + 4, target.z);
+                this.camera.position.set(target.x + dist, target.y + 3, target.z);
                 break;
             case 'iso':
             case 'isometric':
-                this.camera.position.set(target.x + 24, target.y + 26, target.z + 28);
+                this.camera.position.set(target.x + dist * 0.7, target.y + dist * 0.75, target.z + dist * 0.85);
                 break;
             case 'orbit':
             case 'reset':
             default:
-                this.camera.position.set(target.x + 22, target.y + 24, target.z + 32);
+                this.camera.position.set(target.x + dist * 0.65, target.y + dist * 0.65, target.z + dist * 0.9);
                 break;
         }
 

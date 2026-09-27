@@ -4,6 +4,105 @@
    ========================================================================= */
 
 /* =========================================================================
+   0. PUBLIC / MARKETING TOP NAVIGATION BAR
+   ========================================================================= */
+.navbar, .nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-border);
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(11, 18, 32, 0.04);
+}
+
+.nav-container, .nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--max-width, 1400px);
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 var(--space-6, 24px);
+}
+
+.brand, .nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+  font-family: var(--font-display, 'DM Sans', sans-serif);
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: var(--font-bold, 700);
+  color: var(--color-primary, #0B1220);
+  text-decoration: none;
+  letter-spacing: -0.025em;
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary, #0B1220);
+  color: #FFFFFF;
+  border-radius: var(--radius-sm, 6px);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.brand-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-links a, .nav-link {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: var(--font-medium, 500);
+  color: var(--color-text-secondary, #64748B);
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  border-radius: var(--radius-md, 8px);
+  text-decoration: none;
+  transition: all var(--transition-fast, 0.15s ease);
+  white-space: nowrap;
+}
+
+.nav-links a:hover, .nav-link:hover {
+  color: var(--color-primary, #0B1220);
+  background-color: var(--color-surface-muted, #F1F5F9);
+}
+
+.nav-links a.active, .nav-link.active {
+  color: var(--color-accent, #2563EB);
+  background-color: var(--color-accent-subtle, rgba(37, 99, 235, 0.08));
+  font-weight: var(--font-semibold, 600);
+}
+
+.nav-right, .nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+  flex-shrink: 0;
+}
+
+/* =========================================================================
    1. GLOBAL APPLICATION SHELL & LAYOUT
    ========================================================================= */
 .app-shell {
@@ -252,7 +351,7 @@
 }
 
 /* Search Bar */
-.topbar-search {
+.topbar-search, .topbar-search-area {
   flex: 1;
   max-width: 440px;
   position: relative;
@@ -260,7 +359,14 @@
   align-items: center;
 }
 
-.topbar-search-icon {
+.global-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.global-search-box svg, .topbar-search-icon {
   position: absolute;
   left: 12px;
   width: 16px;
@@ -269,25 +375,25 @@
   pointer-events: none;
 }
 
-.topbar-search-input {
+.global-search-box input, .topbar-search-input {
   width: 100%;
   height: 38px;
   background: var(--color-surface-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0 44px 0 36px;
+  padding: 0 54px 0 36px;
   font-size: var(--text-xs);
   color: var(--color-text-primary);
   transition: all var(--transition-fast);
 }
 
-.topbar-search-input:focus {
+.global-search-box input:focus, .topbar-search-input:focus {
   background: #FFFFFF;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px var(--color-accent-glow);
 }
 
-.topbar-search-kbd {
+.global-search-box .search-kbd, .topbar-search-kbd {
   position: absolute;
   right: 10px;
   font-family: var(--font-mono);
@@ -300,10 +406,36 @@
   pointer-events: none;
 }
 
-.topbar-actions {
+.topbar-actions, .topbar-right-actions {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.arch-measure {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-success);
+  background: rgba(22, 163, 74, 0.08);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.user-profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: var(--color-surface-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
 }
 
 .topbar-action-btn {

@@ -15,9 +15,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
 </head>
-<body class="{% if page in ['landing', 'login', 'register'] %}public-page{% else %}app-page{% endif %}">
+<body class="{% if page in ['landing', 'login', 'register'] %}public-page{% elif page == 'builder' %}builder-page{% else %}app-page{% endif %}">
 
-{% if page not in ['landing', 'login', 'register'] %}
+{% if page == 'builder' %}
+    <main class="builder-full-viewport" style="width: 100vw; height: 100vh; overflow: hidden; margin: 0; padding: 0;">
+{% elif page not in ['landing', 'login', 'register'] %}
     <!-- Unified Architectural Application Shell -->
     <div class="app-shell">
         <!-- 250px Architectural Sidebar -->
@@ -25,7 +27,7 @@
             <div class="sidebar-header">
                 <a href="{{ url_for('dashboard') }}" class="brand-link" style="display:flex; align-items:center; gap:10px;">
                     <div class="brand-logo-wrap">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
                             <polyline points="2 17 12 22 22 17"></polyline>
                             <polyline points="2 12 12 17 22 12"></polyline>
@@ -204,7 +206,7 @@
         <div class="nav-container">
             <a href="{{ url_for('index') }}" class="brand">
                 <span class="brand-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
                         <polyline points="2 17 12 22 22 17"></polyline>
                         <polyline points="2 12 12 17 22 12"></polyline>
@@ -222,10 +224,18 @@
             </nav>
             
             <div class="nav-right">
-                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-sm" style="display:flex; align-items:center; gap:6px;">
-                    <span>Open Workspace</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
+                {% if current_user %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-sm" style="display:flex; align-items:center; gap:6px;">
+                        <span>Open Workspace</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">Sign In</a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-sm" style="display:flex; align-items:center; gap:6px;">
+                        <span>Start Designing</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                {% endif %}
             </div>
         </div>
     </header>
@@ -247,7 +257,9 @@
 
         {% block content %}{% endblock %}
 
-{% if page not in ['landing', 'login', 'register'] %}
+{% if page == 'builder' %}
+    </main>
+{% elif page not in ['landing', 'login', 'register'] %}
             </main>
         </div>
     </div>
@@ -260,7 +272,7 @@
             <div class="footer-col footer-col-brand">
                 <div class="brand mb-3">
                     <span class="brand-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
                             <polyline points="2 17 12 22 22 17"></polyline>
                             <polyline points="2 12 12 17 22 12"></polyline>

@@ -478,26 +478,44 @@ export class FloorPlan2DRenderer {
                 ctx.strokeRect(rx, ry, rw, rh);
             }
 
-            // Room Typography & Dimensions
+            // Room Typography & Dimensions (Adaptive sizing to prevent label overlap)
             if (this.showLabels) {
                 ctx.globalAlpha = 1.0;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                // Room Name
-                ctx.fillStyle = isSelected ? '#38bdf8' : '#ffffff';
-                ctx.font = `bold ${Math.max(10, Math.min(13, Math.round(this.scale * 1.0)))}px "DM Sans", Inter, sans-serif`;
-                ctx.fillText(r.name.toUpperCase(), rx + rw / 2, ry + rh / 2 - 8);
+                const cx = rx + rw / 2;
+                const cy = ry + rh / 2;
 
-                // Dimension Text (e.g. 14' × 12')
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = `${Math.max(9, Math.min(11, Math.round(this.scale * 0.85)))}px "JetBrains Mono", monospace`;
-                ctx.fillText(`${r.bounds.width}'0" × ${r.bounds.height}'0"`, rx + rw / 2, ry + rh / 2 + 7);
+                if (rh >= 52 && rw >= 60) {
+                    // Standard 3-line label
+                    ctx.fillStyle = isSelected ? '#38bdf8' : '#ffffff';
+                    ctx.font = `bold ${Math.max(10, Math.min(13, Math.round(this.scale * 1.0)))}px "DM Sans", Inter, sans-serif`;
+                    ctx.fillText(r.name.toUpperCase(), cx, cy - 10);
 
-                // Area Text (e.g. 168 sq.ft)
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-                ctx.font = '9px "JetBrains Mono", monospace';
-                ctx.fillText(`${r.areaSqFt} sq.ft`, rx + rw / 2, ry + rh / 2 + 20);
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = `${Math.max(8, Math.min(10, Math.round(this.scale * 0.8)))}px "JetBrains Mono", monospace`;
+                    ctx.fillText(`${r.bounds.width}'0" × ${r.bounds.height}'0"`, cx, cy + 4);
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+                    ctx.font = '8px "JetBrains Mono", monospace';
+                    ctx.fillText(`${r.areaSqFt} sq.ft`, cx, cy + 16);
+                } else if (rh >= 36 && rw >= 40) {
+                    // Compact 2-line label: Name + Dim
+                    ctx.fillStyle = isSelected ? '#38bdf8' : '#ffffff';
+                    ctx.font = `bold ${Math.max(9, Math.min(11, Math.round(this.scale * 0.9)))}px "DM Sans", Inter, sans-serif`;
+                    ctx.fillText(r.name.toUpperCase(), cx, cy - 6);
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = `8px "JetBrains Mono", monospace`;
+                    ctx.fillText(`${r.bounds.width}'×${r.bounds.height}'`, cx, cy + 7);
+                } else {
+                    // Minimal 1-line label
+                    ctx.fillStyle = isSelected ? '#38bdf8' : '#ffffff';
+                    ctx.font = `bold 9px "DM Sans", Inter, sans-serif`;
+                    const shortName = r.name.length > 6 ? (r.name.substring(0, 5) + '.') : r.name;
+                    ctx.fillText(shortName.toUpperCase(), cx, cy);
+                }
             }
 
             ctx.restore();

@@ -5445,7 +5445,8 @@
 .studio-split-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 64px);
+  height: 100vh;
+  width: 100%;
   background-color: #0b132b;
   overflow: hidden;
 }
@@ -5503,6 +5504,7 @@
   display: flex;
   position: relative;
   overflow: hidden;
+  min-height: 0;
 }
 
 .studio-split-workspace {
@@ -5511,6 +5513,8 @@
   position: relative;
   overflow: hidden;
   background-color: #090e1a;
+  min-width: 0;
+  min-height: 0;
 }
 
 .studio-pane {
@@ -5519,6 +5523,8 @@
   flex-direction: column;
   overflow: hidden;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 0;
+  min-height: 0;
 }
 
 .studio-pane-header {
@@ -5544,88 +5550,95 @@
   overflow: hidden;
 }
 
-/* Floating 3D Camera Controls */
+/* Floating 3D Camera Controls - Sleek Bottom Pill */
 .cam-floating-toolbar {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-md);
-  padding: 6px;
-  z-index: 20;
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  z-index: 25;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
 .cam-tool-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
+  gap: 4px;
+  padding: 4px 8px;
   font-size: 10px;
   font-weight: 600;
   color: #cbd5e1;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 9999px;
   cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
 .cam-tool-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   color: #38bdf8;
-  border-color: rgba(56, 189, 248, 0.3);
+  border-color: rgba(56, 189, 248, 0.35);
 }
 
-/* Floating 3D View Options */
+/* Floating 3D View Options - Compact Top Right */
 .view-options-floating-card {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 10px;
+  right: 10px;
   background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
-  padding: 10px 14px;
+  padding: 8px 12px;
   z-index: 20;
-  width: 175px;
+  width: 148px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .vo-title {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #94a3b8;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
 
 .vo-toggle-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
-  font-size: 11px;
+  margin-bottom: 4px;
+  font-size: 10px;
   color: #e2e8f0;
 }
 
 .vo-modes {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  margin-top: 10px;
-  padding-top: 8px;
+  gap: 3px;
+  margin-top: 6px;
+  padding-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .vo-mode-btn {
-  padding: 4px 6px;
+  padding: 3px 5px;
   font-size: 9px;
-  font-weight: 700;
+  font-weight: 600;
   text-align: center;
   background: rgba(255, 255, 255, 0.05);
   color: #cbd5e1;
@@ -5633,6 +5646,11 @@
   border-radius: 4px;
   cursor: pointer;
   transition: all var(--transition-fast);
+}
+
+.vo-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .vo-mode-btn.active {

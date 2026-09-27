@@ -12,13 +12,14 @@
     <!-- Studio Top Bar Navigation -->
     <header class="studio-topbar-nav">
         <div class="st-brand-group">
-            <span class="st-brand-mark">
+            <a href="{{ url_for('dashboard') }}" class="st-brand-mark" title="Back to Dashboard" style="text-decoration:none; display:flex; align-items:center; gap:8px; color:#fff;">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
                     <polyline points="2 17 12 22 22 17"></polyline>
                     <polyline points="2 12 12 17 22 12"></polyline>
                 </svg>
-            </span>
+                <span style="font-weight: 700; font-size: 13px; font-family: var(--font-display);">HamaraGhar</span>
+            </a>
             <div class="st-project-info">
                 <span class="st-label">Active Project</span>
                 <span class="st-project-name" id="builderProjectName">{{ project.name if project else 'Modern Residence' }}</span>
@@ -55,15 +56,22 @@
         </div>
 
         <!-- Right Action Buttons -->
-        <div class="st-right">
-            <button type="button" class="btn btn-outline btn-sm" id="btnStudioExport" title="Export High-Resolution Blueprint PNG">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <div class="st-right" style="display: flex; align-items: center; gap: 8px;">
+            <a href="{{ url_for('requirements') }}" class="btn btn-ghost btn-xs" style="color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15);" title="Start New Architectural Project">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>New Project</span>
+            </a>
+            <button type="button" class="btn btn-outline btn-xs" id="btnStudioExport" title="Export High-Resolution Blueprint PNG">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 <span>Export</span>
             </button>
-            <button type="button" class="btn btn-primary btn-sm" id="btnStudioSave">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            <button type="button" class="btn btn-primary btn-xs" id="btnStudioSave">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
                 <span>Save</span>
             </button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-ghost btn-xs" style="color: #94a3b8; padding: 4px;" title="Workspace Dashboard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </a>
         </div>
     </header>
 
@@ -140,7 +148,7 @@
             </section>
 
             <!-- Right Pane: 3D House View (Interactive) -->
-            <section class="studio-pane" id="panel3D" style="flex: 1.1;">
+            <section class="studio-pane" id="panel3D" style="flex: 1; min-width: 0; min-height: 0;">
                 <div class="studio-pane-header">
                     <span>3D House View (Interactive)</span>
                     <span style="font-size: 10px; color: #38bdf8; font-family: monospace;">WEBGL THREE.JS ENGINE</span>
