@@ -59,7 +59,7 @@
   --color-success: #16A34A;          /* Architectural Forest Green */
   --color-success-bg: #F0FDF4;
   --color-success-border: #BBF7D0;
-  --color-warning: #F59E0B;          /* Amber Warning */
+  --color-warning: #D97706;          /* Technical Amber Warning */
   --color-warning-bg: #FFFBEB;
   --color-warning-border: #FDE68A;
   --color-danger: #DC2626;           /* Precision Red */
@@ -71,7 +71,7 @@
 
   /* Risk Ratings */
   --color-risk-low: #16A34A;
-  --color-risk-medium: #F59E0B;
+  --color-risk-medium: #D97706;
   --color-risk-high: #DC2626;
   --color-risk-unknown: #64748B;
 
@@ -101,8 +101,7 @@
   --font-bold: 700;
   --font-extrabold: 800;
 
-  /* Spacing (4px Standardized Modular Scale) */
-  --space-0-5: 2px;
+  /* Spacing (Standardized Scale: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80) */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -114,15 +113,18 @@
   --space-12: 48px;
   --space-16: 64px;
   --space-20: 80px;
-  --space-24: 96px;
 
-  /* Border Radii */
+  /* Restrained Border Radii */
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
-  --radius-lg: 12px;     /* Card standard */
-  --radius-xl: 16px;     /* Hero & large cards */
-  --radius-2xl: 24px;
+  --radius-btn: 10px;           /* Buttons: 10px */
+  --radius-card: 14px;          /* Cards: 14px */
+  --radius-panel: 16px;         /* Panels: 16px */
+  --radius-container: 18px;     /* Large application containers: 18px */
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 18px;
   --radius-full: 9999px;
 
   /* Subtle Architectural Elevation */

@@ -47,15 +47,6 @@
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                         <span>Dashboard</span>
                     </a>
-                    <a href="{{ url_for('dashboard') }}#projects" class="sidebar-link">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                        <span>Projects</span>
-                        <span class="sidebar-badge" id="sidebarProjectCount">Live</span>
-                    </a>
-                    <a href="{{ url_for('dashboard') }}#designs" class="sidebar-link">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                        <span>My Designs</span>
-                    </a>
                 </div>
 
                 <!-- DESIGN -->
@@ -63,7 +54,7 @@
                     <span class="sidebar-group-title">DESIGN</span>
                     <a href="{{ url_for('requirements') }}" class="sidebar-link {% if page == 'requirements' %}active{% endif %}">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        <span>AI House Planner</span>
+                        <span>AI Planner</span>
                         <span class="sidebar-badge accent">AI</span>
                     </a>
                     <a href="{{ url_for('floor_plan') }}" class="sidebar-link {% if page == 'floor-plan' %}active{% endif %}">
@@ -81,30 +72,38 @@
                     </a>
                     <a href="{{ url_for('builder') }}#exterior" class="sidebar-link">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                        <span>Exterior Studio</span>
-                    </a>
-                    <a href="{{ url_for('builder') }}#compare" class="sidebar-link">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                        <span>Compare Designs</span>
+                        <span>Exterior</span>
                     </a>
                 </div>
 
-                <!-- ANALYSIS -->
+                <!-- INTELLIGENCE -->
                 <div class="sidebar-group">
-                    <span class="sidebar-group-title">ANALYSIS</span>
+                    <span class="sidebar-group-title">INTELLIGENCE</span>
                     <a href="{{ url_for('cost') }}" class="sidebar-link {% if page == 'cost' %}active{% endif %}">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                        <span>Cost Estimator</span>
+                        <span>Cost</span>
                     </a>
                     <a href="{{ url_for('cost') }}#valuation" class="sidebar-link">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-                        <span>Property Valuation</span>
+                        <span>Valuation</span>
+                    </a>
+                    <a href="{{ url_for('risk') }}" class="sidebar-link {% if page == 'risk' %}active{% endif %}">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline></svg>
+                        <span>Site Risk</span>
                     </a>
                 </div>
 
-                <!-- MANAGE -->
+                <!-- PROJECT -->
                 <div class="sidebar-group">
-                    <span class="sidebar-group-title">MANAGE</span>
+                    <span class="sidebar-group-title">PROJECT</span>
+                    <a href="{{ url_for('builder') }}#compare" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        <span>Compare</span>
+                    </a>
+                    <a href="{{ url_for('dashboard') }}#history" class="sidebar-link">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                        <span>History</span>
+                    </a>
                     <a href="{{ url_for('data_sources') }}" class="sidebar-link {% if page == 'data-sources' %}active{% endif %}">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                         <span>Documents</span>
@@ -154,6 +153,12 @@
                         <span>STUDIO LIVE</span>
                     </div>
 
+                    <!-- Help Action Button -->
+                    <a href="{{ url_for('data_sources') }}" class="btn btn-ghost btn-sm" title="Architectural Standards & Help" style="display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-size: var(--text-xs); font-weight: 500;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        <span>Help</span>
+                    </a>
+
                     <!-- Notifications Dropdown Trigger -->
                     <div class="topbar-action-icon" id="btnNotifications" title="2 New Architectural Audits">
                         <button type="button" class="icon-circle-btn" style="background: rgba(255,255,255,0.06); border: 1px solid var(--color-border); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: var(--color-text); cursor: pointer; position: relative;">
@@ -192,7 +197,7 @@
             </div>
 
             <!-- Page Content Body -->
-            <main style="flex:1; padding: var(--space-6) var(--space-8);">
+            <main class="app-main-content {% if page in ['builder', 'floor-plan'] %}no-pad{% endif %}">
 {% else %}
     <!-- Public Marketing Header -->
     <header class="navbar">

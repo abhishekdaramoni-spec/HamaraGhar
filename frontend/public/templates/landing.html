@@ -8,14 +8,13 @@
     <div class="hero-container container">
         <div class="hero-content">
             <div class="hero-eyebrow">
-                <span class="hero-pill">ARCHITECTURAL TECHNOLOGY PLATFORM</span>
-                <span class="hero-eyebrow-text">CubiCasa5K Intelligence &bull; 2D CAD &bull; Three.js 3D &bull; CPWD BOQ</span>
+                <span class="hero-pill">ARCHITECTURAL TECHNOLOGY</span>
+                <span class="hero-eyebrow-text">AI-POWERED RESIDENTIAL DESIGN</span>
             </div>
             
-            <h1 class="hero-title">AI-POWERED ARCHITECTURAL DESIGN<br>FOR YOUR NEXT HOME.</h1>
-            <p class="hero-subtitle">Plan your home in 2D. Visualize it in Three.js 3D. Predict construction costs and market valuation before breaking ground.</p>
+            <h1 class="hero-title">Design your home.<br>Understand the space.<br>Visualize it before you build.</h1>
             <p class="hero-desc">
-                An integrated platform for residential architecture and cost intelligence in India. Synthesize compliant floor plans, visualize real-time massing and materials in 3D, and generate itemized CPWD-benchmarked cost breakdowns before construction begins.
+                An integrated platform for residential architecture and cost intelligence. Synthesize compliant floor plans, visualize real-time massing and materials in 3D, and generate itemized CPWD-benchmarked cost breakdowns before construction begins.
             </p>
             
             <div class="hero-ctas">
@@ -509,6 +508,8 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='vendor/three.min.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/OrbitControls.js') }}"></script>
 <script src="{{ url_for('static', filename='js/builder/hero-scene.js') }}"></script>
 {% endblock %}
 

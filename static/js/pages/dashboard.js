@@ -70,6 +70,7 @@ async function loadProjects() {
         
         updateMetrics();
         renderResumeHero();
+        renderRecentDesigns();
         filterAndRenderProjects();
     } catch (err) {
         console.error('Failed to load projects:', err);
@@ -176,112 +177,174 @@ function renderResumeHero() {
 
     heroContainer.innerHTML = `
         <div class="dashboard-hero-project">
-            <div class="dhp-canvas-wrapper">
-                <div class="dhp-grid-lines"></div>
-                
-                <div class="dhp-iso-model">
-                    <svg viewBox="0 0 540 320" width="100%" height="100%" class="dhp-iso-svg">
-                        <defs>
-                            <linearGradient id="wallSun" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#ffffff" />
-                                <stop offset="100%" stop-color="#f1f5f9" />
-                            </linearGradient>
-                            <linearGradient id="wallShade" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#e2e8f0" />
-                                <stop offset="100%" stop-color="#cbd5e1" />
-                            </linearGradient>
-                            <linearGradient id="accentTerracotta" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="#c2410c" />
-                                <stop offset="100%" stop-color="#9a3412" />
-                            </linearGradient>
-                            <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="rgba(2, 132, 199, 0.4)" />
-                                <stop offset="100%" stop-color="rgba(224, 242, 254, 0.7)" />
-                            </linearGradient>
-                        </defs>
-                        <polygon points="270,40 500,160 270,280 40,160" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" />
-                        <polygon points="240,80 440,180 280,260 80,160" fill="#dcfce7" stroke="#bbf7d0" stroke-width="1" />
-                        <polygon points="360,140 480,200 400,245 280,185" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1" />
-                        
-                        <polygon points="170,180 270,230 270,160 170,110" fill="url(#wallShade)" stroke="#94a3b8" stroke-width="1" />
-                        <polygon points="270,230 390,170 390,100 270,160" fill="url(#wallSun)" stroke="#94a3b8" stroke-width="1" />
-                        <polygon points="285,215 375,170 375,120 285,165" fill="url(#glassGrad)" stroke="#0284c7" stroke-width="1.2" />
-                        <polygon points="180,170 210,185 210,125 180,110" fill="url(#accentTerracotta)" stroke="#7c2d12" stroke-width="1" />
-
-                        <polygon points="190,115 290,165 290,95 190,45" fill="#334155" stroke="#1e293b" stroke-width="1" />
-                        <polygon points="290,165 370,125 370,55 290,95" fill="url(#wallSun)" stroke="#94a3b8" stroke-width="1" />
-                        <polygon points="205,105 275,140 275,70 205,35" fill="url(#glassGrad)" stroke="#0284c7" stroke-width="1.2" />
-                        <polygon points="290,165 330,145 330,125 290,145" fill="rgba(2, 132, 199, 0.3)" stroke="#0284c7" stroke-width="1.2" />
-
-                        <polygon points="280,30 385,82 285,135 180,82" fill="#0f172a" stroke="#334155" stroke-width="1.5" />
-                    </svg>
-                </div>
-
-                <div class="dhp-floating-card top-left">
-                    <div class="dhp-card-inner">
-                        <div class="progress-ring-box">
-                            <svg width="34" height="34" viewBox="0 0 36 36" class="ring-svg">
-                                <circle cx="18" cy="18" r="14" fill="none" stroke="#e2e8f0" stroke-width="3"></circle>
-                                <circle cx="18" cy="18" r="14" fill="none" stroke="var(--color-accent)" stroke-width="3" 
-                                    stroke-dasharray="88" stroke-dashoffset="${88 - (88 * progress / 100)}" stroke-linecap="round"></circle>
-                            </svg>
-                            <span class="ring-text">${progress}%</span>
+            <div style="padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <span style="font-size: 11px; font-weight: 700; color: var(--color-accent); letter-spacing: 0.08em; text-transform: uppercase;">MAIN PROJECT WORKSPACE</span>
+                        <h2 style="font-size: 24px; font-weight: 800; color: var(--color-primary); margin: 4px 0 6px 0; text-transform: uppercase;">${escapeHtml(currentProject.name || 'MODERN FAMILY RESIDENCE')}</h2>
+                        <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--color-text-secondary); font-family: var(--font-mono);">
+                            <span style="font-weight: 600; color: var(--color-text-primary);">${plot}</span>
+                            <span>&bull;</span>
+                            <span>${floors}</span>
+                            <span>&bull;</span>
+                            <span>${bhk}</span>
+                            <span>&bull;</span>
+                            <span>${Number(area).toLocaleString('en-IN')} sq.ft</span>
                         </div>
-                        <div class="dhp-card-text">
-                            <span class="dhp-label">PROJECT PROGRESS</span>
-                            <span class="dhp-val">${progress}% Completed</span>
-                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-outline" onclick="openProject('${currentProject.id}', 'floor-plan')" style="display: flex; align-items: center; gap: 6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                            <span>2D Blueprint</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="openProject('${currentProject.id}', 'builder')" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px;">
+                            <span>Continue Designing</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </button>
                     </div>
                 </div>
 
-                <div class="dhp-floating-card top-right">
-                    <div class="dhp-card-inner">
-                        <div class="dhp-icon-badge">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                        </div>
-                        <div class="dhp-card-text">
-                            <span class="dhp-label">ESTIMATED COST</span>
-                            <span class="dhp-val text-accent">${formatINR(cost)}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dhp-floating-card bottom-left">
-                    <div class="dhp-card-inner">
-                        <div class="dhp-icon-badge">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path></svg>
-                        </div>
-                        <div class="dhp-card-text">
-                            <span class="dhp-label">BUILT-UP AREA</span>
-                            <span class="dhp-val">${Number(area).toLocaleString('en-IN')} sq.ft &bull; ${floors} &bull; ${bhk}</span>
+                <!-- Status Strip Matching Phase 4 Spec -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding: 16px; background: var(--color-surface-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+                    <div>
+                        <div style="font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Floor Plan</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #16a34a; display: flex; align-items: center; gap: 4px; margin-top: 3px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>COMPLETE</span>
                         </div>
                     </div>
-                </div>
-
-                <div class="dhp-floating-nav bottom-right">
-                    <span class="dhp-nav-label">PROJECT OVERVIEW</span>
-                    <div class="dhp-nav-buttons">
-                        <button class="dhp-nav-btn" onclick="openProject('${currentProject.id}', 'floor-plan')">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="12" x2="21" y2="12"></line><line x1="12" y1="3" x2="12" y2="21"></line></svg>
-                            <span>Floor Plan</span>
-                        </button>
-                        <button class="dhp-nav-btn primary" onclick="openProject('${currentProject.id}', 'builder')">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                            <span>3D View</span>
-                        </button>
-                        <button class="dhp-nav-btn" onclick="openProject('${currentProject.id}', 'cost')">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                            <span>Cost</span>
-                        </button>
-                        <button class="dhp-nav-btn" onclick="openProject('${currentProject.id}', 'risk')">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                            <span>Risk</span>
-                        </button>
+                    <div>
+                        <div style="font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Validation</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #16a34a; display: flex; align-items: center; gap: 4px; margin-top: 3px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>PASSED</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">3D Model</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #0284c7; display: flex; align-items: center; gap: 4px; margin-top: 3px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon></svg>
+                            <span>READY</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Exterior</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #7c3aed; display: flex; align-items: center; gap: 4px; margin-top: 3px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                            <span>5 VARIANTS</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Cost Estimate</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #d97706; display: flex; align-items: center; gap: 4px; margin-top: 3px;">
+                            <span>READY (${formatINR(cost)})</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     `;
+}
+
+function renderRecentDesigns() {
+    const container = document.getElementById('recentDesignsGrid');
+    if (!container) return;
+
+    const currentId = activeProjectId || (allProjects[0] ? allProjects[0].id : 1);
+
+    const designs = [
+        {
+            id: 'A',
+            title: 'Plan A: Central Living',
+            tag: 'Balanced',
+            typology: 'Central Courtyard Spine',
+            ref: 'CubiCasa #482 (94% Sim)',
+            area: '1,850 sq.ft',
+            bhk: '3 BHK • G+1',
+            cost: '₹38,40,000',
+            svg: `
+                <rect x="10" y="10" width="120" height="90" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" />
+                <rect x="10" y="10" width="65" height="50" fill="#e0f2fe" stroke="#0284c7" stroke-width="1" />
+                <text x="42" y="38" font-size="9" font-family="sans-serif" font-weight="600" fill="#0369a1" text-anchor="middle">LIVING</text>
+                <rect x="75" y="10" width="55" height="40" fill="#fef3c7" stroke="#d97706" stroke-width="1" />
+                <text x="102" y="32" font-size="8" font-family="sans-serif" font-weight="600" fill="#b45309" text-anchor="middle">KITCHEN</text>
+                <rect x="10" y="60" width="60" height="40" fill="#dcfce7" stroke="#16a34a" stroke-width="1" />
+                <text x="40" y="82" font-size="8" font-family="sans-serif" font-weight="600" fill="#15803d" text-anchor="middle">BEDROOM 1</text>
+                <rect x="70" y="50" width="60" height="50" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1" />
+                <text x="100" y="78" font-size="8" font-family="sans-serif" font-weight="600" fill="#3730a3" text-anchor="middle">BEDROOM 2</text>
+            `
+        },
+        {
+            id: 'B',
+            title: 'Plan B: Open-Plan',
+            tag: 'Contemporary',
+            typology: 'Integrated Social Zone',
+            ref: 'CubiCasa #819 (92% Sim)',
+            area: '1,820 sq.ft',
+            bhk: '3 BHK • G+1',
+            cost: '₹37,80,000',
+            svg: `
+                <rect x="10" y="10" width="120" height="90" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" />
+                <rect x="10" y="10" width="80" height="45" fill="#e0f2fe" stroke="#0284c7" stroke-width="1" />
+                <text x="50" y="35" font-size="9" font-family="sans-serif" font-weight="600" fill="#0369a1" text-anchor="middle">OPEN LIVING/DINING</text>
+                <rect x="90" y="10" width="40" height="45" fill="#fef3c7" stroke="#d97706" stroke-width="1" />
+                <text x="110" y="35" font-size="8" font-family="sans-serif" font-weight="600" fill="#b45309" text-anchor="middle">KITCHEN</text>
+                <rect x="10" y="55" width="55" height="45" fill="#dcfce7" stroke="#16a34a" stroke-width="1" />
+                <text x="37" y="80" font-size="8" font-family="sans-serif" font-weight="600" fill="#15803d" text-anchor="middle">MASTER BED</text>
+                <rect x="65" y="55" width="65" height="45" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1" />
+                <text x="97" y="80" font-size="8" font-family="sans-serif" font-weight="600" fill="#3730a3" text-anchor="middle">SUITE 2</text>
+            `
+        },
+        {
+            id: 'C',
+            title: 'Plan C: Side Gallery',
+            tag: 'Linear Airflow',
+            typology: 'Cross-Ventilation Corridor',
+            ref: 'CubiCasa #1042 (89% Sim)',
+            area: '1,890 sq.ft',
+            bhk: '3 BHK • G+1',
+            cost: '₹39,20,000',
+            svg: `
+                <rect x="10" y="10" width="120" height="90" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" />
+                <rect x="10" y="10" width="50" height="90" fill="#e0f2fe" stroke="#0284c7" stroke-width="1" />
+                <text x="35" y="55" font-size="9" font-family="sans-serif" font-weight="600" fill="#0369a1" text-anchor="middle">LIVING HALL</text>
+                <rect x="60" y="10" width="70" height="30" fill="#fef3c7" stroke="#d97706" stroke-width="1" />
+                <text x="95" y="28" font-size="8" font-family="sans-serif" font-weight="600" fill="#b45309" text-anchor="middle">DINING & PANTRY</text>
+                <rect x="60" y="40" width="70" height="30" fill="#dcfce7" stroke="#16a34a" stroke-width="1" />
+                <text x="95" y="58" font-size="8" font-family="sans-serif" font-weight="600" fill="#15803d" text-anchor="middle">BEDROOM 1</text>
+                <rect x="60" y="70" width="70" height="30" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1" />
+                <text x="95" y="88" font-size="8" font-family="sans-serif" font-weight="600" fill="#3730a3" text-anchor="middle">GUEST ROOM</text>
+            `
+        }
+    ];
+
+    container.innerHTML = designs.map(d => `
+        <article class="card" style="display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: #ffffff;">
+            <div style="background: #f8fafc; padding: 14px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: center; align-items: center; position: relative;">
+                <svg viewBox="0 0 140 110" width="100%" height="130" style="max-width: 220px;">
+                    ${d.svg}
+                </svg>
+                <span class="badge badge-accent" style="position: absolute; top: 10px; right: 10px; font-size: 10px;">${d.tag}</span>
+            </div>
+            <div style="padding: 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <h3 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">${d.title}</h3>
+                    <div style="font-size: 11px; color: var(--color-text-secondary); margin-bottom: 8px;">
+                        <span>${d.bhk}</span> &bull; <span>${d.area}</span> &bull; <strong style="color: var(--color-accent);">${d.cost}</strong>
+                    </div>
+                    <div style="display: flex; gap: 6px; font-size: 10px; margin-bottom: 14px; flex-wrap: wrap;">
+                        <span class="badge badge-success" style="font-size: 9px; padding: 2px 6px;">NBC 2016 ✓</span>
+                        <span class="badge badge-neutral" style="font-size: 9px; padding: 2px 6px;">${d.ref}</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                    <button class="btn btn-outline btn-xs" style="flex: 1;" onclick="openProject('${currentId}', 'floor-plan')">Open 2D</button>
+                    <button class="btn btn-primary btn-xs" style="flex: 1;" onclick="openProject('${currentId}', 'builder')">Open 3D</button>
+                    <button class="btn btn-ghost btn-xs" onclick="openProject('${currentId}', 'builder#compare')">Compare</button>
+                </div>
+            </div>
+        </article>
+    `).join('');
 }
 
 function filterAndRenderProjects() {

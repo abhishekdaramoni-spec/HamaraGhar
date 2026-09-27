@@ -7,8 +7,8 @@
     <!-- Topbar Header -->
     <div class="dashboard-topbar">
         <div class="dashboard-heading">
-            <h1 id="dashboardGreeting">Good morning, {{ current_user.name if current_user and current_user.name else 'Abhishek' }}.</h1>
-            <p class="dashboard-sub" style="font-style: italic; color: var(--color-text-secondary); margin-top: 2px;">"Build your next idea into a home."</p>
+            <h1 id="dashboardGreeting">Good morning, {{ current_user.name if current_user and current_user.name else 'Abhishek' }}</h1>
+            <p class="dashboard-sub" style="color: var(--color-text-secondary); margin-top: 4px;">Your residential projects, designs and engineering intelligence in one workspace.</p>
         </div>
         <div class="dashboard-topbar-actions">
             <div class="project-selector-wrapper" id="projectSelectorWrapper" style="display: none;">
@@ -36,8 +36,20 @@
         </div>
     </div>
 
-    <!-- Resume Recent Project Banner (Dynamic via JS) -->
+    <!-- Main Project Card (Phase 4 Hero) -->
     <div id="resumeHeroContainer"></div>
+
+    <!-- Recent Designs Section -->
+    <section class="recent-designs-section" id="recentDesignsSection" style="margin-bottom: var(--space-8);">
+        <div class="projects-section-header" style="margin-bottom: var(--space-4);">
+            <div class="projects-section-title">
+                <h2>Recent Designs</h2>
+                <p style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-top: 2px;">CubiCasa5K synthesized architectural alternatives with verified structural clearance.</p>
+            </div>
+            <a href="{{ url_for('floor_plan') }}" class="btn btn-outline btn-sm">Explore Floor Plans &rarr;</a>
+        </div>
+        <div class="recent-designs-grid" id="recentDesignsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5);"></div>
+    </section>
     
     <!-- Workspace Metric Cards -->
     <div class="dashboard-metrics">

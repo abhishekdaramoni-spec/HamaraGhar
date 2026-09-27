@@ -1,137 +1,208 @@
 // =========================================================================
-// HamaraGhar — Architectural Hero 3D Scene Controller
-// Renders a modern architectural residence with realistic materials,
-// shadows, cantilevered masses, glass balconies, and interactive orbit.
+// HamaraGhar — Architectural Hero 3D Scene Controller (Three.js WebGL)
+// Renders an elegant modernist residential villa with realistic materials,
+// sunlight shadows, cantilevered master suite, glass balconies, and orbit.
+// Fully contained within the canvas container — zero escaping DOM elements.
 // =========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    const heroViewport = document.getElementById('heroScene');
-    if (!heroViewport) return;
+    const container = document.getElementById('heroScene');
+    if (!container) return;
 
-    let rotX = -18;
-    let rotY = 32;
-    let zoom = 1400;
-    let isDragging = false;
-    let lastX = 0, lastY = 0;
-    let autoRotate = true;
-
-    // Create 3D Container
-    heroViewport.style.perspective = `${zoom}px`;
-    heroViewport.style.overflow = 'hidden';
-
-    const stage = document.createElement('div');
-    stage.className = 'hero-3d-stage';
-    heroViewport.appendChild(stage);
-
-    function updateStage() {
-        stage.style.transform = `translate(-50%, -46%) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-    }
-    updateStage();
-
-    // Create Architectural Villa Elements
-    function createBox(w, h, d, x, y, z, bg, border, extraClass = '') {
-        const box = document.createElement('div');
-        box.className = `arch-cuboid ${extraClass}`;
-        box.style.width = `${w}px`;
-        box.style.height = `${h}px`;
-        box.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
-
-        const faces = [
-            { name: 'front', transform: `translateZ(${d / 2}px)`, w: w, h: h },
-            { name: 'back', transform: `rotateY(180deg) translateZ(${d / 2}px)`, w: w, h: h },
-            { name: 'right', transform: `rotateY(90deg) translateZ(${w / 2}px)`, w: d, h: h },
-            { name: 'left', transform: `rotateY(-90deg) translateZ(${w / 2}px)`, w: d, h: h },
-            { name: 'top', transform: `rotateX(90deg) translateZ(${h / 2}px)`, w: w, h: d },
-            { name: 'bottom', transform: `rotateX(-90deg) translateZ(${h / 2}px)`, w: w, h: d }
-        ];
-
-        faces.forEach(f => {
-            const face = document.createElement('div');
-            face.className = `arch-face face-${f.name}`;
-            face.style.width = `${f.w}px`;
-            face.style.height = `${f.h}px`;
-            face.style.backgroundColor = bg;
-            if (border) face.style.border = border;
-            face.style.transform = f.transform;
-            box.appendChild(face);
-        });
-
-        stage.appendChild(box);
-        return box;
+    if (typeof THREE === 'undefined') {
+        console.warn('Three.js not loaded for hero scene.');
+        return;
     }
 
-    // 1. Land & Site Platform (Turf + Paved Driveway)
-    createBox(340, 8, 300, -170, 70, -150, '#e2e8f0', '1px solid #cbd5e1', 'site-platform');
-    // Green Turf
-    createBox(200, 4, 180, -160, 66, -140, '#86efac', 'none', 'site-lawn');
-    // Paved Car Porch
-    createBox(120, 6, 260, 40, 67, -130, '#94a3b8', '1px solid #64748b', 'site-driveway');
+    const width = container.clientWidth || 460;
+    const height = container.clientHeight || 380;
 
-    // 2. Ground Floor Main Volume (Living & Dining) - Off-white travertine
-    createBox(180, 70, 140, -110, -5, -70, '#f8fafc', '1px solid #e2e8f0', 'ground-mass');
-    
-    // Timber feature accent wall on ground floor
-    createBox(40, 68, 142, 65, -4, -71, '#9a3412', '1px solid #7c2d12', 'timber-accent');
+    // 1. Scene, Camera, Renderer
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0f172a); // Deep architectural slate
+    scene.fog = new THREE.FogExp2(0x0f172a, 0.012);
 
-    // Ground Floor Large Glazed Windows
-    const gWindow = document.createElement('div');
-    gWindow.className = 'arch-glazing ground-glazing';
-    gWindow.style.transform = 'translate3d(-80px, 15px, 72px)';
-    stage.appendChild(gWindow);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.5, 500);
+    camera.position.set(28, 22, 32);
 
-    // 3. First Floor Cantilevered Master Suite (Charcoal + Wood)
-    createBox(160, 65, 120, -70, -75, -50, '#334155', '1px solid #1e293b', 'first-floor-mass');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
 
-    // First floor modern panoramic window
-    const fWindow = document.createElement('div');
-    fWindow.className = 'arch-glazing first-glazing';
-    fWindow.style.transform = 'translate3d(-50px, -60px, 72px)';
-    stage.appendChild(fWindow);
+    const canvas = renderer.domElement;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    canvas.style.outline = 'none';
+    container.appendChild(canvas);
 
-    // 4. Cantilevered Glass Balcony with Metal Handrail
-    createBox(90, 24, 40, -60, -34, 75, 'rgba(2, 132, 199, 0.25)', '1px solid rgba(2, 132, 199, 0.6)', 'glass-balcony');
+    // 2. Camera Controls
+    let controls = null;
+    if (typeof THREE.OrbitControls !== 'undefined') {
+        controls = new THREE.OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 18;
+        controls.maxDistance = 55;
+        controls.maxPolarAngle = Math.PI / 2 - 0.04; // Don't look from underground
+        controls.target.set(0, 3, 0);
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.8;
+    }
 
-    // 5. Extended Minimalist RCC Flat Roof with Soffit Overhang
-    createBox(180, 8, 140, -80, -83, -60, '#0f172a', '1px solid #334155', 'roof-slab');
+    // 3. Architectural Lighting
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1e293b, 0.65);
+    hemiLight.position.set(0, 40, 0);
+    scene.add(hemiLight);
 
-    // 6. Perimeter Modern Architectural Boundary Wall
-    createBox(336, 18, 4, -168, 52, 148, '#cbd5e1', '1px solid #94a3b8');
-    createBox(4, 18, 296, -168, 52, -148, '#cbd5e1', '1px solid #94a3b8');
+    const sunLight = new THREE.DirectionalLight(0xfff7ed, 1.35);
+    sunLight.position.set(24, 35, 18);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.camera.near = 1;
+    sunLight.shadow.camera.far = 80;
+    sunLight.shadow.camera.left = -20;
+    sunLight.shadow.camera.right = 20;
+    sunLight.shadow.camera.top = 20;
+    sunLight.shadow.camera.bottom = -20;
+    sunLight.shadow.bias = -0.0008;
+    scene.add(sunLight);
 
-    // Interactive Drag & Orbit
-    heroViewport.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        autoRotate = false;
-        lastX = e.clientX;
-        lastY = e.clientY;
-        heroViewport.style.cursor = 'grabbing';
+    const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.35);
+    fillLight.position.set(-20, 15, -15);
+    scene.add(fillLight);
+
+    // 4. Materials
+    const whiteTravertine = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.35,
+        metalness: 0.05
+    });
+    const charcoalSlate = new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.45,
+        metalness: 0.15
+    });
+    const warmTimber = new THREE.MeshStandardMaterial({
+        color: 0xb45309,
+        roughness: 0.6,
+        metalness: 0.05
+    });
+    const architecturalGlass = new THREE.MeshPhysicalMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.55,
+        roughness: 0.1,
+        metalness: 0.1,
+        transmission: 0.6,
+        ior: 1.5
+    });
+    const darkMullion = new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        roughness: 0.2,
+        metalness: 0.8
+    });
+    const siteLawnMat = new THREE.MeshStandardMaterial({
+        color: 0x15803d,
+        roughness: 0.85
+    });
+    const siteDrivewayMat = new THREE.MeshStandardMaterial({
+        color: 0x475569,
+        roughness: 0.7
+    });
+    const sitePavingMat = new THREE.MeshStandardMaterial({
+        color: 0x94a3b8,
+        roughness: 0.6
     });
 
-    window.addEventListener('mouseup', () => {
-        isDragging = false;
-        heroViewport.style.cursor = 'grab';
+    const houseGroup = new THREE.Group();
+
+    // Helper to create box meshes
+    function addBox(w, h, d, x, y, z, mat, castShadow = true, receiveShadow = true) {
+        const geom = new THREE.BoxGeometry(w, h, d);
+        const mesh = new THREE.Mesh(geom, mat);
+        mesh.position.set(x, y + h / 2, z);
+        mesh.castShadow = castShadow;
+        mesh.receiveShadow = receiveShadow;
+        houseGroup.add(mesh);
+        return mesh;
+    }
+
+    // Site Base
+    addBox(32, 0.6, 26, 0, -0.6, 0, sitePavingMat, false, true);
+    // Green Lawn front-left
+    addBox(14, 0.2, 10, -7, 0, 7, siteLawnMat, false, true);
+    // Driveway right
+    addBox(10, 0.15, 24, 9, 0, 0, siteDrivewayMat, false, true);
+
+    // Ground Floor: Main Living volume (Travertine White)
+    addBox(14, 4.2, 12, -4, 0, -1, whiteTravertine);
+
+    // Ground Floor: Timber Accent entrance volume
+    addBox(4.5, 4.2, 8, 3.5, 0, -3, warmTimber);
+
+    // Large Ground Floor Glazing Window
+    const gw = addBox(7, 3.2, 0.2, -4.5, 0.5, 5.05, architecturalGlass, false, false);
+    // Dark window frame
+    addBox(7.2, 0.15, 0.3, -4.5, 0.45, 5.05, darkMullion, false, false);
+    addBox(7.2, 0.15, 0.3, -4.5, 3.75, 5.05, darkMullion, false, false);
+
+    // First Floor: Cantilevered Master Suite (Charcoal Slate)
+    // Projecting forward by 2m for classic architectural massing
+    addBox(13, 3.8, 10, -2.5, 4.2, 1, charcoalSlate);
+
+    // First floor panoramic window
+    addBox(6.5, 2.6, 0.2, -3.5, 4.8, 6.05, architecturalGlass, false, false);
+    addBox(6.7, 0.12, 0.3, -3.5, 4.75, 6.05, darkMullion, false, false);
+    addBox(6.7, 0.12, 0.3, -3.5, 7.42, 6.05, darkMullion, false, false);
+
+    // Glass Balcony with Metal Railing
+    addBox(5, 1.1, 2.5, 3.5, 4.2, 5, architecturalGlass, false, false);
+    addBox(5.1, 0.08, 0.08, 3.5, 5.3, 6.25, darkMullion, false, false);
+
+    // Roof Slab with clean overhang
+    addBox(14.5, 0.4, 11.5, -2.5, 8.0, 1, whiteTravertine);
+
+    // Parapet roof rim
+    addBox(14.5, 0.5, 0.2, -2.5, 8.4, 6.65, charcoalSlate);
+    addBox(14.5, 0.5, 0.2, -2.5, 8.4, -4.65, charcoalSlate);
+
+    // Boundary Wall with gate opening
+    addBox(31.5, 1.2, 0.3, 0, 0, 12.8, whiteTravertine);
+    addBox(0.3, 1.2, 25.5, -15.8, 0, 0, whiteTravertine);
+
+    scene.add(houseGroup);
+
+    // Center model at origin
+    houseGroup.position.set(0, 0, 0);
+
+    // 5. Resize Handling
+    function onResize() {
+        if (!container || !renderer || !camera) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+
+    // 6. Interaction pauses auto-rotate
+    container.addEventListener('pointerdown', () => {
+        if (controls) controls.autoRotate = false;
     });
 
-    window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const dx = e.clientX - lastX;
-        const dy = e.clientY - lastY;
-        lastX = e.clientX;
-        lastY = e.clientY;
-
-        rotY += dx * 0.4;
-        rotX -= dy * 0.4;
-        rotX = Math.max(-55, Math.min(10, rotX));
-        updateStage();
-    });
-
-    // Gentle Auto-Rotation
+    // 7. Render Animation Loop
+    let animId = null;
     function animate() {
-        if (autoRotate) {
-            rotY += 0.15;
-            updateStage();
-        }
-        requestAnimationFrame(animate);
+        animId = requestAnimationFrame(animate);
+        if (controls) controls.update();
+        renderer.render(scene, camera);
     }
-    requestAnimationFrame(animate);
+    animate();
 });
