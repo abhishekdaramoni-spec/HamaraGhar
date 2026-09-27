@@ -71,23 +71,30 @@ class VercelPathMiddleware:
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        matched = (
-            environ.get('HTTP_X_MATCHED_PATH') or
-            environ.get('HTTP_X_FORWARDED_URI') or
-            environ.get('REQUEST_URI')
-        )
-        if matched:
-            clean = matched.split('?')[0].strip()
-            if clean and clean not in ('/api/index.py', '/api/index'):
-                environ['PATH_INFO'] = clean
+        import urllib.parse
+        qs = environ.get('QUERY_STRING', '')
+        params = urllib.parse.parse_qs(qs, keep_blank_values=True)
+        if '__path' in params:
+            p = params['__path'][0].strip('/')
+            environ['PATH_INFO'] = '/' + p if p else '/'
+            params.pop('__path', None)
+            environ['QUERY_STRING'] = urllib.parse.urlencode(params, doseq=True)
         else:
-            path = environ.get('PATH_INFO', '')
-            if path.startswith('/api/index.py'):
-                remainder = path[len('/api/index.py'):]
-                environ['PATH_INFO'] = remainder if remainder else '/'
-            elif path.startswith('/api/index'):
-                remainder = path[len('/api/index'):]
-                environ['PATH_INFO'] = remainder if remainder else '/'
+            current = environ.get('PATH_INFO', '')
+            if current and current not in ('/api/index.py', '/api/index', '/'):
+                pass  # PATH_INFO is already set to a specific application route
+            else:
+                matched = (
+                    environ.get('HTTP_X_FORWARDED_URI') or
+                    environ.get('REQUEST_URI') or
+                    environ.get('HTTP_X_MATCHED_PATH')
+                )
+                if matched:
+                    clean = matched.split('?')[0].strip()
+                    if clean and clean not in ('/api/index.py', '/api/index', '/'):
+                        environ['PATH_INFO'] = clean
+                elif current in ('/api/index.py', '/api/index', ''):
+                    environ['PATH_INFO'] = '/'
         environ['SCRIPT_NAME'] = ''
         return self.wsgi_app(environ, start_response)
 
