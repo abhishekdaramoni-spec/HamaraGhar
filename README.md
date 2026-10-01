@@ -176,3 +176,9 @@ npm run dev
 - **Engineering Safety**: Strict National Building Code of India (NBC 2016 Part 3 Table 1) compliance gate.
 - **Valuation ML Benchmark**: 29,451 Pan-India housing transaction records.
 - **Costing Standard**: Central Public Works Department (CPWD DSR 2024) Schedule of Rates.
+🌐 Live Deployment
+
+🚀 Live Demo:
+https://hamara-ghar-zeta.vercel.app/
+
+The application is deployed on Vercel and is accessible directly through a web browser.
