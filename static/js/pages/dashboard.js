@@ -511,26 +511,46 @@ function renderProjectCard(project) {
 }
 
 function openProject(id, targetPage) {
-    const p = allProjects.find(item => item.id == id);
-    if (!p) return;
+    const p = allProjects ? allProjects.find(item => item.id == id) : null;
     
-    if (window.Utils) {
-        window.Utils.saveConfig(p.data || {});
-        if (typeof window.Utils.saveLocal === 'function') {
-            window.Utils.saveLocal('current_project_id', id);
+    try {
+        if (p && p.data) {
+            if (window.Utils && typeof window.Utils.saveConfig === 'function') {
+                window.Utils.saveConfig(p.data);
+            } else {
+                localStorage.setItem('smartbuild_config', JSON.stringify(p.data));
+                localStorage.setItem('house_data', JSON.stringify(p.data));
+            }
         }
+        if (id) {
+            if (window.Utils && typeof window.Utils.saveLocal === 'function') {
+                window.Utils.saveLocal('current_project_id', id);
+            } else {
+                localStorage.setItem('current_project_id', String(id));
+            }
+        }
+    } catch (e) {
+        console.warn('Could not cache active project:', e);
     }
     
     const routes = {
         'builder': '/builder',
+        'builder#compare': '/builder#compare',
         'floor-plan': '/floor-plan',
         'cost': '/cost',
         'risk': '/risk',
         'summary': '/summary'
     };
     
-    const base = routes[targetPage] || '/floor-plan';
-    window.location.href = `${base}?project_id=${id}`;
+    let base = routes[targetPage] || '/floor-plan';
+    let hash = '';
+    if (base.includes('#')) {
+        const parts = base.split('#');
+        base = parts[0];
+        hash = '#' + parts[1];
+    }
+    const query = id ? `?project_id=${id}` : '';
+    window.location.href = `${base}${query}${hash}`;
 }
 
 async function duplicateProjectPrompt(id) {

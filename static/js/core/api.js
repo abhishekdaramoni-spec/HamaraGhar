@@ -49,3 +49,5 @@ const API = {
   async getRisk(city) { return this.get(`/api/data/risk/${encodeURIComponent(city)}`); },
   async getLayouts() { return this.get('/api/data/layouts'); }
 };
+
+window.API = API;

@@ -91,7 +91,18 @@ const Utils = {
         b: parseInt(result[3], 16)
     } : null;
   },
-  rgbToHex(r, g, b) {
+    rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+  },
+
+  // Save/Load house config
+  saveConfig(data) {
+    this.saveLocal('smartbuild_config', data);
+    this.saveLocal('house_data', data);
+  },
+  loadConfig() {
+    return this.loadLocal('smartbuild_config') || this.loadLocal('house_data') || {};
   }
 };
+
+window.Utils = Utils;
