@@ -52,6 +52,7 @@ class ServerlessDebugMiddleware:
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
+        environ.setdefault('wsgi.errors', sys.stderr)
         try:
             return self.wsgi_app(environ, start_response)
         except Exception as e:
@@ -81,7 +82,8 @@ class VercelPathMiddleware:
             environ['QUERY_STRING'] = urllib.parse.urlencode(params, doseq=True)
         else:
             current = environ.get('PATH_INFO', '')
-            if current and current not in ('/api/index.py', '/api/index', '/'):
+            ENTRYPOINTS = ('/api/index.py', '/api/index', '/app.py', '/app', '/')
+            if current and current not in ENTRYPOINTS:
                 pass  # PATH_INFO is already set to a specific application route
             else:
                 matched = (
@@ -91,9 +93,11 @@ class VercelPathMiddleware:
                 )
                 if matched:
                     clean = matched.split('?')[0].strip()
-                    if clean and clean not in ('/api/index.py', '/api/index', '/'):
+                    if clean and clean not in ENTRYPOINTS:
                         environ['PATH_INFO'] = clean
-                elif current in ('/api/index.py', '/api/index', ''):
+                    else:
+                        environ['PATH_INFO'] = '/'
+                elif current in ENTRYPOINTS:
                     environ['PATH_INFO'] = '/'
         environ['SCRIPT_NAME'] = ''
         return self.wsgi_app(environ, start_response)
