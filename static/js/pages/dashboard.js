@@ -51,12 +51,22 @@ function setupGreeting() {
 function setupEventListeners() {
     const searchInput = document.getElementById('projectSearch');
     const sortSelect = document.getElementById('projectSort');
+    const btnOpenMyDesigns = document.getElementById('btnOpenMyDesigns');
 
     if (searchInput) {
         searchInput.addEventListener('input', () => filterAndRenderProjects());
     }
     if (sortSelect) {
         sortSelect.addEventListener('change', () => filterAndRenderProjects());
+    }
+    if (btnOpenMyDesigns) {
+        btnOpenMyDesigns.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = document.getElementById('projects') || document.querySelector('.projects-section');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
     }
 }
 
@@ -602,3 +612,11 @@ async function deleteProjectPrompt(id) {
         alert('Failed to delete project: ' + (err.message || 'Unknown error'));
     }
 }
+
+// Explicitly register globals on window for inline HTML onclick handlers
+window.openProject = openProject;
+window.duplicateProjectPrompt = duplicateProjectPrompt;
+window.renameProjectPrompt = renameProjectPrompt;
+window.deleteProjectPrompt = deleteProjectPrompt;
+window.clearSearch = clearSearch;
+window.loadProjects = loadProjects;

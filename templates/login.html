@@ -50,7 +50,7 @@
                 <p class="subtitle">Enter your credentials to access your home planning dashboard.</p>
             </div>
 
-            <form action="{{ url_for('login') }}" method="POST" class="auth-form" id="loginForm">
+            <form action="{{ url_for('login', next=request.args.get('next')) }}" method="POST" class="auth-form" id="loginForm">
                 <div class="form-group">
                     <label for="loginEmail">Email Address</label>
                     <input type="email" id="loginEmail" name="email" required placeholder="name@example.com" autocomplete="email">
@@ -72,6 +72,21 @@
                     <span>Sign In to Workspace</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
+
+                <div class="auth-divider" style="display: flex; align-items: center; margin: 18px 0; color: var(--color-text-muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em;">
+                    <span style="flex: 1; height: 1px; background: var(--color-border);"></span>
+                    <span style="padding: 0 10px;">or explore instantly</span>
+                    <span style="flex: 1; height: 1px; background: var(--color-border);"></span>
+                </div>
+
+                <a href="{{ url_for('demo_login', next=request.args.get('next')) }}" class="btn btn-outline btn-block btn-lg" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    <span>Try Demo Account (One-Click)</span>
+                </a>
             </form>
             
             <p class="form-footer">

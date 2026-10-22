@@ -7,7 +7,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/app.py?__path=$1"
+      "destination": "/api/index.py?__path=$1"
     }
   ]
 }

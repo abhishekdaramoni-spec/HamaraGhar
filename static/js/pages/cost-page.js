@@ -246,15 +246,31 @@ const CostStudio = {
         if (cehMainTotal) cehMainTotal.textContent = this.formatINR(grandTotal);
         if (donutTotalVal) donutTotalVal.textContent = this.formatINR(grandTotal);
 
-        // Group into Civil, Materials, Finishing, Electrical, Plumbing
+        // Group into Civil, Materials, Finishing, Electrical, Plumbing (Total must equal subtotal)
         let civilAmt = 0, matAmt = 0, finishAmt = 0, elecAmt = 0, plumbAmt = 0;
         items.forEach(it => {
-            if (it.category === 'Substructure' || it.category === 'Superstructure') civilAmt += it.amount;
-            else if (it.category === 'Masonry' || it.category === 'Roofing') matAmt += it.amount;
-            else if (it.category === 'Flooring' || it.category === 'Finishes' || it.category === 'Landscape') finishAmt += it.amount;
-            else if (it.category === 'Electrical') elecAmt += it.amount;
-            else if (it.category === 'Plumbing') plumbAmt += it.amount;
+            const cat = (it.category || '').toLowerCase();
+            if (cat === 'substructure' || cat === 'superstructure' || cat === 'site labor') {
+                civilAmt += it.amount;
+            } else if (cat === 'masonry' || cat === 'joinery' || cat === 'roofing' || cat === 'site works') {
+                matAmt += it.amount;
+            } else if (cat === 'flooring' || cat === 'finishes' || cat === 'landscape') {
+                finishAmt += it.amount;
+            } else if (cat === 'mep systems' || cat === 'electrical') {
+                elecAmt += it.amount;
+            } else if (cat === 'sanitary' || cat === 'plumbing') {
+                plumbAmt += it.amount;
+            } else {
+                civilAmt += it.amount;
+            }
         });
+
+        const safeSubtotal = Math.max(1, subtotal);
+        const pCiv = Math.round((civilAmt / safeSubtotal) * 100);
+        const pMat = Math.round((matAmt / safeSubtotal) * 100);
+        const pFin = Math.round((finishAmt / safeSubtotal) * 100);
+        const pEle = Math.round((elecAmt / safeSubtotal) * 100);
+        const pPlu = Math.max(0, 100 - (pCiv + pMat + pFin + pEle)); // Balance remainder to 100%
 
         const bCiv = document.getElementById('barValCivil');
         const bMat = document.getElementById('barValMaterials');
@@ -262,11 +278,47 @@ const CostStudio = {
         const bEle = document.getElementById('barValElectrical');
         const bPlu = document.getElementById('barValPlumbing');
 
-        if (bCiv) bCiv.textContent = `${this.formatINR(civilAmt)} (${Math.round(civilAmt * 100 / subtotal)}%)`;
-        if (bMat) bMat.textContent = `${this.formatINR(matAmt)} (${Math.round(matAmt * 100 / subtotal)}%)`;
-        if (bFin) bFin.textContent = `${this.formatINR(finishAmt)} (${Math.round(finishAmt * 100 / subtotal)}%)`;
-        if (bEle) bEle.textContent = `${this.formatINR(elecAmt)} (${Math.round(elecAmt * 100 / subtotal)}%)`;
-        if (bPlu) bPlu.textContent = `${this.formatINR(plumbAmt)} (${Math.round(plumbAmt * 100 / subtotal)}%)`;
+        if (bCiv) bCiv.textContent = `${this.formatINR(civilAmt)} (${pCiv}%)`;
+        if (bMat) bMat.textContent = `${this.formatINR(matAmt)} (${pMat}%)`;
+        if (bFin) bFin.textContent = `${this.formatINR(finishAmt)} (${pFin}%)`;
+        if (bEle) bEle.textContent = `${this.formatINR(elecAmt)} (${pEle}%)`;
+        if (bPlu) bPlu.textContent = `${this.formatINR(plumbAmt)} (${pPlu}%)`;
+
+        // Update progress bar widths in the DOM
+        const fills = document.querySelectorAll('.cdc-bars-col .bar-group .bar-fill');
+        if (fills.length >= 5) {
+            fills[0].style.width = `${pCiv}%`;
+            fills[1].style.width = `${pMat}%`;
+            fills[2].style.width = `${pFin}%`;
+            fills[3].style.width = `${pEle}%`;
+            fills[4].style.width = `${pPlu}%`;
+        }
+
+        // Update SVG Donut chart segments dynamically (circumference = 289)
+        const donutCircles = document.querySelectorAll('.cdc-donut-svg circle:not(:first-child)');
+        if (donutCircles.length >= 5) {
+            const circ = 289;
+            const segCiv = (pCiv / 100) * circ;
+            const segMat = (pMat / 100) * circ;
+            const segFin = (pFin / 100) * circ;
+            const segEle = (pEle / 100) * circ;
+            const segPlu = (pPlu / 100) * circ;
+
+            donutCircles[0].setAttribute('stroke-dasharray', `${segCiv.toFixed(1)} ${(circ - segCiv).toFixed(1)}`);
+            donutCircles[0].setAttribute('stroke-dashoffset', '0');
+
+            donutCircles[1].setAttribute('stroke-dasharray', `${segMat.toFixed(1)} ${(circ - segMat).toFixed(1)}`);
+            donutCircles[1].setAttribute('stroke-dashoffset', `-${segCiv.toFixed(1)}`);
+
+            donutCircles[2].setAttribute('stroke-dasharray', `${segFin.toFixed(1)} ${(circ - segFin).toFixed(1)}`);
+            donutCircles[2].setAttribute('stroke-dashoffset', `-${(segCiv + segMat).toFixed(1)}`);
+
+            donutCircles[3].setAttribute('stroke-dasharray', `${segEle.toFixed(1)} ${(circ - segEle).toFixed(1)}`);
+            donutCircles[3].setAttribute('stroke-dashoffset', `-${(segCiv + segMat + segFin).toFixed(1)}`);
+
+            donutCircles[4].setAttribute('stroke-dasharray', `${segPlu.toFixed(1)} ${(circ - segPlu).toFixed(1)}`);
+            donutCircles[4].setAttribute('stroke-dashoffset', `-${(segCiv + segMat + segFin + segEle).toFixed(1)}`);
+        }
 
         // Render Target Budget Comparison
         this.renderBudgetComparison(grandTotal);
@@ -404,6 +456,33 @@ const CostStudio = {
         const bhk = Number(this.config.bedrooms || this.config.bhk || 3);
         const city = this.config.city || 'Bangalore';
 
+        const cpwdDisplay = document.getElementById('mlCpwdCostDisplay');
+        const priceDisplay = document.getElementById('mlPriceValuationDisplay');
+        const priceSubtext = document.getElementById('mlPriceSubtext');
+        const equityDisplay = document.getElementById('mlEquityMarginDisplay');
+        const equityRatioText = document.getElementById('mlEquityRatioText');
+
+        // Immediate deterministic calculation baseline so cards are NEVER blank
+        const grandTotal = this.currentBreakdown ? this.currentBreakdown.grandTotal : (builtup * 1850);
+        let cpwdLakhs = Math.round((grandTotal / 100000) * 100) / 100;
+        const cityRates = { 'Mumbai': 18500, 'Bangalore': 6500, 'Bengaluru': 6500, 'Pune': 5800, 'Hyderabad': 5800, 'Delhi': 7200, 'Chennai': 6200, 'Jaipur': 3800 };
+        const baseRate = cityRates[city] || 5400;
+        let mlPriceLakhs = Math.round(((builtup * baseRate) / 100000) * 100) / 100;
+
+        if (cpwdDisplay) cpwdDisplay.textContent = `₹ ${cpwdLakhs.toLocaleString('en-IN')} Lakhs`;
+        if (priceDisplay) priceDisplay.textContent = `₹ ${mlPriceLakhs.toLocaleString('en-IN')} Lakhs`;
+        if (priceSubtext) priceSubtext.textContent = `Preliminary market valuation based on ${city} standard rate (₹${baseRate.toLocaleString('en-IN')}/sq.ft).`;
+
+        let diff = mlPriceLakhs - cpwdLakhs;
+        if (equityDisplay) {
+            equityDisplay.textContent = `₹ ${diff >= 0 ? '+' : ''}${diff.toFixed(2)} Lakhs`;
+            equityDisplay.style.color = diff >= 0 ? '#0d9488' : '#e11d48';
+        }
+        if (equityRatioText) {
+            const pct = cpwdLakhs > 0 ? ((diff / cpwdLakhs) * 100).toFixed(1) : '0.0';
+            equityRatioText.innerHTML = `<strong>Equity Margin:</strong> ${diff >= 0 ? '+' : ''}${pct}% projected asset appreciation above construction outlay.`;
+        }
+
         const payload = {
             square_ft: builtup,
             built_up_area_sqft: builtup,
@@ -423,15 +502,6 @@ const CostStudio = {
                 const data = await res.json();
                 const ml = data.property_valuation_ml;
                 const cpwd = data.construction_cost_cpwd;
-
-                const cpwdDisplay = document.getElementById('mlCpwdCostDisplay');
-                const priceDisplay = document.getElementById('mlPriceValuationDisplay');
-                const priceSubtext = document.getElementById('mlPriceSubtext');
-                const equityDisplay = document.getElementById('mlEquityMarginDisplay');
-                const equityRatioText = document.getElementById('mlEquityRatioText');
-
-                let cpwdLakhs = 0;
-                let mlPriceLakhs = 0;
 
                 if (cpwd && cpwd.calculation) {
                     cpwdLakhs = cpwd.calculation.total_construction_cost_lakhs;
@@ -453,9 +523,9 @@ const CostStudio = {
                 }
 
                 if (cpwdLakhs > 0 && mlPriceLakhs > 0) {
-                    const diff = mlPriceLakhs - cpwdLakhs;
+                    diff = mlPriceLakhs - cpwdLakhs;
                     if (equityDisplay) {
-                        equityDisplay.textContent = `₹ ${diff > 0 ? '+' : ''}${diff.toFixed(2)} Lakhs`;
+                        equityDisplay.textContent = `₹ ${diff >= 0 ? '+' : ''}${diff.toFixed(2)} Lakhs`;
                         equityDisplay.style.color = diff >= 0 ? '#0d9488' : '#e11d48';
                     }
                     if (equityRatioText) {

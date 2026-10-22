@@ -133,11 +133,19 @@
                 {% endif %}
             </div>
         </aside>
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
         <!-- Main Workspace Area -->
         <div class="app-main">
             <!-- App Topbar matching user specification -->
             <header class="app-topbar">
+                <button type="button" class="mobile-sidebar-toggle" id="mobileSidebarToggle" aria-label="Toggle Navigation">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
                 <div class="topbar-search-area">
                     <div class="global-search-box">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -377,6 +385,21 @@
     <script src="{{ url_for('static', filename='js/core/utils.js') }}"></script>
     <script src="{{ url_for('static', filename='js/core/api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/core/ai-assistant.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('mobileSidebarToggle');
+            const sidebar = document.getElementById('appSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (toggle && sidebar) {
+                const toggleSidebar = () => {
+                    sidebar.classList.toggle('mobile-open');
+                    if (backdrop) backdrop.classList.toggle('active');
+                };
+                toggle.addEventListener('click', toggleSidebar);
+                if (backdrop) backdrop.addEventListener('click', toggleSidebar);
+            }
+        });
+    </script>
 
     {% block scripts %}{% endblock %}
 </body>

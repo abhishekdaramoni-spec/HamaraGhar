@@ -1189,11 +1189,91 @@
   }
 }
 
+/* Mobile Sidebar Toggle */
+.mobile-sidebar-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-sidebar-toggle:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+/* Sidebar Backdrop */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 98;
+}
+.sidebar-backdrop.active {
+  display: block;
+}
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 100;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  min-width: 52px;
+}
+
+.mobile-nav-item svg {
+  stroke: #94a3b8;
+  transition: stroke 0.15s ease;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item.active {
+  color: #f8fafc;
+}
+
+.mobile-nav-item.active svg {
+  stroke: var(--color-accent);
+}
+
 @media (max-width: 768px) {
   .app-sidebar {
     position: fixed;
     transform: translateX(-100%);
     box-shadow: var(--shadow-xl);
+    z-index: 99;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .app-sidebar.mobile-open {
     transform: translateX(0);
@@ -1201,7 +1281,7 @@
   .mobile-sidebar-toggle {
     display: inline-flex;
   }
-  .topbar-search {
+  .topbar-search, .topbar-search-area {
     display: none;
   }
   .app-topbar {
@@ -1212,5 +1292,11 @@
   }
   .projects-grid {
     grid-template-columns: 1fr;
+  }
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  .app-main {
+    padding-bottom: 60px;
   }
 }

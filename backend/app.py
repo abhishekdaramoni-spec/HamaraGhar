@@ -170,7 +170,13 @@ def login_required(f):
         if 'user_id' not in session:
             if request.path.startswith('/api/'):
                 return jsonify({'error': 'Authentication required'}), 401
-            return redirect(url_for('login'))
+            return redirect(url_for('login', next=request.path))
+        user = get_current_user()
+        if not user:
+            session.pop('user_id', None)
+            if request.path.startswith('/api/'):
+                return jsonify({'error': 'Authentication required'}), 401
+            return redirect(url_for('login', next=request.path))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -684,23 +690,54 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if 'user_id' in session and get_current_user():
+        return redirect(url_for('dashboard'))
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
         if not email or not password:
             flash('Please enter email and password.', 'error')
-            return redirect(url_for('login'))
+            return redirect(url_for('login', next=request.args.get('next')))
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password_hash, password):
             session['user_id'] = user.id
             flash(f'Welcome back, {user.name}!', 'success')
+            next_url = request.args.get('next')
+            if next_url and next_url.startswith('/'):
+                return redirect(next_url)
             return redirect(url_for('dashboard'))
         flash('Invalid email or password. Please try again.', 'error')
-        return redirect(url_for('login'))
+        return redirect(url_for('login', next=request.args.get('next')))
     return render_template('login.html', current_user=get_current_user(), page='login')
+
+@app.route('/demo-login')
+def demo_login():
+    """Instant one-click demo architect workspace access for evaluators and guests."""
+    user = User.query.filter_by(email='abhishek@hamaraghar.ai').first()
+    if not user:
+        user = User(
+            name='Abhishek Daramoni',
+            email='abhishek@hamaraghar.ai',
+            password_hash=generate_password_hash('HamaraGhar2026!')
+        )
+        db.session.add(user)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            user = User.query.filter_by(email='abhishek@hamaraghar.ai').first()
+    session['user_id'] = user.id
+    seed_default_projects_for_user(user.id)
+    flash(f'Logged in as {user.name} (Architect Workspace Demo).', 'success')
+    next_url = request.args.get('next')
+    if next_url and next_url.startswith('/'):
+        return redirect(next_url)
+    return redirect(url_for('dashboard'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if 'user_id' in session and get_current_user():
+        return redirect(url_for('dashboard'))
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
@@ -726,6 +763,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         session['user_id'] = new_user.id
+        seed_default_projects_for_user(new_user.id)
         flash(f'Welcome to HamaraGhar, {name}! Your account has been created.', 'success')
         return redirect(url_for('dashboard'))
     return render_template('register.html', current_user=get_current_user(), page='register')
@@ -737,48 +775,57 @@ def logout():
     return redirect(url_for('index'))
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
-    user = ensure_workspace_user()
+    user = get_current_user()
+    seed_default_projects_for_user(user.id)
     return render_template('dashboard.html', current_user=user, page='dashboard')
 
 @app.route('/requirements')
+@login_required
 def requirements():
-    user = ensure_workspace_user()
+    user = get_current_user()
     return render_template('requirements.html', current_user=user, page='requirements')
 
 @app.route('/floor-plan')
+@login_required
 def floor_plan():
-    user = ensure_workspace_user()
+    user = get_current_user()
     project = get_scoped_project(request.args.get('project_id'))
     return render_template('floor-plan.html', current_user=user, page='floor-plan', project=project, project_dict=serialize_project(project))
 
 @app.route('/builder')
+@login_required
 def builder():
-    user = ensure_workspace_user()
+    user = get_current_user()
     project = get_scoped_project(request.args.get('project_id'))
     return render_template('builder.html', current_user=user, page='builder', project=project, project_dict=serialize_project(project))
 
 @app.route('/interior')
+@login_required
 def interior():
-    user = ensure_workspace_user()
+    user = get_current_user()
     project = get_scoped_project(request.args.get('project_id'))
     return render_template('interior.html', current_user=user, page='interior', project=project, project_dict=serialize_project(project))
 
 @app.route('/cost')
+@login_required
 def cost():
-    user = ensure_workspace_user()
+    user = get_current_user()
     project = get_scoped_project(request.args.get('project_id'))
     return render_template('cost.html', current_user=user, page='cost', project=project, project_dict=serialize_project(project))
 
 @app.route('/risk')
+@login_required
 def risk():
-    user = ensure_workspace_user()
+    user = get_current_user()
     project = get_scoped_project(request.args.get('project_id'))
     return render_template('risk.html', current_user=user, page='risk', project=project, project_dict=serialize_project(project))
 
 @app.route('/summary')
+@login_required
 def summary():
-    user = ensure_workspace_user()
+    user = get_current_user()
     project = get_scoped_project(request.args.get('project_id'))
     return render_template('summary.html', current_user=user, page='summary', project=project, project_dict=serialize_project(project))
 
@@ -843,15 +890,22 @@ def api_logout():
     return jsonify({'message': 'Logged out successfully'})
 
 @app.route('/api/auth/me', methods=['GET'])
+@login_required
 def api_me():
-    user = ensure_workspace_user()
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Not authenticated'}), 401
     return jsonify({'id': user.id, 'name': user.name, 'email': user.email})
 
 # --- API PROJECTS ---
 @app.route('/api/projects', methods=['GET'])
+@login_required
 def api_get_projects():
-    user = ensure_workspace_user()
-    projects = Project.query.filter_by(user_id=user.id).order_by(Project.created_at.desc()).all()
+    user_id = session['user_id']
+    projects = Project.query.filter_by(user_id=user_id).order_by(Project.created_at.desc()).all()
+    if not projects:
+        seed_default_projects_for_user(user_id)
+        projects = Project.query.filter_by(user_id=user_id).order_by(Project.created_at.desc()).all()
     return jsonify([{
         'id': p.id,
         'name': p.name,
@@ -861,8 +915,9 @@ def api_get_projects():
     } for p in projects])
 
 @app.route('/api/projects', methods=['POST'])
+@login_required
 def api_create_project():
-    user = ensure_workspace_user()
+    user_id = session['user_id']
     data = request.json or {}
     if 'name' not in data or 'data' not in data:
         return jsonify({'error': 'Missing name or data'}), 400
@@ -881,7 +936,7 @@ def api_create_project():
         return jsonify({'error': 'Project payload exceeds size limit (5MB)'}), 413
         
     project = Project(
-        user_id=user.id,
+        user_id=user_id,
         name=name,
         data_json=raw_json
     )
@@ -894,9 +949,10 @@ def api_create_project():
     }), 201
 
 @app.route('/api/projects/<int:project_id>', methods=['GET'])
+@login_required
 def api_get_project(project_id):
-    user = ensure_workspace_user()
-    project = Project.query.filter_by(id=project_id, user_id=user.id).first()
+    user_id = session['user_id']
+    project = Project.query.filter_by(id=project_id, user_id=user_id).first()
     if not project:
         return jsonify({'error': 'Not found'}), 404
     return jsonify({
@@ -906,9 +962,10 @@ def api_get_project(project_id):
     })
 
 @app.route('/api/projects/<int:project_id>', methods=['PUT'])
+@login_required
 def api_update_project(project_id):
-    user = ensure_workspace_user()
-    project = Project.query.filter_by(id=project_id, user_id=user.id).first()
+    user_id = session['user_id']
+    project = Project.query.filter_by(id=project_id, user_id=user_id).first()
     if not project:
         return jsonify({'error': 'Not found'}), 404
     data = request.json or {}
@@ -933,9 +990,10 @@ def api_update_project(project_id):
     }), 200
 
 @app.route('/api/projects/<int:project_id>', methods=['DELETE'])
+@login_required
 def api_delete_project(project_id):
-    user = ensure_workspace_user()
-    project = Project.query.filter_by(id=project_id, user_id=user.id).first()
+    user_id = session['user_id']
+    project = Project.query.filter_by(id=project_id, user_id=user_id).first()
     if not project:
         return jsonify({'error': 'Not found'}), 404
     db.session.delete(project)
